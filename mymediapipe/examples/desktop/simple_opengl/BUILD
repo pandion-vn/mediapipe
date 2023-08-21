@@ -16,7 +16,7 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-cc_binary(
+cc_library(
     name = "simple_opengl",
     srcs = ["main.cc"],
     hdrs = [
@@ -44,4 +44,12 @@ cc_binary(
 
     ],
     alwayslink = 1,
+)
+
+cc_binary(
+    name = "simple_opengl_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_opengl:simple_opengl",
+        # "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
+    ],
 )
