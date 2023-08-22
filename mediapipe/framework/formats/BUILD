@@ -149,6 +149,7 @@ cc_library(
     name = "image_frame",
     srcs = ["image_frame.cc"],
     hdrs = ["image_frame.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":image_format_cc_proto",
         "//mediapipe/framework:port",
@@ -173,6 +174,7 @@ cc_library(
     name = "image_frame_opencv",
     srcs = ["image_frame_opencv.cc"],
     hdrs = ["image_frame_opencv.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":image_format_cc_proto",
         ":image_frame",

@@ -120,6 +120,14 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "opengl",
+    actual = select({
+        "//conditions:default": ":opengl_binary",
+    }),
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "opencv_ios_xcframework_files_bzl",
     srcs = ["opencv_ios_xcframework_files.bzl"],
@@ -258,6 +266,15 @@ alias(
         "//conditions:default": "@linux_opencv//:opencv",
     }),
 )
+
+alias(
+    name = "opengl_binary",
+    actual = select({
+        "//mediapipe:macos": "@macos_opengl//:opengl",
+        "//conditions:default": "@linux_opengl//:opengl",
+    }),
+)
+
 
 cc_library(
     name = "libffmpeg",

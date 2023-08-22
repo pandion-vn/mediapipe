@@ -20,25 +20,28 @@ cc_library(
     name = "simple_opengl",
     srcs = ["main.cc"],
     hdrs = [
-        "include/common.h"
+        "include/common.h",
+        "include/constants.h",
     ],
     deps = [
         "//mediapipe/calculators/core:pass_through_calculator",
         "//mediapipe/framework:calculator_graph",
+        "//mediapipe/framework/formats:image_frame",
+        "//mediapipe/framework/formats:image_frame_opencv",
         "//mediapipe/framework/port:logging",
         "//mediapipe/framework/port:parse_text_proto",
         "//mediapipe/framework/port:status",
         "//mediapipe/framework/port:opencv_highgui",
         "//mediapipe/framework/port:opencv_imgproc",
         "//mediapipe/framework/port:opencv_video",
+        "//mediapipe/gpu:gl_base",
         "//mediapipe/gpu:gl_calculator_helper",
         "//mediapipe/gpu:gpu_buffer",
         "//mediapipe/gpu:gpu_shared_data_internal",
-        "@opengl//:opengl-headers",
-        "@opengl//:opengl-libs",
+        "//third_party:opengl",
     ],
     linkopts = [
-        "-lstdc++fs",
+        # "-lstdc++fs",
     ],
     data = [
 

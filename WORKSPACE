@@ -330,9 +330,9 @@ new_local_repository(
 )
 
 new_local_repository(
-    name = "opengl",
-    build_file = "@//third_party:opengl.BUILD",
-    path = "/usr",
+    name = "macos_opengl",
+    build_file = "@//third_party:opengl_macos.BUILD",
+    path = "/usr/local",
 )
 
 new_local_repository(
