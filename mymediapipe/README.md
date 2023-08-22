@@ -38,6 +38,15 @@ scripts\run_simple_opengl.sh
 
 Insert LightSaber Shader into OpenGL node
 
+Build
+```
+```
+
+Run
+```
+```
+
+
 ## Unit test 
 
 Include `ut\README.md`

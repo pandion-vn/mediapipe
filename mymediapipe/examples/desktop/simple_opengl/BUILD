@@ -8,7 +8,7 @@ cc_library(
     name = "simple_opengl",
     srcs = ["main.cc"],
     deps = [
-        # "//third_party:opencv",
+        "//third_party:opencv",
         "//third_party:opengl",
         "//third_party:opengl_glfw",
         # "@system_headers//:headers",
