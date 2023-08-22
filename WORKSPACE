@@ -344,7 +344,7 @@ new_local_repository(
 new_local_repository(
     name = "linux_opengl_glfw",
     build_file = "@//third_party:opengl_glfw_linux.BUILD",
-    path = "third_party/glfw_linux",
+    path = "/usr/local",
 )
 
 new_local_repository(
