@@ -17,7 +17,7 @@ cc_library(
         # "include/glm",
     ],
     linkopts = [
-        "-framework OpenGL",
+        # "-framework OpenGL",
     ],
     visibility = ["//visibility:public"],
 )
