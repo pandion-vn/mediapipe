@@ -336,6 +336,12 @@ new_local_repository(
 )
 
 new_local_repository(
+    name = "linux_opengl",
+    build_file = "@//third_party:opengl_linux.BUILD",
+    path = "/usr",
+)
+
+new_local_repository(
     name = "linux_ffmpeg",
     build_file = "@//third_party:ffmpeg_linux.BUILD",
     path = "/usr"
