@@ -39,6 +39,9 @@ cc_library(
         "//mediapipe/gpu:gpu_buffer",
         "//mediapipe/gpu:gpu_shared_data_internal",
         "//third_party:opengl",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
     ],
     linkopts = [
         # "-lstdc++fs",
