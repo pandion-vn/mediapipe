@@ -1,0 +1,1 @@
+GLOG_logtostderr=1 bazel-bin/mymediapipe/examples/desktop/simple_opengl2/simple_opengl2_demo

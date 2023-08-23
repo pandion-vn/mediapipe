@@ -136,6 +136,14 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "opengl_glm",
+    actual = select({
+        "//conditions:default": "@opengl_glm",
+    }),
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "opencv_ios_xcframework_files_bzl",
     srcs = ["opencv_ios_xcframework_files.bzl"],

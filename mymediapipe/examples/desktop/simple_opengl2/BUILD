@@ -17,28 +17,35 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "simple_opengl",
+    name = "simple_opengl2",
     srcs = ["main.cc"],
     hdrs = [
         "include/common.h",
         "include/constants.h",
     ],
     deps = [
-        "//mediapipe/calculators/core:pass_through_calculator",
         "//mediapipe/framework:calculator_graph",
-        "//mediapipe/framework/formats:image_frame",
-        "//mediapipe/framework/formats:image_frame_opencv",
         "//mediapipe/framework/port:logging",
         "//mediapipe/framework/port:parse_text_proto",
         "//mediapipe/framework/port:status",
-        "//mediapipe/framework/port:opencv_highgui",
-        "//mediapipe/framework/port:opencv_imgproc",
-        "//mediapipe/framework/port:opencv_video",
-        "//mediapipe/gpu:gl_base",
-        "//mediapipe/gpu:gl_calculator_helper",
-        "//mediapipe/gpu:gpu_buffer",
-        "//mediapipe/gpu:gpu_shared_data_internal",
+        # "//mediapipe/calculators/core:pass_through_calculator",
+        # "//mediapipe/framework:calculator_graph",
+        # "//mediapipe/framework/formats:image_frame",
+        # "//mediapipe/framework/formats:image_frame_opencv",
+        # "//mediapipe/framework/port:logging",
+        # "//mediapipe/framework/port:parse_text_proto",
+        # "//mediapipe/framework/port:status",
+        # "//mediapipe/framework/port:opencv_highgui",
+        # "//mediapipe/framework/port:opencv_imgproc",
+        # "//mediapipe/framework/port:opencv_video",
+        # "//mediapipe/gpu:gl_base",
+        # "//mediapipe/gpu:gl_calculator_helper",
+        # "//mediapipe/gpu:gpu_buffer",
+        # "//mediapipe/gpu:gpu_shared_data_internal",
+        "//third_party:opencv",
         "//third_party:opengl",
+        "//third_party:opengl_glfw",
+        "//third_party:opengl_glm",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/strings",
@@ -47,15 +54,14 @@ cc_library(
         # "-lstdc++fs",
     ],
     data = [
-
     ],
     alwayslink = 1,
 )
 
 cc_binary(
-    name = "simple_opengl_demo",
+    name = "simple_opengl2_demo",
     deps = [
-        "//mymediapipe/examples/desktop/simple_opengl:simple_opengl",
+        "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2",
         # "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
 )
