@@ -17,6 +17,8 @@ cc_library(
         # "include/glm",
     ],
     linkopts = [
+        "-l:librt.so",
+        "-l:libGLEW.so",
         "-l:libX11.so",
     ],
     visibility = ["//visibility:public"],
