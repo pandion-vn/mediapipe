@@ -8,7 +8,7 @@ cc_library(
       "include/GLFW/*.h",
     ]),
     srcs = glob([
-      "lib-x86_64/libglfw.3.dylib",    
+      "lib/libglfw.3.dylib",    
     ]),
     linkopts = [
         # "-lGL",

@@ -336,21 +336,21 @@ new_local_repository(
 )
 
 new_local_repository(
-    name = "macos_opengl_glfw",
-    build_file = "@//third_party:opengl_glfw_macos.BUILD",
-    path = "third_party/glfw_macos",
+    name = "linux_opengl",
+    build_file = "@//third_party:opengl_linux.BUILD",
+    path = "/usr",
 )
 
 new_local_repository(
-    name = "linux_opengl_glfw",
-    build_file = "@//third_party:opengl_glfw_linux.BUILD",
+    name = "macos_opengl_libs",
+    build_file = "@//third_party:opengl_libs_macos.BUILD",
     path = "/usr/local",
 )
 
 new_local_repository(
-    name = "linux_opengl",
-    build_file = "@//third_party:opengl_linux.BUILD",
-    path = "/usr",
+    name = "linux_opengl_libs",
+    build_file = "@//third_party:opengl_libs_linux.BUILD",
+    path = "/usr/local",
 )
 
 new_local_repository(

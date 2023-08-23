@@ -286,8 +286,8 @@ alias(
 alias(
     name = "opengl_glfw_binary",
     actual = select({
-        "//mediapipe:macos": "@macos_opengl_glfw//:opengl_glfw",
-        "//conditions:default": "@linux_opengl_glfw//:opengl_glfw",
+        "//mediapipe:macos": "@macos_opengl_libs//:opengl_glfw",
+        "//conditions:default": "@linux_opengl_libs//:opengl_glfw",
     }),
 )
 
