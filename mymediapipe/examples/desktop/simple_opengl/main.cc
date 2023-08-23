@@ -59,13 +59,12 @@ int main(int argc, char** argv)
       exit(EXIT_FAILURE);
   }
   
-  double fps = 0.0;
-  fps = capture.get(CV_CAP_PROP_FPS);
-  if (fps != fps) { // NaN
-      fps = 25.0;
-  }
-
-  std::cout << "FPS: " << fps << std::endl;
+  // double fps = 0.0;
+  // fps = capture.get(cv::CAP_PROP_FPS);
+  // if (fps != fps) { // NaN
+  //     fps = 25.0;
+  // }
+  // std::cout << "FPS: " << fps << std::endl;
   
   int32_t windowWidth = 1280;
   int32_t windowHeight = 720;
