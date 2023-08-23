@@ -18,7 +18,7 @@ cc_library(
     ],
     linkopts = [
         "-l:librt.so",
-        "-l:libGLEW.so",
+        # "-l:libGLEW.so",
         "-l:libX11.so",
     ],
     visibility = ["//visibility:public"],
