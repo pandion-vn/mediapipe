@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <sstream>
 
-using namespace std;
-
 #ifdef __APPLE__
 
 #define GL_SILENCE_DEPRECATION
@@ -23,13 +21,18 @@ using namespace std;
 
 // #include <GL/glew.h>
 // #include <GLES3/gl32.h>
+#include <GL/gl.h>
+#include <GL/glew.h>
 #include <GLES3/gl3.h>
+#define GLFW_INCLUDE_ES2
 
 #endif  // defined(__APPLE__)
 
-// #define GLFW_INCLUDE_ES2
 
 #include <opencv2/opencv.hpp>
+
+using namespace std;
+using namespace cv;
 
 // I use glfw to easy to write
 // 簡単に書くために、glfwを使用します。
