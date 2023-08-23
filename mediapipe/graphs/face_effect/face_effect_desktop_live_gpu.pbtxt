@@ -104,7 +104,7 @@ node {
 # Renders the selected effect based on `selected_effect_id`.
 node {
   calculator: "SwitchContainer"
-  input_stream: "SELECT:selected_effect_id"
+  input_side_packet: "SELECT:selected_effect_id"
   input_stream: "IMAGE_GPU:throttled_input_video"
   input_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
   input_side_packet: "ENVIRONMENT:environment"
