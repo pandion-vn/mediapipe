@@ -26,9 +26,11 @@ output_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
 node {
   calculator: "ConstantSidePacketCalculator"
   output_side_packet: "PACKET:num_faces"
+  output_side_packet: "PACKET:2:with_attention"
   node_options: {
     [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
       packet { int_value: 1 }
+      packet { bool_value: true }
     }
   }
 }
@@ -39,6 +41,7 @@ node {
   calculator: "FaceLandmarkFrontGpu"
   input_stream: "IMAGE:input_image"
   input_side_packet: "NUM_FACES:num_faces"
+  input_side_packet: "WITH_ATTENTION:with_attention"
   output_stream: "LANDMARKS:multi_face_landmarks"
 }
 
