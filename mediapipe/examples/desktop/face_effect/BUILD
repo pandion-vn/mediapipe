@@ -31,6 +31,6 @@ cc_binary(
     ],
     deps = [
         "//mediapipe/examples/desktop:demo_run_graph_main_gpu",
-        "//mediapipe/graphs/face_effect:face_effect_gpu_deps",
+        "//mediapipe/graphs/face_effect:desktop_live_gpu_calculators",
     ],
 )
