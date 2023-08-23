@@ -26,8 +26,8 @@ cc_binary(
         "//mediapipe/graphs/face_effect/data:glasses.pngblob",
         "//mediapipe/modules/face_detection:face_detection_short_range.tflite",
         "//mediapipe/modules/face_geometry/data:geometry_pipeline_metadata.binarypb",
-        # "//mediapipe/modules/face_landmark:face_landmark.tflite",
-        "//mediapipe/modules/face_landmark:face_landmark_with_attention.tflite"
+        "//mediapipe/modules/face_landmark:face_landmark.tflite",
+        # "//mediapipe/modules/face_landmark:face_landmark_with_attention.tflite"
     ],
     deps = [
         "//mediapipe/examples/desktop:demo_run_graph_main_gpu",
