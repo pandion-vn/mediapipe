@@ -25,8 +25,8 @@ output_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
 # most 1 face.
 node {
   calculator: "ConstantSidePacketCalculator"
-  output_side_packet: "PACKET:num_faces"
-  output_side_packet: "PACKET:2:with_attention"
+  output_side_packet: "PACKET:0:num_faces"
+  output_side_packet: "PACKET:1:with_attention"
   node_options: {
     [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
       packet { int_value: 1 }
