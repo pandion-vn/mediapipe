@@ -1,10 +1,6 @@
 #include "../include/sandbox.h"
 // #include <experimental/filesystem>
 
-constexpr char kInputStream[] = "input_video";
-constexpr char kOutputStream[] = "output_video";
-constexpr char kWindowName[] = "MediaPipe";
-
 ABSL_FLAG(std::string, calculator_graph_config_file, "",
           "Name of file containing text format CalculatorGraphConfig proto.");
 ABSL_FLAG(std::string, input_video_path, "",
@@ -14,6 +10,14 @@ ABSL_FLAG(std::string, output_video_path, "",
           "Full path of where to save result (.mp4 only). "
           "If not provided, show result in a window.");
 
+// Instantiate static variables
+mediapipe::CalculatorGraph              Sandbox::graph;
+GLFWwindow*                             Sandbox::glfwWindow;
+cv::VideoCapture                        Sandbox::camCapture;
+std::atomic<bool>                       Sandbox::dataReady;
+bool                                    Sandbox::stopCapture;
+SpriteRenderer*                         Sandbox::spriteRenderer;
+
 Sandbox::Sandbox(unsigned int width, unsigned int height) 
     : keys(), width(width), height(height), frames(0) {
 }
@@ -21,10 +25,27 @@ Sandbox::Sandbox(unsigned int width, unsigned int height)
 Sandbox::~Sandbox() {
     //cam_capture.release();
     //delete Renderer;
-    // delete gpu_helper;
+    //delete gpu_helper;
 }
 
 mediapipe::Status Sandbox::Init() {
+    // load shaders
+    ResourceManager::LoadShader("assets/sandbox/shaders/sprite.vs", "assets/sandbox/shaders/sprite.fs", nullptr, "sprite");
+
+    // configure shaders
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 
+                                      0.0f, -1.0f, 1.0f);
+    ResourceManager::GetShader("sprite").Use().SetInteger("sprite", 0);
+    ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+
+    // set render-specific controls
+    Shader shaderSprite = ResourceManager::GetShader("sprite");
+    spriteRenderer = new SpriteRenderer(shaderSprite);
+
+
+    LOG(INFO) << "Start running the calculator graph.";
+    threadCam = std::thread(&Sandbox::DoCamCapture, this);
+    return mediapipe::OkStatus();
 }
 
 mediapipe::Status Sandbox::InitialMPPGraph() {
@@ -39,34 +60,183 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
     LOG(INFO) << "Initialize the calculator graph.";
     mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
+    graph.StartRun({});
+    return mediapipe::OkStatus();
 }
 
 int Sandbox::InitOpenGL() {
+    if (!glfwInit()) {
+        LOG(INFO) << "GLFW INTI ERROR";
+        return EXIT_FAILURE;
+    }
+    LOG(INFO) << "GLFW VERSION : " << glfwGetVersionString();
+
+    // GLFWmonitor *primary = glfwGetPrimaryMonitor();
+    // const GLFWvidmode *mode = glfwGetVideoMode(primary);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    // glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    // glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    // glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    // glfwWindowHint(GLFW_ALPHA_BITS, 8);
+    // glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    // glfwWindowHint(GLFW_STENCIL_BITS, 8);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+    // enable anti-alising 4x with GLFW
+    glfwWindowHint(GLFW_SAMPLES, 0);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+    glfwWindowHint(GLFW_RESIZABLE, false);
+    
+    glfwWindow = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, kWindowName, nullptr, nullptr);
+    glfwMakeContextCurrent(glfwWindow);
+    // glfwSwapInterval(1);
+    
+#ifdef __APPLE__
+#else // Not APPLE
+//     glewExperimental = true;
+//     GLenum err = glewInit();
+//     if (GLEW_OK != err) {
+//         fprintf(stderr, " GLEW INIT ERROR !!!  . \n");
+//         std::cerr << "Error initialization GLEW: " << glewGetErrorString(err) << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+#endif
+    return 0;
 }
 
-void Sandbox::ConfigureOpenGL(unsigned int viewport_w, unsigned int viewport_h) {
+void Sandbox::ConfigureOpenGL(unsigned int viewportW, unsigned int viewportH) {
+    // Debugger FramebufferSize
+    int viewport_w, viewport_h;
+    float viewport_aspect;
+    glfwGetFramebufferSize(Sandbox::glfwWindow, &viewport_w, &viewport_h);
+    viewport_aspect = float(viewport_h) / float(viewport_w);
+    LOG(INFO) << "viewport_w: " << viewport_w <<  
+                 " , viewport_h: " << viewport_h << 
+                 " , aspect: " << viewport_aspect;
+                 
+    glfwSetKeyCallback(glfwWindow, Sandbox::KeyCallback);
+    glfwSetFramebufferSizeCallback(glfwWindow, Sandbox::FramebufferSizeCallback);
+
+    // OpenGL configuration
+    // --------------------
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthRange(0.0, 1.0);
+    glDepthMask(true);
+    glClearDepth(1.0f);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    glViewport(0, 0, viewportW, viewportH);
+}
+
+void Sandbox::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    // empty now
+}
+
+void Sandbox::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    // empty now
+}
+
+int Sandbox::InitCamCapture() {
+    // if (camCapture.open(gst, cv::CAP_GSTREAMER)) {
+    if (camCapture.open(0)) {
+        LOG(INFO) << "Init Opencv Camera Success";
+    } else {
+        LOG(INFO) << "File To Open Camera";
+        camCapture.release();
+        return 1;
+    }
+    if (!camCapture.isOpened()) {
+        LOG(INFO) << "cam capture cannot open";
+        return 1;
+    }
+    stopCapture = false;
+    dataReady = false;
+    return 0;
 }
 
 void Sandbox::UpdateCamera(float dt) {
+    std::unique_lock<std::mutex> lck(mutexCamBuffer, std::defer_lock);
+    if (dataReady && lck.try_lock()) {
+        ResourceManager::LoadTextureFromMat(camTexture, camBuffer, true);
+        dataReady = false;
+    }
+
+    // if (HasHuman) {
+    //     cameraView = 0.08f;
+    //     HasHuman = false;
+    // }
+
+    // if (HasOpenHand) {
+    //     openEffect = 0.08f;
+    //     HasOpenHand = false;
+    // }
+
+    // if (cameraView > 0) {
+    //     cameraView -= dt;
+    //     // if (camView > 0.1) {
+    //     neonRenderer->Phase = 2;
+    //     // } else {
+    //         // neonRenderer->Phase = 1;
+    //     // }
+    // } else {
+    //     neonRenderer->Phase = 0;
+    // }
 }
 
 void Sandbox::ProcessInput(float dt) {
     // empty now
 }
 
+void Sandbox::Update(float dt)
+{
+    UpdateCamera(dt);
+    // UpdateEffekseer(dt);
+
+    // Frames++;
+}
+
 void Sandbox::Render(float dt) {
+    spriteRenderer->DrawSprite(camTexture, 
+                               glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+                               0.0f, glm::vec3(1.0f), dt);
+    // neonRenderer->DrawSprite(camTexture,
+    //                          glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+    //                          0.0f, glm::vec3(1.0f), dt);
 }
 
 void Sandbox::Reset() {
 }
 
-void Sandbox::Stop() {
+void Sandbox::stop() {
+    this->stopCapture = true;
 }
 
-void Sandbox::Join() {
+void Sandbox::join() {
+    this->threadCam.join();
 }
 
 void Sandbox::DoCamCapture() {
-    // while (!stopCapture) {
-    // }
+    while (!stopCapture) {
+        camCapture >> camBufferTmp;
+        if (camBufferTmp.empty()) {
+            LOG(INFO) << "Ignore empty frames";
+            continue;
+        }
+
+        cv::Mat camBuff;	
+        cv::cvtColor(camBufferTmp, camBuff, cv::COLOR_BGR2RGBA);
+        cv::flip(camBuff, camBuff, /*flipcode=HORIZONTAL*/ 1);
+
+        std::lock_guard<std::mutex> lk (mutexCamBuffer);
+        camBuff.copyTo(camBuffer);
+        dataReady = true;
+    }
 }

@@ -3,7 +3,7 @@
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
-constexpr char kWindowName[] = "ADS";
+constexpr char kWindowName[] = "MyMediaPipe";
 
 // The Width of the screen
 const unsigned int SCREEN_WIDTH = 1280;

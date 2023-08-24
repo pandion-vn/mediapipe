@@ -1,27 +1,49 @@
 # MediaPipe graph, simple input and output video 
 # on CPU.
 # Used in the example in
-# mediapipie/examples/desktop/object_detection:object_detection_tensorflow.
+# mymediapipie/examples/desktop/simple_io:desktop_simple_io_cpu_calculators.
+# Images on CPU coming into and out of the graph.
+input_stream: "input_video"
+output_stream: "output_video"
 
-# Decodes an input video file into images and a video header.
 node {
-  calculator: "OpenCvVideoDecoderCalculator"
-  input_side_packet: "INPUT_FILE_PATH:input_video_path"
-  output_stream: "VIDEO:input_video"
-  output_stream: "VIDEO_PRESTREAM:input_video_header"
-}
-
-# Encodes the annotated images into a video file, adopting properties specified
-# in the input video header, e.g., video framerate.
-node {
-  calculator: "OpenCvVideoEncoderCalculator"
-  input_stream: "VIDEO:input_video"
-  input_stream: "VIDEO_PRESTREAM:input_video_header"
-  input_side_packet: "OUTPUT_FILE_PATH:output_video_path"
-  node_options: {
-    [type.googleapis.com/mediapipe.OpenCvVideoEncoderCalculatorOptions]: {
-      codec: "avc1"
-      video_format: "mp4"
-    }
+  calculator: "FlowLimiterCalculator"
+  input_stream: "input_video"
+  input_stream: "FINISHED:output_video"
+  input_stream_info: {
+    tag_index: "FINISHED"
+    back_edge: true
   }
+  output_stream: "throttled_input_video"
 }
+
+# Draws annotations and overlays them on top of the input images.
+node {
+  calculator: "AnnotationOverlayCalculator"
+  input_stream: "IMAGE:throttled_input_video"
+  # input_stream: "render_data"
+  output_stream: "IMAGE:output_video"
+}
+
+# # Decodes an input video file into images and a video header.
+# node {
+#   calculator: "OpenCvVideoDecoderCalculator"
+#   input_side_packet: "INPUT_FILE_PATH:input_video_path"
+#   output_stream: "VIDEO:input_video"
+#   output_stream: "VIDEO_PRESTREAM:input_video_header"
+# }
+
+# # Encodes the annotated images into a video file, adopting properties specified
+# # in the input video header, e.g., video framerate.
+# node {
+#   calculator: "OpenCvVideoEncoderCalculator"
+#   input_stream: "VIDEO:input_video"
+#   input_stream: "VIDEO_PRESTREAM:input_video_header"
+#   input_side_packet: "OUTPUT_FILE_PATH:output_video_path"
+#   node_options: {
+#     [type.googleapis.com/mediapipe.OpenCvVideoEncoderCalculatorOptions]: {
+#       codec: "avc1"
+#       video_format: "mp4"
+#     }
+#   }
+# }

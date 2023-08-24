@@ -25,8 +25,10 @@ cc_library(
     name = "desktop_simple_io_cpu_calculators",
     deps = [
         "//mediapipe/calculators/image:image_transformation_calculator",
-        "//mediapipe/calculators/video:opencv_video_decoder_calculator",
-        "//mediapipe/calculators/video:opencv_video_encoder_calculator",
+        "//mediapipe/calculators/core:flow_limiter_calculator",
+        "//mediapipe/calculators/util:annotation_overlay_calculator",
+        # "//mediapipe/calculators/video:opencv_video_decoder_calculator",
+        # "//mediapipe/calculators/video:opencv_video_encoder_calculator",
     ],
 )
 

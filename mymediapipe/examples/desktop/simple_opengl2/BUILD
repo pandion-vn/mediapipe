@@ -19,13 +19,23 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "simple_opengl2",
     srcs = [
+        "lib/stb_image.cpp",
         "main.cc",
         "src/sandbox.cc",
+        "src/texture.cc",
+        "src/sprite_renderer.cc",
+        "src/resource_manager.cc",
+        "src/shader.cc",
     ],
     hdrs = [
+        "lib/stb_image.h",
         "include/common.h",
         "include/constants.h",
         "include/sandbox.h",
+        "include/texture.h",
+        "include/sprite_renderer.h",
+        "include/resource_manager.h",
+        "include/shader.h",
     ],
     deps = [
         "//mediapipe/framework:calculator_framework",
@@ -68,5 +78,6 @@ cc_binary(
     deps = [
         "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2",
         "//mymediapipe/graphs/simple_io:desktop_simple_io_cpu_calculators",
+        # "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
 )

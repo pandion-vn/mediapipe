@@ -34,7 +34,7 @@
 
 #endif
 
-// #define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE
 // #define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
 
@@ -69,7 +69,7 @@
 // #include "mediapipe/gpu/gpu_buffer.h"
 // #include "mediapipe/gpu/gpu_shared_data_internal.h"
 
-// #include "constants.h"
+#include "constants.h"
 // #include "tempo.h"
 
 #endif
