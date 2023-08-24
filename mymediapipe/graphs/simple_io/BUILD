@@ -22,7 +22,7 @@ load(
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "desktop_simple_io",
+    name = "desktop_simple_io_cpu_calculators",
     deps = [
         "//mediapipe/calculators/image:image_transformation_calculator",
         "//mediapipe/calculators/video:opencv_video_decoder_calculator",
@@ -31,7 +31,7 @@ cc_library(
 )
 
 cc_library(
-    name = "desktop_simple_io_gpu",
+    name = "desktop_simple_io_gpu_calculators",
     deps = [
         "//mediapipe/calculators/core:flow_limiter_calculator",
         "//mediapipe/calculators/image:recolor_calculator",
@@ -43,8 +43,15 @@ cc_library(
 )
 
 mediapipe_binary_graph(
-    name = "desktop_gpu_binary_graph",
+    name = "desktop_simple_io_cpu_binary_graph",
+    graph = "graph_cpu.pbtxt",
+    output_name = "desktop_simple_io_cpu.binarypb",
+    deps = [":desktop_simple_io_cpu_calculators"],
+)
+
+mediapipe_binary_graph(
+    name = "desktop_simple_io_gpu_binary_graph",
     graph = "graph_gpu.pbtxt",
-    output_name = "desktop_gpu.binarypb",
-    deps = [":desktop_simple_io_gpu"],
+    output_name = "desktop_simple_io_gpu.binarypb",
+    deps = [":desktop_simple_io_gpu_calculators"],
 )
