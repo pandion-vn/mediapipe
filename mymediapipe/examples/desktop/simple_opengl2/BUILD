@@ -69,6 +69,8 @@ cc_library(
         # "-lstdc++fs",
     ],
     data = [
+        "assets/shaders/sprite.fs",
+        "assets/shaders/sprite.vs",
     ],
     alwayslink = 1,
 )

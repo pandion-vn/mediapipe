@@ -14,12 +14,21 @@ mediapipe::Status RunMPPGraph() {
     } else {
         LOG(INFO) << "Success!";
     }
+    Sandbox::InitOpenGL();
+
+    // Debugger FramebufferSize
+    int viewport_w, viewport_h;
+    float viewport_aspect;
+    glfwGetFramebufferSize(Sandbox::glfwWindow, &viewport_w, &viewport_h);
+    viewport_aspect = float(viewport_h) / float(viewport_w);
+    LOG(INFO) << "viewport_w: " << viewport_w <<  
+                 " , viewport_h: " << viewport_h << 
+                 " , aspect: " << viewport_aspect;
 
     srand(time(NULL));
-    Sandbox::InitOpenGL();
-    Sandbox::ConfigureOpenGL(1280, 720);
+    Sandbox::ConfigureOpenGL(viewport_w, viewport_h);
     Sandbox::InitCamCapture();
-    sandboxApp = new Sandbox(1280, 720);
+    sandboxApp = new Sandbox(viewport_w, viewport_h);
     sandboxApp->Init();
     // deltaTime variables
     // -------------------
@@ -53,7 +62,7 @@ mediapipe::Status RunMPPGraph() {
 
         // render
         // ------
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         sandboxApp->Render(currentFrame);
         frames++;
@@ -64,6 +73,8 @@ mediapipe::Status RunMPPGraph() {
             updates = 0, frames = 0;
         }
     }
+    sandboxApp->stop();
+    sandboxApp->join();
 
     glfwDestroyWindow(Sandbox::glfwWindow);
     glfwTerminate();

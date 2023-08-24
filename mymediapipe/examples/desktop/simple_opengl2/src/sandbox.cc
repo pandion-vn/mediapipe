@@ -30,12 +30,12 @@ Sandbox::~Sandbox() {
 
 mediapipe::Status Sandbox::Init() {
     // load shaders
-    ResourceManager::LoadShader("assets/sandbox/shaders/sprite.vs", "assets/sandbox/shaders/sprite.fs", nullptr, "sprite");
+    ResourceManager::LoadShader("mymediapipe/assets/shaders/sprite.vs", "mymediapipe/assets/shaders/sprite.fs", nullptr, "sprite");
 
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 
                                       0.0f, -1.0f, 1.0f);
-    ResourceManager::GetShader("sprite").Use().SetInteger("sprite", 0);
+    // ResourceManager::GetShader("sprite").Use().SetInteger("sprite", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
 
     // set render-specific controls
@@ -66,7 +66,7 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
 
 int Sandbox::InitOpenGL() {
     if (!glfwInit()) {
-        LOG(INFO) << "GLFW INTI ERROR";
+        LOG(INFO) << "GLFW Initial error";
         return EXIT_FAILURE;
     }
     LOG(INFO) << "GLFW VERSION : " << glfwGetVersionString();
@@ -110,15 +110,6 @@ int Sandbox::InitOpenGL() {
 }
 
 void Sandbox::ConfigureOpenGL(unsigned int viewportW, unsigned int viewportH) {
-    // Debugger FramebufferSize
-    int viewport_w, viewport_h;
-    float viewport_aspect;
-    glfwGetFramebufferSize(Sandbox::glfwWindow, &viewport_w, &viewport_h);
-    viewport_aspect = float(viewport_h) / float(viewport_w);
-    LOG(INFO) << "viewport_w: " << viewport_w <<  
-                 " , viewport_h: " << viewport_h << 
-                 " , aspect: " << viewport_aspect;
-                 
     glfwSetKeyCallback(glfwWindow, Sandbox::KeyCallback);
     glfwSetFramebufferSizeCallback(glfwWindow, Sandbox::FramebufferSizeCallback);
 
@@ -197,6 +188,7 @@ void Sandbox::ProcessInput(float dt) {
 
 void Sandbox::Update(float dt)
 {
+    // LOG(INFO) << "Do Sandbox::Update";
     UpdateCamera(dt);
     // UpdateEffekseer(dt);
 
@@ -204,6 +196,8 @@ void Sandbox::Update(float dt)
 }
 
 void Sandbox::Render(float dt) {
+    // LOG(INFO) << "Do Sandbox::Render";
+
     spriteRenderer->DrawSprite(camTexture, 
                                glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
                                0.0f, glm::vec3(1.0f), dt);
@@ -213,6 +207,7 @@ void Sandbox::Render(float dt) {
 }
 
 void Sandbox::Reset() {
+    // empty now
 }
 
 void Sandbox::stop() {
@@ -225,6 +220,7 @@ void Sandbox::join() {
 
 void Sandbox::DoCamCapture() {
     while (!stopCapture) {
+        // LOG(INFO) << "Do Camera Capture";
         camCapture >> camBufferTmp;
         if (camBufferTmp.empty()) {
             LOG(INFO) << "Ignore empty frames";
