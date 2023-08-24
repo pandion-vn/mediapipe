@@ -30,7 +30,8 @@ Sandbox::~Sandbox() {
 
 mediapipe::Status Sandbox::Init() {
     // load shaders
-    ResourceManager::LoadShader("mymediapipe/assets/shaders/sprite.vs", "mymediapipe/assets/shaders/sprite.fs", nullptr, "sprite");
+    ResourceManager::LoadShader("mymediapipe/assets/shaders/sprite.vs", 
+                                "mymediapipe/assets/shaders/sprite.fs", nullptr, "sprite");
 
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 
@@ -145,7 +146,7 @@ int Sandbox::InitCamCapture() {
         return 1;
     }
     if (!camCapture.isOpened()) {
-        LOG(INFO) << "cam capture cannot open";
+        LOG(INFO) << "Cam capture cannot open";
         return 1;
     }
     stopCapture = false;
@@ -156,6 +157,7 @@ int Sandbox::InitCamCapture() {
 void Sandbox::UpdateCamera(float dt) {
     std::unique_lock<std::mutex> lck(mutexCamBuffer, std::defer_lock);
     if (dataReady && lck.try_lock()) {
+        // LOG(INFO) << "Do ResourceManager::LoadTextureFromMat camBuffer";
         ResourceManager::LoadTextureFromMat(camTexture, camBuffer, true);
         dataReady = false;
     }
