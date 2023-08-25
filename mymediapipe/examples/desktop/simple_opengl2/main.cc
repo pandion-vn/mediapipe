@@ -21,13 +21,6 @@ const char *fragmentShaderSource = "#version 330 core\n"
 
 
 mediapipe::Status RunMPPGraph() {
-    mediapipe::Status status = Sandbox::InitialMPPGraph();
-    if (!status.ok()) {
-        LOG(ERROR) << "Failed to run the graph: " << status.message();
-        return mediapipe::Status(mediapipe::StatusCode::kInternal, "Failed to run the graph");
-    } else {
-        LOG(INFO) << "Success!";
-    }
     Sandbox::InitOpenGL();
 
     // Debugger FramebufferSize
@@ -40,7 +33,6 @@ mediapipe::Status RunMPPGraph() {
                  " , aspect: " << viewport_aspect;
 
     srand(time(NULL));
-    
     sandboxApp = new Sandbox(viewport_w, viewport_h);
     Sandbox::ConfigureOpenGL(viewport_w, viewport_h);
     sandboxApp->Init();
@@ -53,9 +45,15 @@ mediapipe::Status RunMPPGraph() {
     float lastFrame = glfwGetTime(), timer = lastFrame;
     int32_t frames = 0, updates = 0;
 
-    while (!glfwWindowShouldClose(Sandbox::glfwWindow)) {
-        glfwPollEvents();
+    mediapipe::Status status = Sandbox::InitialMPPGraph();
+    if (!status.ok()) {
+        LOG(ERROR) << "Failed to run the graph: " << status.message();
+        return mediapipe::Status(mediapipe::StatusCode::kInternal, "Failed to run the graph");
+    } else {
+        LOG(INFO) << "Success!";
+    }
 
+    while (!glfwWindowShouldClose(Sandbox::glfwWindow)) {
         // calculate delta time
         // --------------------
         float currentFrame = glfwGetTime();
@@ -77,11 +75,12 @@ mediapipe::Status RunMPPGraph() {
 
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         sandboxApp->Render(currentFrame);
         frames++;
         glfwSwapBuffers(Sandbox::glfwWindow);
+        glfwPollEvents();
         if (glfwGetTime() - timer > 1.0) {
             timer++;
             LOG(INFO) << "FPS: " << frames << ", updates:" << updates;

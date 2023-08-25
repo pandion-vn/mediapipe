@@ -91,17 +91,9 @@ int Sandbox::InitOpenGL() {
     // GLFWmonitor *primary = glfwGetPrimaryMonitor();
     // const GLFWvidmode *mode = glfwGetVideoMode(primary);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-    // glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-    // glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-    // glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-    // glfwWindowHint(GLFW_ALPHA_BITS, 8);
-    // glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    // glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    // glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
     // enable anti-alising 4x with GLFW
     glfwWindowHint(GLFW_SAMPLES, 0);
 #ifdef __APPLE__
@@ -120,6 +112,8 @@ int Sandbox::InitOpenGL() {
     // glfwSwapInterval(1);
     
 #ifdef __APPLE__
+    std::cout << "Version: " << glGetString( GL_VERSION ) << " :Version " << std::endl;
+
 #else // Not APPLE
 //     glewExperimental = true;
 //     GLenum err = glewInit();
