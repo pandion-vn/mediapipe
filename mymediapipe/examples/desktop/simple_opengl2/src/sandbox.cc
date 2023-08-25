@@ -223,17 +223,17 @@ void Sandbox::Update(float dt)
 void Sandbox::Render(float dt) {
 
     // LOG(INFO) << "Do Sandbox::Render";
-    Texture2D background = ResourceManager::GetTexture("background");
-    spriteRenderer->DrawSprite(background, 
-                               glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
-                               45.0f, glm::vec3(0.0f, 1.0f, 0.0f), dt);
-
-    // spriteRenderer->DrawSprite(camTexture, 
+    // Texture2D background = ResourceManager::GetTexture("background");
+    // spriteRenderer->DrawSprite(background, 
     //                            glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
-    //                            0.0f, glm::vec3(1.0f), dt);
-    neonRenderer->DrawSprite(camTexture,
-                             glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
-                             0.0f, glm::vec3(1.0f), dt);
+    //                            45.0f, glm::vec3(0.0f, 1.0f, 0.0f), dt);
+
+    spriteRenderer->DrawSprite(camTexture, 
+                               glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+                               0.0f, glm::vec3(1.0f), dt);
+    // neonRenderer->DrawSprite(camTexture,
+    //                          glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+    //                          0.0f, glm::vec3(1.0f), dt);
 }
 
 void Sandbox::Reset() {
