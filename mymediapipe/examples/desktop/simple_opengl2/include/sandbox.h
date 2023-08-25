@@ -4,6 +4,7 @@
 #include "common.h"
 #include "resource_manager.h"
 #include "sprite_renderer.h"
+#include "neon_renderer.h"
 
 class Sandbox {
 private:
@@ -29,6 +30,7 @@ public:
     static GLFWwindow*                                      glfwWindow;
     static cv::VideoCapture                                 camCapture;
     static SpriteRenderer                                   *spriteRenderer;
+    static NeonRenderer                                     *neonRenderer;
 
     // static methods
     static mediapipe::Status InitialMPPGraph();

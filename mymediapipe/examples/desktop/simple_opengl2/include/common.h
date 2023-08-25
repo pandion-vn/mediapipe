@@ -13,9 +13,15 @@
 
 #ifdef __APPLE__
 
+// #include <OpenGLES/ES2/gl.h>
+// #include <OpenGLES/ES2/glext.h>
+
 #define GL_SILENCE_DEPRECATION
+// #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
-#include <OpenGL/gl3ext.h>
+// #include <OpenGL/gl3.h>
+// #include <OpenGL/gl.h>
+// #include <OpenGL/gl3ext.h>
 #define GLFW_INCLUDE_GLCOREARB
 #define glGenVertexArrays glGenVertexArraysAPPLE
 #define glBindVertexArray glBindVertexArrayAPPLE
@@ -27,10 +33,10 @@
 // #include <GL/glext.h>
 // #include <GL/glew.h>
 // #include <GLES3/gl32.h>
-// #include <GL/gl.h>
-// #include <GL/glew.h>
-// #include <GLES3/gl3.h>
-// #define GLFW_INCLUDE_ES2
+#include <GL/gl.h>
+#include <GL/glew.h>
+#include <GLES3/gl3.h>
+#define GLFW_INCLUDE_ES2
 
 #endif
 

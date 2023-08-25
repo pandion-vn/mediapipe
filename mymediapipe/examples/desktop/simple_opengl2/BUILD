@@ -24,6 +24,7 @@ cc_library(
         "src/sandbox.cc",
         "src/texture.cc",
         "src/sprite_renderer.cc",
+        "src/neon_renderer.cc",
         "src/resource_manager.cc",
         "src/shader.cc",
     ],
@@ -34,6 +35,7 @@ cc_library(
         "include/sandbox.h",
         "include/texture.h",
         "include/sprite_renderer.h",
+        "include/neon_renderer.h",
         "include/resource_manager.h",
         "include/shader.h",
     ],
@@ -69,8 +71,8 @@ cc_library(
         # "-lstdc++fs",
     ],
     data = [
-        "assets/shaders/sprite.fs",
-        "assets/shaders/sprite.vs",
+        # "assets/shaders/sprite.fs",
+        # "assets/shaders/sprite.vs",
     ],
     alwayslink = 1,
 )

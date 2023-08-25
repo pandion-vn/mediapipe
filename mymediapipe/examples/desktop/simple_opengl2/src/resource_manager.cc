@@ -103,6 +103,7 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
 
 Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
 {
+    std::cout << "ResourceManager::loadTextureFromFile" << std::endl;
     // create texture object
     Texture2D texture;
     if (alpha)
@@ -112,11 +113,18 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)
     }
     // load image
     int width, height, nrChannels;
-    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+    std::cout << "ResourceManager::loadTextureFromFile stbi_load " << file << std::endl;
+    unsigned char* imageData = stbi_load(file, &width, &height, &nrChannels, 0);
+    if (imageData == nullptr) {
+        std::cout << "Image decoding failed (" << stbi_failure_reason() << "): " << file << std::endl;
+        // return absl::InternalError(absl::StrFormat("Image decoding failed (%s): %s",
+        //                                        stbi_failure_reason(), file));
+    }
+    std::cout << "Image decoded width: " << width << " height: " << height << std::endl;
     // now generate texture
-    texture.Generate(width, height, data);
+    texture.Generate(width, height, imageData);
     // and finally free image data
-    stbi_image_free(data);
+    stbi_image_free(imageData);
     return texture;
 }
 

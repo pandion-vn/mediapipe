@@ -17,6 +17,7 @@ cv::VideoCapture                        Sandbox::camCapture;
 std::atomic<bool>                       Sandbox::dataReady;
 bool                                    Sandbox::stopCapture;
 SpriteRenderer*                         Sandbox::spriteRenderer;
+NeonRenderer*                           Sandbox::neonRenderer;
 
 Sandbox::Sandbox(unsigned int width, unsigned int height) 
     : keys(), width(width), height(height), frames(0) {
@@ -32,16 +33,31 @@ mediapipe::Status Sandbox::Init() {
     // load shaders
     ResourceManager::LoadShader("mymediapipe/assets/shaders/sprite.vs", 
                                 "mymediapipe/assets/shaders/sprite.fs", nullptr, "sprite");
+    ResourceManager::LoadShader("mymediapipe/assets/shaders/neon_swing.vs", 
+                                "mymediapipe/assets/shaders/neon_swing.fs", nullptr, "neon_swing");
 
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 
                                       0.0f, -1.0f, 1.0f);
-    // ResourceManager::GetShader("sprite").Use().SetInteger("sprite", 0);
+    ResourceManager::GetShader("sprite").Use().SetInteger("sprite", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+
+    ResourceManager::GetShader("neon_swing").Use().SetInteger("sprite", 0);
+    ResourceManager::GetShader("neon_swing").Use().SetInteger("viewfinder", 1);
+    ResourceManager::GetShader("neon_swing").Use().SetInteger("background", 2);
+    ResourceManager::GetShader("neon_swing").SetMatrix4("projection", projection);
+
 
     // set render-specific controls
     Shader shaderSprite = ResourceManager::GetShader("sprite");
     spriteRenderer = new SpriteRenderer(shaderSprite);
+
+    Shader neonSprite = ResourceManager::GetShader("neon_swing");
+    neonRenderer = new NeonRenderer(neonSprite, this->width, this->height);
+
+    // load textures
+    // ResourceManager::LoadTexture("mymediapipe/assets/textures/play_your_hand.jpg", false, "background");
+    ResourceManager::LoadTexture("mymediapipe/assets/textures/background.jpg", false, "background");
 
 
     LOG(INFO) << "Start running the calculator graph.";
@@ -94,6 +110,12 @@ int Sandbox::InitOpenGL() {
     glfwWindowHint(GLFW_RESIZABLE, false);
     
     glfwWindow = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, kWindowName, nullptr, nullptr);
+    if (glfwWindow == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
     glfwMakeContextCurrent(glfwWindow);
     // glfwSwapInterval(1);
     
@@ -134,6 +156,7 @@ void Sandbox::KeyCallback(GLFWwindow* window, int key, int scancode, int action,
 
 void Sandbox::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
     // empty now
+    glViewport(0, 0, width, height);
 }
 
 int Sandbox::InitCamCapture() {
@@ -198,14 +221,19 @@ void Sandbox::Update(float dt)
 }
 
 void Sandbox::Render(float dt) {
-    // LOG(INFO) << "Do Sandbox::Render";
 
-    spriteRenderer->DrawSprite(camTexture, 
+    // LOG(INFO) << "Do Sandbox::Render";
+    Texture2D background = ResourceManager::GetTexture("background");
+    spriteRenderer->DrawSprite(background, 
                                glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
-                               0.0f, glm::vec3(1.0f), dt);
-    // neonRenderer->DrawSprite(camTexture,
-    //                          glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
-    //                          0.0f, glm::vec3(1.0f), dt);
+                               45.0f, glm::vec3(0.0f, 1.0f, 0.0f), dt);
+
+    // spriteRenderer->DrawSprite(camTexture, 
+    //                            glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+    //                            0.0f, glm::vec3(1.0f), dt);
+    neonRenderer->DrawSprite(camTexture,
+                             glm::vec2(0.0f, 0.0f), glm::vec2(this->width, this->height), 
+                             0.0f, glm::vec3(1.0f), dt);
 }
 
 void Sandbox::Reset() {
@@ -225,7 +253,7 @@ void Sandbox::DoCamCapture() {
         // LOG(INFO) << "Do Camera Capture";
         camCapture >> camBufferTmp;
         if (camBufferTmp.empty()) {
-            LOG(INFO) << "Ignore empty frames";
+            // LOG(INFO) << "Ignore empty frames";
             continue;
         }
 

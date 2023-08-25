@@ -9,13 +9,13 @@
 
 #ifdef __APPLE__
 
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl.h>
-#include <OpenGL/gl3ext.h>
+// #define GL_SILENCE_DEPRECATION
+// #include <OpenGL/gl.h>
+// #include <OpenGL/gl3ext.h>
 #define GLFW_INCLUDE_GLCOREARB
-#define glGenVertexArrays glGenVertexArraysAPPLE
-#define glBindVertexArray glBindVertexArrayAPPLE
-#define glDeleteVertexArrays glDeleteVertexArraysAPPLE
+// #define glGenVertexArrays glGenVertexArraysAPPLE
+// #define glBindVertexArray glBindVertexArrayAPPLE
+// #define glDeleteVertexArrays glDeleteVertexArraysAPPLE
 
 #else
 
