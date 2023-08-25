@@ -53,6 +53,8 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 // #include <GL/glut.h>
+#include <GLES3/gl3.h>
+#define GLFW_INCLUDE_ES2
 
 #endif
 
