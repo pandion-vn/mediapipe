@@ -34,13 +34,13 @@
 // #include <GL/glew.h>
 // #include <GLES3/gl32.h>
 #include <GL/gl.h>
-#include <GL/glew.h>
+// #include <GL/glew.h>
 #include <GLES3/gl3.h>
 #define GLFW_INCLUDE_ES2
 
 #endif
 
-#define GLFW_INCLUDE_NONE
+// #define GLFW_INCLUDE_NONE
 // #define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
 
