@@ -13,30 +13,46 @@
 
 #ifdef __APPLE__
 
-// #include <OpenGLES/ES2/gl.h>
-// #include <OpenGLES/ES2/glext.h>
+#include <TargetConditionals.h>
+
+#if TARGET_OS_OSX
+
+#define HAS_NSGL 1
+
+#include <OpenGL/OpenGL.h>
+
+#if CGL_VERSION_1_3
+#include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
+#else
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#endif  // CGL_VERSION_1_3
+
+#else
+
+#define HAS_EAGL 1
+
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+
+#endif  // TARGET_OS_OSX
 
 #define GL_SILENCE_DEPRECATION
-// #define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl.h>
-// #include <OpenGL/gl3.h>
-// #include <OpenGL/gl.h>
-// #include <OpenGL/gl3ext.h>
-#define GLFW_INCLUDE_GLCOREARB
-#define glGenVertexArrays glGenVertexArraysAPPLE
-#define glBindVertexArray glBindVertexArrayAPPLE
-#define glDeleteVertexArrays glDeleteVertexArraysAPPLE
+// #define GLFW_INCLUDE_GLCOREARB
+// #define glGenVertexArrays glGenVertexArraysAPPLE
+// #define glBindVertexArray glBindVertexArrayAPPLE
+// #define glDeleteVertexArrays glDeleteVertexArraysAPPLE
 
 #else // Not APPLE
-
-// #include <GL/glew.h> # disable by mediapipe
-// #include <GL/glext.h>
-// #include <GL/glew.h>
-// #include <GLES3/gl32.h>
+#ifdef _WIN32
+  #include <windows.h>
+#endif
 #include <GL/gl.h>
-// #include <GL/glew.h>
-#include <GLES3/gl3.h>
-#define GLFW_INCLUDE_ES2
+#include <GL/glu.h>
+#include <GL/glut.h>
 
 #endif
 
@@ -44,10 +60,6 @@
 // #define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
 
-// #include <Effekseer.h>
-// #include <Effekseer.Modules.h>
-// #include <Effekseer.SIMD.h>
-// #include <EffekseerRendererGL.h>
 #include "opencv2/opencv.hpp"
 
 #include "glm/glm.hpp"

@@ -101,7 +101,7 @@ int Sandbox::InitOpenGL() {
     // glfwWindowHint(GLFW_ALPHA_BITS, 8);
     // glfwWindowHint(GLFW_DEPTH_BITS, 24);
     // glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+    // glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
     // enable anti-alising 4x with GLFW
     glfwWindowHint(GLFW_SAMPLES, 0);
 #ifdef __APPLE__
