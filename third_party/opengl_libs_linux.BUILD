@@ -30,7 +30,7 @@ cc_library(
       "include/GL/*.h",
     ]),
     srcs = glob([
-      "lib/libglew.a",
+      "lib/libGLEW.a",
     ]),
     linkopts = [
         "-lGL",
