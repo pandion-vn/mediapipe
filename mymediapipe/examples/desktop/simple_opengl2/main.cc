@@ -6,20 +6,6 @@
 
 Sandbox* sandboxApp;
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
-
-
 mediapipe::Status RunMPPGraph() {
     Sandbox::InitOpenGL();
 
@@ -53,6 +39,67 @@ mediapipe::Status RunMPPGraph() {
         LOG(INFO) << "Success!";
     }
 
+    GLuint vao;
+	GLuint vbo;
+	/* geometry to use. these are 3 xyz points (9 floats total) to make a triangle
+	*/
+	GLfloat points[] = {
+		 0.0f,	0.5f,	0.0f,
+		 0.5f, -0.5f,	0.0f,
+		-0.5f, -0.5f,	0.0f
+	};
+	/* these are the strings of code for the shaders
+	the vertex shader positions each vertex point */
+	const char* vertex_shader =
+	"#version 410\n"
+	"in vec3 vp;"
+	"void main () {"
+	"	gl_Position = vec4 (vp, 1.0);"
+	"}";
+	/* the fragment shader colours each fragment (pixel-sized area of the
+	triangle) */
+	const char* fragment_shader =
+	"#version 410\n"
+	"out vec4 frag_colour;"
+	"void main () {"
+	"	frag_colour = vec4 (0.5, 0.0, 0.5, 1.0);"
+	"}";
+	/* GL shader objects for vertex and fragment shader [components] */
+	GLuint vs, fs;
+	/* GL shader programme object [combined, to link] */
+	GLuint shader_programme;
+
+    /* a vertex buffer object (VBO) is created here. this stores an array of data
+	on the graphics adapter's memory. in our case - the vertex points */
+	glGenBuffers (1, &vbo);
+	glBindBuffer (GL_ARRAY_BUFFER, vbo);
+	glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (GLfloat), points, GL_STATIC_DRAW);
+	
+	/* the vertex array object (VAO) is a little descriptor that defines which
+	data from vertex buffer objects should be used as input variables to vertex
+	shaders. in our case - use our only VBO, and say 'every three floats is a 
+	variable' */
+	glGenVertexArrays (1, &vao);
+	glBindVertexArray (vao);
+	glEnableVertexAttribArray (0);
+	glBindBuffer (GL_ARRAY_BUFFER, vbo);
+	glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	
+	/* here we copy the shader strings into GL shaders, and compile them. we then
+	create an executable shader 'program' and attach both of the compiled shaders.
+	we link this, which matches the outputs of the vertex shader to the inputs of
+	the fragment shader, etc. and it is then ready to use */
+	vs = glCreateShader (GL_VERTEX_SHADER);
+	glShaderSource (vs, 1, &vertex_shader, NULL);
+	glCompileShader (vs);
+	fs = glCreateShader (GL_FRAGMENT_SHADER);
+	glShaderSource (fs, 1, &fragment_shader, NULL);
+	glCompileShader (fs);
+	shader_programme = glCreateProgram ();
+	glAttachShader (shader_programme, fs);
+	glAttachShader (shader_programme, vs);
+	glLinkProgram (shader_programme);
+
     while (!glfwWindowShouldClose(Sandbox::glfwWindow)) {
         // calculate delta time
         // --------------------
@@ -75,9 +122,14 @@ mediapipe::Status RunMPPGraph() {
 
         // render
         // ------
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         sandboxApp->Render(currentFrame);
+        glUseProgram (shader_programme);
+		glBindVertexArray (vao);
+		/* draw points 0-3 from the currently bound VAO with current in-use shader*/
+		glDrawArrays (GL_TRIANGLES, 0, 3);
+
         frames++;
         glfwSwapBuffers(Sandbox::glfwWindow);
         glfwPollEvents();

@@ -11,56 +11,8 @@
 #include <iostream>
 #include <cmath>
 
-#ifdef __APPLE__
-
-#include <TargetConditionals.h>
-
-#if TARGET_OS_OSX
-
-#define HAS_NSGL 1
-
-#include <OpenGL/OpenGL.h>
-
-#if CGL_VERSION_1_3
-#include <OpenGL/gl3.h>
-#include <OpenGL/gl3ext.h>
-#else
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
-#endif  // CGL_VERSION_1_3
-
-#else
-
-#define HAS_EAGL 1
-
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#include <OpenGLES/ES3/gl.h>
-#include <OpenGLES/ES3/glext.h>
-
-#endif  // TARGET_OS_OSX
-
-#define GL_SILENCE_DEPRECATION
-// #define GLFW_INCLUDE_GLCOREARB
-// #define glGenVertexArrays glGenVertexArraysAPPLE
-// #define glBindVertexArray glBindVertexArrayAPPLE
-// #define glDeleteVertexArrays glDeleteVertexArraysAPPLE
-
-#else // Not APPLE
-#ifdef _WIN32
-  #include <windows.h>
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
-// #include <GL/glut.h>
-#include <GLES3/gl3.h>
-#define GLFW_INCLUDE_ES2
-
-#endif
-
-// #define GLFW_INCLUDE_NONE
-// #define GLFW_INCLUDE_ES2
-#include <GLFW/glfw3.h>
+#include <GL/glew.h> /* include GLEW and new version of GL on Windows */
+#include <GLFW/glfw3.h> /* GLFW helper library */
 
 #include "opencv2/opencv.hpp"
 

@@ -93,12 +93,12 @@ int Sandbox::InitOpenGL() {
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // enable anti-alising 4x with GLFW
-    glfwWindowHint(GLFW_SAMPLES, 0);
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // enable anti-alising 4x with GLFW
+    // glfwWindowHint(GLFW_SAMPLES, 0);
     glfwWindowHint(GLFW_RESIZABLE, false);
     
     glfwWindow = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, kWindowName, nullptr, nullptr);
@@ -110,19 +110,19 @@ int Sandbox::InitOpenGL() {
     }
     glfwMakeContextCurrent(glfwWindow);
     // glfwSwapInterval(1);
-    
-#ifdef __APPLE__
-    std::cout << "Version: " << glGetString( GL_VERSION ) << " :Version " << std::endl;
 
-#else // Not APPLE
-//     glewExperimental = true;
-//     GLenum err = glewInit();
-//     if (GLEW_OK != err) {
-//         fprintf(stderr, " GLEW INIT ERROR !!!  . \n");
-//         std::cerr << "Error initialization GLEW: " << glewGetErrorString(err) << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
-#endif
+    /* start GLEW extension handler */
+	glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        fprintf(stderr, " GLEW INIT ERROR !!!  . \n");
+        std::cerr << "Error initialization GLEW: " << glewGetErrorString(err) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+	/* get version info */
+	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "OpenGL version supported: " << glGetString(GL_VERSION) << std::endl;
     return 0;
 }
 

@@ -137,6 +137,15 @@ alias(
 )
 
 alias(
+    name = "opengl_glew",
+    actual = select({
+        "//conditions:default": ":opengl_glew_binary",
+    }),
+    visibility = ["//visibility:public"],
+)
+
+
+alias(
     name = "opengl_glm",
     actual = select({
         "//conditions:default": "@opengl_glm",
@@ -296,6 +305,14 @@ alias(
     actual = select({
         "//mediapipe:macos": "@macos_opengl_libs//:opengl_glfw",
         "//conditions:default": "@linux_opengl_libs//:opengl_glfw",
+    }),
+)
+
+alias(
+    name = "opengl_glew_binary",
+    actual = select({
+        "//mediapipe:macos": "@macos_opengl_libs//:opengl_glew",
+        "//conditions:default": "@linux_opengl_libs//:opengl_glew",
     }),
 )
 

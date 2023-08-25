@@ -62,6 +62,7 @@ cc_library(
         "//third_party:opencv",
         "//third_party:opengl",
         "//third_party:opengl_glfw",
+        "//third_party:opengl_glew",
         "//third_party:opengl_glm",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
