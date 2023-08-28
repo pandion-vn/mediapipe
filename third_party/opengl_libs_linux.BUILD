@@ -38,6 +38,7 @@ cc_library(
         "-lm",
         "-lpthread",
         "-lrt",
+        "-l:libGLEW.so",
     ],
     includes = [
       "include/GL/",
