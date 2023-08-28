@@ -46,9 +46,9 @@ cc_library(
         "//mediapipe/framework/port:parse_text_proto",
         "//mediapipe/framework/port:status",
         "//mediapipe/framework/port:commandlineflags",
+        "//mediapipe/framework/formats:image_frame",
+        "//mediapipe/framework/formats:image_frame_opencv",
         # "//mediapipe/calculators/core:pass_through_calculator",
-        # "//mediapipe/framework/formats:image_frame",
-        # "//mediapipe/framework/formats:image_frame_opencv",
         # "//mediapipe/framework/port:logging",
         # "//mediapipe/framework/port:parse_text_proto",
         # "//mediapipe/framework/port:status",
@@ -85,4 +85,19 @@ cc_binary(
         "//mymediapipe/graphs/simple_io:desktop_simple_io_cpu_calculators",
         # "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
+)
+
+cc_binary(
+    name = "simple_opengl2_hair_seg_demo",
+    data = ["//mediapipe/models:hair_segmentation.tflite"],
+    deps = [
+        "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2",
+    ] + select({
+        "//mediapipe/gpu:disable_gpu": [
+            "//mediapipe/graphs/hair_segmentation:desktop_calculators",
+        ],
+        "//conditions:default": [
+            "//mediapipe/graphs/hair_segmentation:mobile_calculators",
+        ],
+    }),
 )

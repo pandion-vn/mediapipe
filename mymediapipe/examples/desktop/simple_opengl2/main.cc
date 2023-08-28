@@ -83,8 +83,8 @@ mediapipe::Status RunMPPGraph() {
     glfwTerminate();
     LOG(INFO) << "Shutting down.";
     MP_RETURN_IF_ERROR(Sandbox::graph.CloseInputStream(kInputStream));
-    // return Sandbox::graph.WaitUntilDone();
-    return mediapipe::OkStatus();
+    return Sandbox::graph.WaitUntilDone();
+    // return mediapipe::OkStatus();
 }
     
 int main(int argc, char** argv) {

@@ -18,6 +18,7 @@ std::atomic<bool>                       Sandbox::dataReady;
 bool                                    Sandbox::stopCapture;
 SpriteRenderer*                         Sandbox::spriteRenderer;
 NeonRenderer*                           Sandbox::neonRenderer;
+std::unique_ptr<mediapipe::OutputStreamPoller>              Sandbox::poller;
 
 Sandbox::Sandbox(unsigned int width, unsigned int height) 
     : keys(), width(width), height(height), frames(0) {
@@ -75,9 +76,17 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
             mediapipe::ParseTextProtoOrDie<mediapipe::CalculatorGraphConfig>(calculator_graph_config_contents);
 
     LOG(INFO) << "Initialize the calculator graph.";
-    mediapipe::CalculatorGraph graph;
+    // mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
-    graph.StartRun({});
+    LOG(INFO) << "Start running the calculator graph.";
+    // auto poller_status = graph.AddOutputStreamPoller(kOutputStream);
+    // MP_ASSERT_OK(poller_status.status());
+    // poller = std::move(status_or_poller.value());
+    poller.reset(
+        new mediapipe::OutputStreamPoller(graph.AddOutputStreamPoller(kOutputStream).value()));
+    
+    MP_RETURN_IF_ERROR(graph.StartRun({}));
+    // graph.StartRun({});
     return mediapipe::OkStatus();
 }
 
@@ -154,6 +163,12 @@ void Sandbox::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 }
 
 int Sandbox::InitCamCapture() {
+
+#if (CV_MAJOR_VERSION >= 3) && (CV_MINOR_VERSION >= 2)
+    camCapture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    camCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    camCapture.set(cv::CAP_PROP_FPS, 30);
+#endif
     // if (camCapture.open(gst, cv::CAP_GSTREAMER)) {
     if (camCapture.open(0)) {
         LOG(INFO) << "Init Opencv Camera Success";
@@ -255,8 +270,32 @@ void Sandbox::DoCamCapture() {
         cv::cvtColor(camBufferTmp, camBuff, cv::COLOR_BGR2RGBA);
         cv::flip(camBuff, camBuff, /*flipcode=HORIZONTAL*/ 1);
 
+        // Wrap Mat into an ImageFrame.
+        auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
+            mediapipe::ImageFormat::SRGB, camBuff.cols, camBuff.rows,
+            mediapipe::ImageFrame::kDefaultAlignmentBoundary);
+        cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
+        camBuff.copyTo(input_frame_mat);
+
+        // Send image packet into the graph.
+        size_t frame_timestamp_us =
+            (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
+        graph.AddPacketToInputStream(
+            kInputStream, mediapipe::Adopt(input_frame.release())
+                            .At(mediapipe::Timestamp(frame_timestamp_us)));
+
+        // Get the graph result packet, or stop if that fails.
+        mediapipe::Packet packet;
+        if (!poller->Next(&packet)) break;
+        auto& output_frame = packet.Get<mediapipe::ImageFrame>();
+
+        // Convert back to opencv for display or saving.
+        cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+        // cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2BGR);
+        // LOG(INFO) << "output_frame size" << output_frame_mat.size();
+
         std::lock_guard<std::mutex> lk (mutexCamBuffer);
-        camBuff.copyTo(camBuffer);
+        output_frame_mat.copyTo(camBuffer);
         dataReady = true;
     }
 }
