@@ -300,20 +300,19 @@ void Sandbox::DoCamCapture() {
         size_t frame_timestamp_us =
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
         // LOG(INFO) << "Timestamp : " << frame_timestamp_us;
-        MP_RETURN_IF_ERROR(
-            gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us, &graph,
-                                        &gpu_helper]() -> absl::Status {
-                // Convert ImageFrame to GpuBuffer.
-                auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
-                auto gpu_frame = texture.GetFrame<mediapipe::GpuBuffer>();
-                glFlush();
-                texture.Release();
-                // Send GPU image packet into the graph.
-                MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                    kInputStream, mediapipe::Adopt(gpu_frame.release())
-                                        .At(mediapipe::Timestamp(frame_timestamp_us))));
-                return absl::OkStatus();
-            }));
+        gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us, &graph,
+                                    &gpu_helper]() -> absl::Status {
+            // Convert ImageFrame to GpuBuffer.
+            auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
+            auto gpu_frame = texture.GetFrame<mediapipe::GpuBuffer>();
+            glFlush();
+            texture.Release();
+            // Send GPU image packet into the graph.
+            MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                kInputStream, mediapipe::Adopt(gpu_frame.release())
+                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+            return absl::OkStatus();
+        });
         // graph.AddPacketToInputStream(
         //     kInputStream, mediapipe::Adopt(input_frame.release())
         //                     .At(mediapipe::Timestamp(frame_timestamp_us)));
@@ -324,7 +323,7 @@ void Sandbox::DoCamCapture() {
         // auto& output_frame = packet.Get<mediapipe::ImageFrame>();
         std::unique_ptr<mediapipe::ImageFrame> output_frame;
         // Convert GpuBuffer to ImageFrame.
-        MP_RETURN_IF_ERROR(gpu_helper.RunInGlContext(
+        gpu_helper.RunInGlContext(
             [&packet, &output_frame, &gpu_helper]() -> absl::Status {
                 auto& gpu_frame = packet.Get<mediapipe::GpuBuffer>();
                 auto texture = gpu_helper.CreateSourceTexture(gpu_frame);
@@ -340,13 +339,12 @@ void Sandbox::DoCamCapture() {
                 glFlush();
                 texture.Release();
                 return absl::OkStatus();
-            }));
+            });
 
         // Convert back to opencv for display or saving.
         // cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
         cv::Mat output_frame_mat = mediapipe::formats::MatView(output_frame.get());
         if (output_frame_mat.channels() == 4) {
-
         } else {
             cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
         }
