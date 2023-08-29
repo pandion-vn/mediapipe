@@ -91,7 +91,7 @@ cc_library(
         "lib/stb_image.h",
         "include/common.h",
         "include/constants.h",
-        "include/sandbox.h",
+        "include/sandbox_gpu.h",
         "include/texture.h",
         "include/sprite_renderer.h",
         "include/neon_renderer.h",

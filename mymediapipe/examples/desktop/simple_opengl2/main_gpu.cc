@@ -2,7 +2,7 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "include/common.h"
-#include "include/sandbox.h"
+#include "include/sandbox_gpu.h"
 
 Sandbox* sandboxApp;
 

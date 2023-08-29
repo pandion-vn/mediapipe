@@ -17,6 +17,7 @@ ABSL_FLAG(std::string, output_video_path, "",
 
 // Instantiate static variables
 mediapipe::CalculatorGraph              Sandbox::graph;
+mediapipe::GlCalculatorHelper           Sandbox::gpu_helper;
 GLFWwindow*                             Sandbox::glfwWindow;
 cv::VideoCapture                        Sandbox::camCapture;
 std::atomic<bool>                       Sandbox::dataReady;
@@ -88,7 +89,7 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
     LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_resources, mediapipe::GpuResources::Create());
     MP_RETURN_IF_ERROR(graph.SetGpuResources(std::move(gpu_resources)));
-    mediapipe::GlCalculatorHelper gpu_helper;
+    // mediapipe::GlCalculatorHelper gpu_helper;
     gpu_helper.InitializeForTest(graph.GetGpuResources().get());
     
     LOG(INFO) << "Start running the calculator graph.";
