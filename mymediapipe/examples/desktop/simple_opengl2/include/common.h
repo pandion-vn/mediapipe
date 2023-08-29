@@ -11,9 +11,10 @@
 #include <iostream>
 #include <cmath>
 
+#if MEDIAPIPE_DISABLE_GPU
 #include <GL/glew.h> /* include GLEW and new version of GL on Windows */
-#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h> /* GLFW helper library */
+#endif  // !MEDIAPIPE_DISABLE_GPU
 
 #include "opencv2/opencv.hpp"
 
