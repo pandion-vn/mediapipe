@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <GL/glew.h> /* include GLEW and new version of GL on Windows */
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h> /* GLFW helper library */
 
 #include "opencv2/opencv.hpp"
