@@ -131,13 +131,13 @@ int Sandbox::InitOpenGL() {
     // glfwSwapInterval(1);
 
     /* start GLEW extension handler */
-	glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        fprintf(stderr, " GLEW INIT ERROR !!!  . \n");
-        std::cerr << "Error initialization GLEW: " << glewGetErrorString(err) << std::endl;
-        exit(EXIT_FAILURE);
-    }
+	// glewExperimental = GL_TRUE;
+    // GLenum err = glewInit();
+    // if (GLEW_OK != err) {
+    //     fprintf(stderr, " GLEW INIT ERROR !!!  . \n");
+    //     std::cerr << "Error initialization GLEW: " << glewGetErrorString(err) << std::endl;
+    //     exit(EXIT_FAILURE);
+    // }
 
 	/* get version info */
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
