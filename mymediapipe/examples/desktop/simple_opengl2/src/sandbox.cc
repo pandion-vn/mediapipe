@@ -18,7 +18,8 @@ std::atomic<bool>                       Sandbox::dataReady;
 bool                                    Sandbox::stopCapture;
 SpriteRenderer*                         Sandbox::spriteRenderer;
 NeonRenderer*                           Sandbox::neonRenderer;
-std::unique_ptr<mediapipe::OutputStreamPoller>              Sandbox::poller;
+// std::unique_ptr<mediapipe::OutputStreamPoller>              Sandbox::poller;
+mediapipe::StatusOrPoller               Sandbox::poller_status;
 
 Sandbox::Sandbox(unsigned int width, unsigned int height) 
     : keys(), width(width), height(height), frames(0) {
@@ -60,9 +61,9 @@ mediapipe::Status Sandbox::Init() {
     // ResourceManager::LoadTexture("mymediapipe/assets/textures/play_your_hand.jpg", false, "background");
     ResourceManager::LoadTexture("mymediapipe/assets/textures/background.jpg", false, "background");
 
+    LOG(INFO) << "Start running the thread camera capture.";
+    Sandbox::threadCam = std::thread(&Sandbox::DoCamCapture, this);
 
-    LOG(INFO) << "Start running the calculator graph.";
-    threadCam = std::thread(&Sandbox::DoCamCapture, this);
     return mediapipe::OkStatus();
 }
 
@@ -79,11 +80,11 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
     // mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
     LOG(INFO) << "Start running the calculator graph.";
-    // auto poller_status = graph.AddOutputStreamPoller(kOutputStream);
-    // MP_ASSERT_OK(poller_status.status());
-    // poller = std::move(status_or_poller.value());
-    poller.reset(
-        new mediapipe::OutputStreamPoller(graph.AddOutputStreamPoller(kOutputStream).value()));
+    poller_status = graph.AddOutputStreamPoller(kOutputStream);
+    // poller_status.ok();
+    // poller = std::move(poller_status.value());
+    // poller.reset(
+        // new mediapipe::OutputStreamPoller(graph.AddOutputStreamPoller(kOutputStream).value()));
     
     MP_RETURN_IF_ERROR(graph.StartRun({}));
     // graph.StartRun({});
@@ -186,10 +187,14 @@ int Sandbox::InitCamCapture() {
     return 0;
 }
 
+void Sandbox::UpdateCamera1(cv::Mat &camBuffer, float dt) {
+    ResourceManager::LoadTextureFromMat(camTexture, camBuffer, true);
+}
+
 void Sandbox::UpdateCamera(float dt) {
     std::unique_lock<std::mutex> lck(mutexCamBuffer, std::defer_lock);
     if (dataReady && lck.try_lock()) {
-        // LOG(INFO) << "Do ResourceManager::LoadTextureFromMat camBuffer";
+        LOG(INFO) << "Do ResourceManager::LoadTextureFromMat camBuffer";
         ResourceManager::LoadTextureFromMat(camTexture, camBuffer, true);
         dataReady = false;
     }
@@ -258,42 +263,47 @@ void Sandbox::join() {
 }
 
 void Sandbox::DoCamCapture() {
+    cv::Mat camera_frame_raw;
+
     while (!stopCapture) {
         // LOG(INFO) << "Do Camera Capture";
-        camCapture >> camBufferTmp;
-        if (camBufferTmp.empty()) {
+        camCapture >> camera_frame_raw;
+        if (camera_frame_raw.empty()) {
             // LOG(INFO) << "Ignore empty frames";
             continue;
         }
 
-        cv::Mat camBuff;	
-        cv::cvtColor(camBufferTmp, camBuff, cv::COLOR_BGR2RGBA);
-        cv::flip(camBuff, camBuff, /*flipcode=HORIZONTAL*/ 1);
+        cv::Mat camera_frame;	
+        cv::cvtColor(camera_frame_raw, camera_frame, cv::COLOR_BGR2RGB);
+        cv::flip(camera_frame, camera_frame, /*flipcode=HORIZONTAL*/ 1);
+        LOG(INFO) << "camera_frame size" << camera_frame.size() << " channels: " << camera_frame.channels();;
 
         // Wrap Mat into an ImageFrame.
         auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
-            mediapipe::ImageFormat::SRGB, camBuff.cols, camBuff.rows,
+            mediapipe::ImageFormat::SRGB, camera_frame.cols, camera_frame.rows,
             mediapipe::ImageFrame::kDefaultAlignmentBoundary);
         cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
-        camBuff.copyTo(input_frame_mat);
+        camera_frame.copyTo(input_frame_mat);
 
         // Send image packet into the graph.
         size_t frame_timestamp_us =
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
+        // LOG(INFO) << "Timestamp : " << frame_timestamp_us;
         graph.AddPacketToInputStream(
             kInputStream, mediapipe::Adopt(input_frame.release())
                             .At(mediapipe::Timestamp(frame_timestamp_us)));
 
         // Get the graph result packet, or stop if that fails.
         mediapipe::Packet packet;
-        if (!poller->Next(&packet)) break;
+        if (!poller_status->Next(&packet)) continue;
         auto& output_frame = packet.Get<mediapipe::ImageFrame>();
 
         // Convert back to opencv for display or saving.
         cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
-        // cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2BGR);
-        // LOG(INFO) << "output_frame size" << output_frame_mat.size();
+        cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+        LOG(INFO) << "output_frame size" << output_frame_mat.size() << " channels: " << output_frame_mat.channels();;
 
+        // cv::imshow("kWindowName", output_frame_mat);
         std::lock_guard<std::mutex> lk (mutexCamBuffer);
         output_frame_mat.copyTo(camBuffer);
         dataReady = true;

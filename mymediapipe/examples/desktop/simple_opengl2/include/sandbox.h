@@ -13,7 +13,7 @@ private:
     std::mutex                  mutexCamBuffer;
     std::thread                 threadCam;
     Texture2D                   camTexture;
-    cv::Mat                     camBuffer, camBufferTmp;
+    cv::Mat                     camBuffer;
 
 public:
     Sandbox(unsigned int width, unsigned int height);
@@ -26,7 +26,7 @@ public:
     // static attrs
     static mediapipe::CalculatorGraph                       graph;
     // static mediapipe::GlCalculatorHelper                    gpuHelper;
-    static std::unique_ptr<mediapipe::OutputStreamPoller>   poller;
+    static mediapipe::StatusOrPoller                        poller_status;
     static GLFWwindow*                                      glfwWindow;
     static cv::VideoCapture                                 camCapture;
     static SpriteRenderer                                   *spriteRenderer;
@@ -49,6 +49,7 @@ public:
     void ProcessInput(float dt);
     void Update(float dt);
     void UpdateCamera(float dt);
+    void UpdateCamera1(cv::Mat &camBuffer, float dt);
     void UpdateEffekseer(float dt);
     void Render(float dt);
 
