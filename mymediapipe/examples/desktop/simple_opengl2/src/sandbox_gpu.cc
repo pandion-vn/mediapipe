@@ -1,4 +1,9 @@
 #include "../include/sandbox.h"
+#include "mediapipe/gpu/gl_calculator_helper.h"
+#include "mediapipe/gpu/gpu_buffer.h"
+#include "mediapipe/gpu/gpu_shared_data_internal.h"
+#include "mediapipe/util/resource_util.h"
+
 // #include <experimental/filesystem>
 
 ABSL_FLAG(std::string, calculator_graph_config_file, "",
@@ -79,6 +84,13 @@ mediapipe::Status Sandbox::InitialMPPGraph() {
     LOG(INFO) << "Initialize the calculator graph.";
     // mediapipe::CalculatorGraph graph;
     MP_RETURN_IF_ERROR(graph.Initialize(config));
+
+    LOG(INFO) << "Initialize the GPU.";
+    ASSIGN_OR_RETURN(auto gpu_resources, mediapipe::GpuResources::Create());
+    MP_RETURN_IF_ERROR(graph.SetGpuResources(std::move(gpu_resources)));
+    mediapipe::GlCalculatorHelper gpu_helper;
+    gpu_helper.InitializeForTest(graph.GetGpuResources().get());
+    
     LOG(INFO) << "Start running the calculator graph.";
     poller_status = graph.AddOutputStreamPoller(kOutputStream);
     // poller_status.ok();
@@ -288,18 +300,56 @@ void Sandbox::DoCamCapture() {
         size_t frame_timestamp_us =
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
         // LOG(INFO) << "Timestamp : " << frame_timestamp_us;
-        graph.AddPacketToInputStream(
-            kInputStream, mediapipe::Adopt(input_frame.release())
-                            .At(mediapipe::Timestamp(frame_timestamp_us)));
+        MP_RETURN_IF_ERROR(
+            gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us, &graph,
+                                        &gpu_helper]() -> absl::Status {
+                // Convert ImageFrame to GpuBuffer.
+                auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
+                auto gpu_frame = texture.GetFrame<mediapipe::GpuBuffer>();
+                glFlush();
+                texture.Release();
+                // Send GPU image packet into the graph.
+                MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                    kInputStream, mediapipe::Adopt(gpu_frame.release())
+                                        .At(mediapipe::Timestamp(frame_timestamp_us))));
+                return absl::OkStatus();
+            }));
+        // graph.AddPacketToInputStream(
+        //     kInputStream, mediapipe::Adopt(input_frame.release())
+        //                     .At(mediapipe::Timestamp(frame_timestamp_us)));
 
         // Get the graph result packet, or stop if that fails.
         mediapipe::Packet packet;
         if (!poller_status->Next(&packet)) continue;
-        auto& output_frame = packet.Get<mediapipe::ImageFrame>();
+        // auto& output_frame = packet.Get<mediapipe::ImageFrame>();
+        std::unique_ptr<mediapipe::ImageFrame> output_frame;
+        // Convert GpuBuffer to ImageFrame.
+        MP_RETURN_IF_ERROR(gpu_helper.RunInGlContext(
+            [&packet, &output_frame, &gpu_helper]() -> absl::Status {
+                auto& gpu_frame = packet.Get<mediapipe::GpuBuffer>();
+                auto texture = gpu_helper.CreateSourceTexture(gpu_frame);
+                output_frame = absl::make_unique<mediapipe::ImageFrame>(
+                    mediapipe::ImageFormatForGpuBufferFormat(gpu_frame.format()),
+                    gpu_frame.width(), gpu_frame.height(),
+                    mediapipe::ImageFrame::kGlDefaultAlignmentBoundary);
+                gpu_helper.BindFramebuffer(texture);
+                const auto info = mediapipe::GlTextureInfoForGpuBufferFormat(
+                    gpu_frame.format(), 0, gpu_helper.GetGlVersion());
+                glReadPixels(0, 0, texture.width(), texture.height(), info.gl_format,
+                            info.gl_type, output_frame->MutablePixelData());
+                glFlush();
+                texture.Release();
+                return absl::OkStatus();
+            }));
 
         // Convert back to opencv for display or saving.
-        cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
-        cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+        // cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+        cv::Mat output_frame_mat = mediapipe::formats::MatView(output_frame.get());
+        if (output_frame_mat.channels() == 4) {
+
+        } else {
+            cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2RGBA);
+        }
         // LOG(INFO) << "output_frame size" << output_frame_mat.size() << " channels: " << output_frame_mat.channels();;
 
         // cv::imshow("kWindowName", output_frame_mat);
