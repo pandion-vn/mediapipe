@@ -79,7 +79,7 @@ cc_library(
     name = "simple_opengl2_gpu",
     srcs = [
         "lib/stb_image.cpp",
-        "main.cc",
+        "main_gpu.cc",
         "src/sandbox_gpu.cc",
         "src/texture.cc",
         "src/sprite_renderer.cc",
