@@ -40,6 +40,7 @@
 #include "mediapipe/gpu/gl_calculator_helper.h"
 #include "mediapipe/gpu/gpu_buffer.h"
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
+#include "mediapipe/util/resource_util.h"
 
 #include "constants.h"
 // #include "tempo.h"
