@@ -50,15 +50,13 @@
 
 #endif  // TARGET_OS_OSX
 
-#else // __APPLE__
+#else // NONE __APPLE__
 
 #define HAS_EGL 1
 
-#include <GL/glew.h>
-
-// #include <EGL/egl.h>
-// #include <GLES2/gl2.h>
-// #include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #if defined(__ANDROID__)
 // Weak-link all GL APIs included from this point on.
 // TODO: Annotate these with availability attributes for the
@@ -68,7 +66,7 @@
 #define GL_APICALL __attribute__((weak_import)) KHRONOS_APICALL
 #endif  // defined(__ANDROID__)
 
-// #include <GLES3/gl32.h>
+#include <GLES3/gl32.h>
 
 // When using the Linux EGL headers, we may end up pulling a
 // "#define Status int" from Xlib.h, which interferes with absl::Status.
