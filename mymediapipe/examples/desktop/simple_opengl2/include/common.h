@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <GL/glew.h> /* include GLEW and new version of GL on Windows */
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h> /* GLFW helper library */
 
 #include "opencv2/opencv.hpp"
@@ -36,9 +37,9 @@
 // #include "mediapipe/framework/formats/detection.pb.h"
 // #include "mediapipe/framework/formats/location.h"
 // #include "mediapipe/framework/formats/landmark.pb.h"
-// #include "mediapipe/gpu/gl_calculator_helper.h"
-// #include "mediapipe/gpu/gpu_buffer.h"
-// #include "mediapipe/gpu/gpu_shared_data_internal.h"
+#include "mediapipe/gpu/gl_calculator_helper.h"
+#include "mediapipe/gpu/gpu_buffer.h"
+#include "mediapipe/gpu/gpu_shared_data_internal.h"
 
 #include "constants.h"
 // #include "tempo.h"
