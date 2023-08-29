@@ -29,7 +29,7 @@ public:
 
     // static attrs
     static mediapipe::CalculatorGraph                       graph;
-    static mediapipe::GlCalculatorHelper                    gpuHelper;
+    static mediapipe::GlCalculatorHelper                    gpu_helper;
     static mediapipe::StatusOrPoller                        poller_status;
     static GLFWwindow*                                      glfwWindow;
     static cv::VideoCapture                                 camCapture;
