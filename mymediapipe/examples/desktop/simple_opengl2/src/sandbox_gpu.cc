@@ -1,4 +1,4 @@
-#include "../include/sandbox.h"
+#include "../include/sandbox_gpu.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
 #include "mediapipe/gpu/gpu_buffer.h"
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
