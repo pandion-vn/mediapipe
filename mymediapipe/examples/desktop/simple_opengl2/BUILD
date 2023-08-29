@@ -75,12 +75,78 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_library(
+    name = "simple_opengl2_gpu",
+    srcs = [
+        "lib/stb_image.cpp",
+        "main.cc",
+        "src/sandbox_gpu.cc",
+        "src/texture.cc",
+        "src/sprite_renderer.cc",
+        "src/neon_renderer.cc",
+        "src/resource_manager.cc",
+        "src/shader.cc",
+    ],
+    hdrs = [
+        "lib/stb_image.h",
+        "include/common.h",
+        "include/constants.h",
+        "include/sandbox.h",
+        "include/texture.h",
+        "include/sprite_renderer.h",
+        "include/neon_renderer.h",
+        "include/resource_manager.h",
+        "include/shader.h",
+    ],
+    deps = [
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework:calculator_graph",
+        "//mediapipe/framework/port:logging",
+        "//mediapipe/framework/port:parse_text_proto",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/framework/port:commandlineflags",
+        "//mediapipe/framework/formats:image_frame",
+        "//mediapipe/framework/formats:image_frame_opencv",
+        # "//mediapipe/calculators/core:pass_through_calculator",
+        # "//mediapipe/framework/port:opencv_highgui",
+        # "//mediapipe/framework/port:opencv_imgproc",
+        # "//mediapipe/framework/port:opencv_video",
+        # "//mediapipe/gpu:gl_base",
+        # "//mediapipe/gpu:gl_calculator_helper",
+        # "//mediapipe/gpu:gpu_buffer",
+        # "//mediapipe/gpu:gpu_shared_data_internal",
+        "//third_party:opencv",
+        "//third_party:opengl",
+        "//third_party:opengl_glfw",
+        "//third_party:opengl_glew",
+        "//third_party:opengl_glm",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
+    ],
+    linkopts = [
+        # "-lstdc++fs",
+    ],
+    data = [
+        # "assets/shaders/sprite.fs",
+        # "assets/shaders/sprite.vs",
+    ],
+    alwayslink = 1,
+)
+
 cc_binary(
     name = "simple_opengl2_demo",
     deps = [
         "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2",
         "//mymediapipe/graphs/simple_io:desktop_simple_io_cpu_calculators",
-        # "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
+    ],
+)
+
+cc_binary(
+    name = "simple_opengl2_demo_gpu",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2_gpu",
+        "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
 )
 
@@ -97,4 +163,14 @@ cc_binary(
             "//mediapipe/graphs/hair_segmentation:mobile_calculators",
         ],
     }),
+)
+
+# Linux only
+cc_binary(
+    name = "simple_opengl2_hair_seg_demo_gpu",
+    data = ["//mediapipe/models:hair_segmentation.tflite"],
+    deps = [
+        "//mymediapipe/examples/desktop/simple_opengl2:simple_opengl2_gpu",
+        "//mediapipe/graphs/hair_segmentation:mobile_calculators",
+    ],
 )
