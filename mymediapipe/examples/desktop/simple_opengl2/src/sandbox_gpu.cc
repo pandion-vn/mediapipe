@@ -155,7 +155,7 @@ void Sandbox::ConfigureOpenGL(unsigned int viewportW, unsigned int viewportH) {
     glDepthFunc(GL_LEQUAL);
     // glDepthRange(0.0, 1.0);
     glDepthMask(true);
-    glClearDepth(1.0f);
+    // glClearDepth(1.0f);
     // glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
