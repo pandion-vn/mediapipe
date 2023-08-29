@@ -5,6 +5,10 @@
 #include "resource_manager.h"
 #include "sprite_renderer.h"
 #include "neon_renderer.h"
+#include "mediapipe/gpu/gl_calculator_helper.h"
+#include "mediapipe/gpu/gpu_buffer.h"
+#include "mediapipe/gpu/gpu_shared_data_internal.h"
+#include "mediapipe/util/resource_util.h"
 
 class Sandbox {
 private:
