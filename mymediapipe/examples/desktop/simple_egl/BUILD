@@ -18,16 +18,17 @@ cc_library(
         "//mediapipe/framework/port:parse_text_proto",
         "//mediapipe/framework/port:status",
         "//mediapipe/gpu:gl_calculator_helper",
-        "//mediapipe/gpu:gpu_buffer",
-        "//mediapipe/gpu:gpu_shared_data_internal",
+        # "//mediapipe/gpu:gpu_buffer",
+        # "//mediapipe/gpu:gpu_shared_data_internal",
         "//mediapipe/util:resource_util",
         "//third_party:opencv",
         "//third_party:opengl",
+        "//third_party:opengl_glew",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
     ],
     linkopts = [
-        "-lGLESv2",
+        # "-lGLESv2",
     ],
 )
 
