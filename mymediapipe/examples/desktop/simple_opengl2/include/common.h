@@ -11,7 +11,9 @@
 #include <iostream>
 #include <cmath>
 
-// #include <GL/glew.h> /* include GLEW and new version of GL on Windows */
+#if MEDIAPIPE_DISABLE_GPU
+#include <GL/glew.h> /* include GLEW and new version of GL on Windows */
+#endif  // !MEDIAPIPE_DISABLE_GPU
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h> /* GLFW helper library */
 
@@ -37,10 +39,13 @@
 // #include "mediapipe/framework/formats/detection.pb.h"
 // #include "mediapipe/framework/formats/location.h"
 // #include "mediapipe/framework/formats/landmark.pb.h"
+
+#if !MEDIAPIPE_DISABLE_GPU
 #include "mediapipe/gpu/gl_calculator_helper.h"
 #include "mediapipe/gpu/gpu_buffer.h"
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
 #include "mediapipe/util/resource_util.h"
+#endif  // !MEDIAPIPE_DISABLE_GPU
 
 #include "constants.h"
 // #include "tempo.h"
