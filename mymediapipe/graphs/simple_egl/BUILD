@@ -12,6 +12,7 @@ package(default_visibility = ["//visibility:public"])
 mediapipe_proto_library(
     name = "triangle_renderer_calculator_proto",
     srcs = ["triangle_renderer_calculator.proto"],
+    visibility = ["//visibility:public"],
     deps = [
         "//mediapipe/framework:calculator_options_proto",
     ],

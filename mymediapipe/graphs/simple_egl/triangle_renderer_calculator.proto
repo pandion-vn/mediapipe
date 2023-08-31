@@ -14,13 +14,13 @@
 
 syntax = "proto2";
 
-package mediapipe;
+package mymediapipe;
 
 import "mediapipe/framework/calculator_options.proto";
 
 message TriangleRendererCalculatorOptions {
   extend CalculatorOptions {
-    optional TriangleEffectRendererCalculatorOptions ext = 323693808;
+    optional TriangleRendererCalculatorOptions ext = 323693808;
   }
 
   // Defines a path for the visual effect texture file. The effect texture is
