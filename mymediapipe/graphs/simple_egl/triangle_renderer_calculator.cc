@@ -25,7 +25,8 @@ public:
         return absl::OkStatus();
     }
 
-    ~TriangleRendererCalculatorCalculator() {
+    ~TriangleRendererCalculator() {
+        // gpu_helper_.RunInGlContext([this]() { effect_renderer_.reset(); });
     }
 private:
     mediapipe::GlCalculatorHelper gpu_helper_;
