@@ -14,7 +14,7 @@
 
 syntax = "proto2";
 
-package mymediapipe;
+package mediapipe;
 
 import "mediapipe/framework/calculator_options.proto";
 

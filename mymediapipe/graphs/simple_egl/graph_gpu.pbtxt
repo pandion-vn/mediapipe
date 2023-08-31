@@ -54,7 +54,7 @@ node {
   # input_stream: "MASK_GPU:throttled_input_video"
   output_stream: "IMAGE_GPU:output_video"
   node_options: {
-    [type.googleapis.com/mymediapipe.TriangleRendererCalculatorOptions] {
+    [type.googleapis.com/mediapipe.TriangleRendererCalculatorOptions] {
       effect_texture_path: "mediapipe/graphs/face_effect/data/glasses.pngblob"
       mask_channel: ALPHA
     }

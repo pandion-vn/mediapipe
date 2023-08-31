@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace mymediapipe {
+namespace mediapipe {
 namespace {
 
 static constexpr char kImageGpuTag[] = "IMAGE_GPU";
@@ -31,4 +31,4 @@ private:
 
 REGISTER_CALCULATOR(TriangleRendererCalculator);
 
-}  // namespace mymediapipe
+}  // namespace mediapipe
