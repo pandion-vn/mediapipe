@@ -360,6 +360,12 @@ new_local_repository(
 )
 
 new_local_repository(
+    name = "macos_opengl_es",
+    build_file = "@//third_party:opengl_es_macos.BUILD",
+    path = "third_party/opengl_es",
+)
+
+new_local_repository(
     name = "linux_ffmpeg",
     build_file = "@//third_party:ffmpeg_linux.BUILD",
     path = "/usr"

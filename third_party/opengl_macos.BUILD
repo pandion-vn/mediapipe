@@ -18,7 +18,9 @@ cc_library(
     ],
     linkopts = [
         "-framework OpenGL",
+        "-framework GLKit",
         "-framework CoreVideo",
+        "-framework MetalKit",
     ],
     visibility = ["//visibility:public"],
 )

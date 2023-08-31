@@ -153,6 +153,14 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "opengl_es",
+    actual = select({
+        "//mediapipe:macos": "@macos_opengl_es//:opengl_es",
+    }),
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "opencv_ios_xcframework_files_bzl",
     srcs = ["opencv_ios_xcframework_files.bzl"],

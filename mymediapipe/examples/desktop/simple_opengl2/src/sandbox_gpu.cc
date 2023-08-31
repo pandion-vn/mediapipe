@@ -297,17 +297,16 @@ void Sandbox::DoCamCapture() {
         size_t frame_timestamp_us =
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
         // LOG(INFO) << "Timestamp : " << frame_timestamp_us;
-        gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us, &graph,
-                                    &gpu_helper]() -> absl::Status {
+        Sandbox::gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us]() -> absl::Status {
             // Convert ImageFrame to GpuBuffer.
-            auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
+            auto texture = Sandbox::gpu_helper.CreateSourceTexture(*input_frame.get());
             auto gpu_frame = texture.GetFrame<mediapipe::GpuBuffer>();
             glFlush();
             texture.Release();
             // Send GPU image packet into the graph.
-            MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+            MP_RETURN_IF_ERROR(Sandbox::graph.AddPacketToInputStream(
                 kInputStream, mediapipe::Adopt(gpu_frame.release())
-                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+                                            .At(mediapipe::Timestamp(frame_timestamp_us))));
             return absl::OkStatus();
         });
         // graph.AddPacketToInputStream(
@@ -320,17 +319,17 @@ void Sandbox::DoCamCapture() {
         // auto& output_frame = packet.Get<mediapipe::ImageFrame>();
         std::unique_ptr<mediapipe::ImageFrame> output_frame;
         // Convert GpuBuffer to ImageFrame.
-        gpu_helper.RunInGlContext(
-            [&packet, &output_frame, &gpu_helper]() -> absl::Status {
+        Sandbox::gpu_helper.RunInGlContext(
+            [&packet, &output_frame]() -> absl::Status {
                 auto& gpu_frame = packet.Get<mediapipe::GpuBuffer>();
-                auto texture = gpu_helper.CreateSourceTexture(gpu_frame);
+                auto texture = Sandbox::gpu_helper.CreateSourceTexture(gpu_frame);
                 output_frame = absl::make_unique<mediapipe::ImageFrame>(
                     mediapipe::ImageFormatForGpuBufferFormat(gpu_frame.format()),
                     gpu_frame.width(), gpu_frame.height(),
                     mediapipe::ImageFrame::kGlDefaultAlignmentBoundary);
-                gpu_helper.BindFramebuffer(texture);
+                Sandbox::gpu_helper.BindFramebuffer(texture);
                 const auto info = mediapipe::GlTextureInfoForGpuBufferFormat(
-                    gpu_frame.format(), 0, gpu_helper.GetGlVersion());
+                    gpu_frame.format(), 0, Sandbox::gpu_helper.GetGlVersion());
                 glReadPixels(0, 0, texture.width(), texture.height(), info.gl_format,
                             info.gl_type, output_frame->MutablePixelData());
                 glFlush();
