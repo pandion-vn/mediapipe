@@ -1,4 +1,5 @@
 load("//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
+load("//mediapipe/framework/port:build_config.bzl", "mediapipe_cc_proto_library")
 load("//mediapipe/framework/tool:mediapipe_graph.bzl", "mediapipe_simple_subgraph")
 load(
     "//mediapipe/framework/tool:mediapipe_graph.bzl",
