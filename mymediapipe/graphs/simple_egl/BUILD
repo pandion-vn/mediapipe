@@ -1,5 +1,5 @@
 load("//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
-load("//mediapipe/framework/port:build_config.bzl", "mediapipe_cc_proto_library")
+# load("//mediapipe/framework/port:build_config.bzl", "mediapipe_cc_proto_library")
 load("//mediapipe/framework/tool:mediapipe_graph.bzl", "mediapipe_simple_subgraph")
 load(
     "//mediapipe/framework/tool:mediapipe_graph.bzl",
@@ -64,6 +64,7 @@ cc_library(
         "//mediapipe/calculators/image:recolor_calculator",
         "//mediapipe/calculators/util:annotation_overlay_calculator",
         "//mediapipe/calculators/image:image_transformation_calculator",
+        ":triangle_renderer_calculator",
         # "//mediapipe/gpu:gpu_buffer_to_image_frame_calculator",
         # "//mediapipe/gpu:image_frame_to_gpu_buffer_calculator",
     ],
