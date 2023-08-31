@@ -156,7 +156,7 @@ alias(
 alias(
     name = "opengl_es",
     actual = select({
-        "//mediapipe:macos": "@macos_opengl_es//:opengl_es",
+        "//mediapipe:default": "@macos_opengl_es//:opengl_es",
     }),
     visibility = ["//visibility:public"],
 )
