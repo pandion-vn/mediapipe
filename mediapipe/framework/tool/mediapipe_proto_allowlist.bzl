@@ -324,4 +324,5 @@ rewrite_target_list = [
     "xenomorph_rig_proto",
     "zoo_mutation_calculator_proto",
     "zoo_mutator_proto",
+    "triangle_renderer_calculator_proto",
 ]
