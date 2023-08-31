@@ -1,5 +1,9 @@
 load("//mediapipe/framework/port:build_config.bzl", "mediapipe_proto_library")
 load("//mediapipe/framework/tool:mediapipe_graph.bzl", "mediapipe_simple_subgraph")
+load(
+    "//mediapipe/framework/tool:mediapipe_graph.bzl",
+    "mediapipe_binary_graph",
+)
 
 licenses(["notice"])
 
@@ -38,4 +42,23 @@ cc_library(
         "@com_google_absl//absl/types:optional",
     ],
     alwayslink = 1,
+)
+
+cc_library(
+    name = "desktop_simple_egl_gpu_calculators",
+    deps = [
+        "//mediapipe/calculators/core:flow_limiter_calculator",
+        "//mediapipe/calculators/image:recolor_calculator",
+        "//mediapipe/calculators/util:annotation_overlay_calculator",
+        "//mediapipe/calculators/image:image_transformation_calculator",
+        # "//mediapipe/gpu:gpu_buffer_to_image_frame_calculator",
+        # "//mediapipe/gpu:image_frame_to_gpu_buffer_calculator",
+    ],
+)
+
+mediapipe_binary_graph(
+    name = "desktop_simple_egl_gpu_binary_graph",
+    graph = "graph_gpu.pbtxt",
+    output_name = "desktop_simple_egl_gpu.binarypb",
+    deps = [":desktop_simple_egl_gpu_calculators"],
 )

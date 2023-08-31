@@ -37,6 +37,6 @@ cc_binary(
     name = "simple_egl_demo",
     deps = [
         "//mymediapipe/examples/desktop/simple_egl:demo_run_graph_main_gpu",
-        "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
+        "//mymediapipe/graphs/simple_egl:desktop_simple_egl_gpu_calculators",
     ],
 )
