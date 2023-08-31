@@ -5,6 +5,9 @@
 #include <vector>
 
 #include "absl/types/optional.h"
+#include "mediapipe/framework/port/status.h"
+#include "mediapipe/framework/port/statusor.h"
+#include "mediapipe/gpu/gl_base.h"
 
 // Encapsulates a stateful face effect renderer.
 class TriangleRenderer {

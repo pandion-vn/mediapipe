@@ -35,6 +35,7 @@ cc_library(
         # "//mediapipe/framework/port:statusor",
         "//mediapipe/gpu:gl_calculator_helper",
         "//mediapipe/gpu:gpu_buffer",
+        "//mymediapipe/graphs/simple_egl/libs:triangle_renderer",
         # "//mediapipe/modules/face_geometry/libs:effect_renderer",
         # "//mediapipe/modules/face_geometry/libs:validation_utils",
         # "//mediapipe/modules/face_geometry/protos:environment_cc_proto",

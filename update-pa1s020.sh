@@ -1,0 +1,1 @@
+fswatch -o . | xargs -n1 -I{} rsync -azP --exclude=.git . deploy@pa1s020:~/hdd/Workspace/mediapipe

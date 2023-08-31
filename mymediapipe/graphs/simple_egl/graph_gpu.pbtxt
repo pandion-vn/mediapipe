@@ -56,7 +56,6 @@ node {
   node_options: {
     [type.googleapis.com/mediapipe.TriangleRendererCalculatorOptions] {
       effect_texture_path: "mediapipe/graphs/face_effect/data/glasses.pngblob"
-      mask_channel: ALPHA
     }
   }
 }
