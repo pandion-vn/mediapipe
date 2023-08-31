@@ -19,23 +19,12 @@ mediapipe_proto_library(
     ],
 )
 
-# mediapipe_cc_proto_library(
-#     name = "triangle_renderer_calculator_cc_proto",
-#     srcs = ["triangle_renderer_calculator.proto"],
-#     visibility = ["//visibility:public"],
-#     cc_deps = [
-#         "//mediapipe/framework:calculator_cc_proto",
-#     ],
-#     deps = ["triangle_renderer_calculator_proto"],
-# )
-
-
 cc_library(
     name = "triangle_renderer_calculator",
     srcs = ["triangle_renderer_calculator.cc"],
     deps = [
         ":triangle_renderer_calculator_cc_proto",
-        # "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework:calculator_framework",
         # "//mediapipe/framework/formats:image_frame",
         # "//mediapipe/framework/formats:image_frame_opencv",
         # "//mediapipe/framework/port:opencv_core",

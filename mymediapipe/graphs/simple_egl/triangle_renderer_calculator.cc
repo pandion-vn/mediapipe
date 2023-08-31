@@ -1,6 +1,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "absl/types/optional.h"
+#include "mediapipe/framework/calculator_framework.h"
 
 namespace mediapipe {
 namespace {
