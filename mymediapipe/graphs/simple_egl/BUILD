@@ -18,6 +18,17 @@ mediapipe_proto_library(
     ],
 )
 
+mediapipe_cc_proto_library(
+    name = "triangle_renderer_calculator_cc_proto",
+    srcs = ["triangle_renderer_calculator.proto"],
+    visibility = ["//visibility:public"],
+    cc_deps = [
+        "//mediapipe/framework:calculator_cc_proto",
+    ],
+    deps = ["triangle_renderer_calculator_proto"],
+)
+
+
 cc_library(
     name = "triangle_renderer_calculator",
     srcs = ["triangle_renderer_calculator.cc"],
