@@ -3,6 +3,8 @@
 #include <vector>
 #include "absl/types/optional.h"
 #include "mediapipe/framework/calculator_framework.h"
+#include "mediapipe/gpu/gl_calculator_helper.h"
+#include "mediapipe/gpu/gpu_buffer.h"
 
 namespace mediapipe {
 namespace {
