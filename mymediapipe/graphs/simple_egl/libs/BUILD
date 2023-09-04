@@ -16,7 +16,7 @@ cc_library(
         "//mediapipe/framework/port:status",
         "//mediapipe/framework/port:statusor",
         "//mediapipe/gpu:gl_base",
-        # "//mediapipe/gpu:shader_util",
+        "//mediapipe/gpu:shader_util",
         # "//mediapipe/modules/face_geometry/protos:environment_cc_proto",
         # "//mediapipe/modules/face_geometry/protos:face_geometry_cc_proto",
         # "//mediapipe/modules/face_geometry/protos:mesh_3d_cc_proto",

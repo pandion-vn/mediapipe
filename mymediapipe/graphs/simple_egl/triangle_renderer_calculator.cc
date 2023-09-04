@@ -32,9 +32,11 @@ public:
         return gpu_helper_.RunInGlContext([&]() -> absl::Status {
             const auto& options = cc->Options<TriangleRendererCalculatorOptions>();
 
-            // ASSIGN_OR_RETURN(effect_renderer_,
-            //                  CreateTriangleRenderer(),
-            //                  _ << "Failed to create the effect renderer!");
+            LOG(INFO) << "TriangleRendererCalculator.Open -- CreateTriangleRenderer()";
+
+            ASSIGN_OR_RETURN(effect_renderer_,
+                             CreateTriangleRenderer(),
+                             _ << "Failed to create the effect renderer!");
             return absl::OkStatus();
         });
     }
@@ -47,32 +49,32 @@ public:
             return absl::OkStatus();
         }
 
-        LOG(INFO) << "TriangleRendererCalculator.Process()";
-        std::cout << "TriangleRendererCalculator.Process()" << std::endl;
+        // LOG(INFO) << "TriangleRendererCalculator.Process()";
 
         return gpu_helper_.RunInGlContext([this, cc]() -> absl::Status {
             const auto& input_gpu_buffer = cc->Inputs().Tag(kImageGpuTag).Get<GpuBuffer>();
 
-            // GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);
+            GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);
+            // LOG(INFO) << "TriangleRendererCalculator -- input_gl_texture";
 
-            // GlTexture output_gl_texture = gpu_helper_.CreateDestinationTexture(
-            //     input_gl_texture.width(), input_gl_texture.height());
+            GlTexture output_gl_texture = gpu_helper_.CreateDestinationTexture(
+                input_gl_texture.width(), input_gl_texture.height());
+            // LOG(INFO) << "TriangleRendererCalculator -- output_gl_texture";
 
-            // MP_RETURN_IF_ERROR(effect_renderer_->RenderEffect(
-            //         input_gl_texture.width(), input_gl_texture.height(), 
-            //         input_gl_texture.target(), input_gl_texture.name(), 
-            //         output_gl_texture.target(), output_gl_texture.name()))
-            //             << "Failed to render the effect!";
+            MP_RETURN_IF_ERROR(effect_renderer_->RenderEffect(
+                                                    input_gl_texture.width(), input_gl_texture.height(), 
+                                                    input_gl_texture.target(), input_gl_texture.name(), 
+                                                    output_gl_texture.target(), output_gl_texture.name()
+                                                )) << "Failed to render the effect!";
 
             // LOG(INFO) << "TriangleRendererCalculator.Process()";
 
-            auto output = std::make_unique<GpuBuffer>(input_gpu_buffer);
-            // std::unique_ptr<GpuBuffer> output_gpu_buffer =
-            //     output_gl_texture.GetFrame<GpuBuffer>();
+            // auto output_gpu_buffer = std::make_unique<GpuBuffer>(input_gpu_buffer);
+            std::unique_ptr<GpuBuffer> output_gpu_buffer = output_gl_texture.GetFrame<GpuBuffer>();
 
             cc->Outputs()
                 .Tag(kImageGpuTag)
-                .Add(output.release(), cc->InputTimestamp());
+                .Add(output_gpu_buffer.release(), cc->InputTimestamp());
             // output_gl_texture.Release();
             // input_gl_texture.Release();
 
