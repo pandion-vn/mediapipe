@@ -19,9 +19,9 @@ package(default_visibility = ["//mediapipe/examples:__subpackages__"])
 # Linux only
 cc_binary(
     name = "sobel_edge_gpu",
-    data = [
-        "//mediapipe/graphs/edge_detection:mobile_calculators.binarypb",
-    ],
+    # data = [
+    #     "//mediapipe/graphs/edge_detection:mobile_calculators.binarypb",
+    # ],
     deps = [
         "//mediapipe/examples/desktop:demo_run_graph_main_gpu",
         "//mediapipe/graphs/edge_detection:mobile_calculators",
