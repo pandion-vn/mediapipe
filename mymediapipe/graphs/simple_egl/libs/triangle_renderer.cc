@@ -67,7 +67,9 @@ class TriangleRendererImpl : public TriangleRenderer {
 public:
     TriangleRendererImpl(
         std::unique_ptr<RenderTarget> render_target,
-        std::unique_ptr<Renderer> renderer) {}
+        std::unique_ptr<Renderer> renderer):
+            render_target_(std::move(render_target)),
+            renderer_(std::move(renderer)) {}
     
     absl::Status RenderEffect(
         int frame_width,            //
@@ -79,30 +81,36 @@ public:
         // Validate input arguments.
         // MP_RETURN_IF_ERROR(ValidateFrameDimensions(frame_width, frame_height))
         //     << "Invalid frame dimensions!";
-        // RET_CHECK(src_texture_name > 0 && dst_texture_name > 0)
-        //     << "Both source and destination texture names must be non-null!";
-        // RET_CHECK_NE(src_texture_name, dst_texture_name)
-        //     << "Source and destination texture names must be different!";
+        RET_CHECK(src_texture_name > 0 && dst_texture_name > 0)
+            << "Both source and destination texture names must be non-null!";
+        RET_CHECK_NE(src_texture_name, dst_texture_name)
+            << "Source and destination texture names must be different!";
 
-        
+        LOG(INFO) << "TriangleRendererImpl.RenderEffect()";
+
         // At this point in the code, the destination texture must contain the
         // correctly renderer effect, so we should just return.
         return absl::OkStatus();
     }
+private:
+    std::unique_ptr<RenderTarget> render_target_;
+    std::unique_ptr<Renderer> renderer_;
 };
 
 } // namespace
 
 absl::StatusOr<std::unique_ptr<TriangleRenderer>> CreateTriangleRenderer() {
     ASSIGN_OR_RETURN(std::unique_ptr<RenderTarget> render_target,
-                   RenderTarget::Create(),
-                   _ << "Failed to create a render target!");
-    ASSIGN_OR_RETURN(std::unique_ptr<Renderer> renderer, Renderer::Create(),
-                    _ << "Failed to create a renderer!");
+                        RenderTarget::Create(),
+                        _ << "Failed to create a render target!");
+    ASSIGN_OR_RETURN(std::unique_ptr<Renderer> renderer, 
+                        Renderer::Create(),
+                        _ << "Failed to create a renderer!");
 
     std::unique_ptr<TriangleRenderer> result =
         absl::make_unique<TriangleRendererImpl>(std::move(render_target), 
                                                 std::move(renderer));
 
+    LOG(INFO) << "CreateTriangleRenderer()";
     return result;
 }

@@ -48,9 +48,9 @@ node: {
 }
 
 # Colors the hair segmentation with the color specified in the option.
-node {
+node: {
   calculator: "TriangleRendererCalculator"
-  input_stream: "IMAGE_GPU:throttled_input_video"
+  input_stream: "IMAGE_GPU:transformed_input_video"
   # input_stream: "MASK_GPU:throttled_input_video"
   output_stream: "IMAGE_GPU:output_video"
   node_options: {
