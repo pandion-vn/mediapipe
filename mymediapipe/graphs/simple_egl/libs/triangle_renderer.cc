@@ -136,7 +136,8 @@ public:
             uniform sampler2D texture;
 
             void main() {
-                gl_FragColor = texture2D(texture, v_tex_coord);
+                // gl_FragColor = texture2D(texture, v_tex_coord);
+                gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
             }
         )";
 
@@ -193,9 +194,9 @@ public:
         // LOG(INFO) << "Renderer.Render()";
 
         // Set up textures and uniforms.
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(texture.target(), texture.handle());
-        glUniform1i(texture_uniform_, 1);
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(texture.target(), texture.handle());
+        // glUniform1i(texture_uniform_, 1);
         
         GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f,
                                 -0.5f, -0.5f, 0.0f,
@@ -212,8 +213,8 @@ public:
         glDrawArrays ( GL_TRIANGLES, 0, 3 );
 
         // Unbind textures and uniforms.
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(texture.target(), 0);
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(texture.target(), 0);
         
         // render_target.Unbind();
         // Unbind vertex attributes.
@@ -248,6 +249,13 @@ public:
         std::unique_ptr<Renderer> renderer):
             render_target_(std::move(render_target)),
             renderer_(std::move(renderer)) {}
+
+    absl::Status ValidateFrameDimensions(int frame_width, int frame_height) {
+        RET_CHECK_GT(frame_width, 0) << "Frame width must be positive!";
+        RET_CHECK_GT(frame_height, 0) << "Frame height must be positive!";
+
+        return absl::OkStatus();
+    }
     
     absl::Status RenderEffect(
         int frame_width,            //
@@ -257,17 +265,12 @@ public:
         GLenum dst_texture_target,  //
         GLuint dst_texture_name) {
         // Validate input arguments.
-        // MP_RETURN_IF_ERROR(ValidateFrameDimensions(frame_width, frame_height))
-        //     << "Invalid frame dimensions!";
+        MP_RETURN_IF_ERROR(ValidateFrameDimensions(frame_width, frame_height))
+            << "Invalid frame dimensions!";
         RET_CHECK(src_texture_name > 0 && dst_texture_name > 0)
             << "Both source and destination texture names must be non-null!";
         RET_CHECK_NE(src_texture_name, dst_texture_name)
             << "Source and destination texture names must be different!";
-
-        // LOG(INFO) << "TriangleRendererImpl.RenderEffect()" 
-        //           << "frame_width: " << frame_width << " frame_height: " << frame_height
-        //           << " src_texture_name: " << src_texture_name 
-        //           << " dst_texture_name: " << dst_texture_name;
 
         // Wrap both source and destination textures.
         ASSIGN_OR_RETURN(
@@ -303,22 +306,17 @@ private:
 } // namespace
 
 absl::StatusOr<std::unique_ptr<TriangleRenderer>> CreateTriangleRenderer() {
-    // LOG(INFO) << "TriangleRendererCalculator.Open -- RenderTarget()";
     ASSIGN_OR_RETURN(std::unique_ptr<RenderTarget> render_target,
                         RenderTarget::Create(),
                         _ << "Failed to create a render target!");
-    // LOG(INFO) << "TriangleRendererCalculator.Open -- RenderTarget()";
 
-    // LOG(INFO) << "TriangleRendererCalculator.Open -- Renderer()";
     ASSIGN_OR_RETURN(std::unique_ptr<Renderer> renderer, 
                         Renderer::Create(),
                         _ << "Failed to create a renderer!");
-    // LOG(INFO) << "TriangleRendererCalculator.Open -- Renderer()";
 
     std::unique_ptr<TriangleRenderer> result =
         absl::make_unique<TriangleRendererImpl>(std::move(render_target), 
                                                 std::move(renderer));
 
-    // LOG(INFO) << "CreateTriangleRenderer()";
     return result;
 }
