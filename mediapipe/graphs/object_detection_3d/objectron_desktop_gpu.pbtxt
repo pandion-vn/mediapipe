@@ -135,6 +135,12 @@ node {
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
   input_stream: "box_texture_encoded_content_stream"
+  output_stream: "box_texture_image_frame_stream_cpu"
+}
+
+node: {
+  calculator: "ImageFrameToGpuBufferCalculator"
+  input_stream: "box_texture_image_frame_stream_cpu"
   output_stream: "box_texture_image_frame_stream"
 }
 
@@ -176,6 +182,12 @@ node {
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
   input_stream: "obj_texture_encoded_content_stream"
+  output_stream: "obj_texture_image_frame_stream_cpu"
+}
+
+node: {
+  calculator: "ImageFrameToGpuBufferCalculator"
+  input_stream: "obj_texture_image_frame_stream_cpu"
   output_stream: "obj_texture_image_frame_stream"
 }
 
@@ -216,10 +228,4 @@ node {
       animation_speed_fps: 25
     }
   }
-}
-
-node: {
-  calculator: "ImageFrameToGpuBufferCalculator"
-  input_stream: "output_video_cpu"
-  output_stream: "output_video"
 }
