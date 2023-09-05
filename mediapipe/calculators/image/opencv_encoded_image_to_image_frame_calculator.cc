@@ -112,9 +112,9 @@ absl::Status OpenCvEncodedImageToImageFrameCalculator::Process(
   output_mat.copyTo(formats::MatView(output_frame.get()));
 
   if (cc->Outputs().NumEntries() == 1) {
-      cc->Outputs().Index(0).Add(output_frame.release()).At(cc->InputTimestamp()));
+      cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp()));
     } else {
-      cc->OutputSidePackets().Index(0).Set(output_frame.release()).At(mediapipe::Timestamp::Unset()));
+      cc->OutputSidePackets().Index(0).Set(Adopt(output_frame.release())).At(mediapipe::Timestamp::Unset()));
     }
   // cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp());
   
