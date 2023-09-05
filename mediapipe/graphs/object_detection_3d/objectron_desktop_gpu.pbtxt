@@ -203,7 +203,7 @@ node {
   input_stream: "VIDEO:input_video_4x3"
   input_stream: "MODEL_MATRICES:model_matrices"
   input_stream: "MASK_MODEL_MATRICES:mask_model_matrices"
-  output_stream: "OUTPUT:output_video"
+  output_stream: "OUTPUT:output_video_cpu"
   input_side_packet: "TEXTURE:obj_texture_image_frame"
   input_side_packet: "ANIMATION_ASSET:box_asset_name"
   input_side_packet: "MASK_TEXTURE:box_texture_image_frame"
@@ -216,4 +216,10 @@ node {
       animation_speed_fps: 25
     }
   }
+}
+
+node: {
+  calculator: "ImageFrameToGpuBufferCalculator"
+  input_stream: "output_video_cpu"
+  output_stream: "output_video"
 }

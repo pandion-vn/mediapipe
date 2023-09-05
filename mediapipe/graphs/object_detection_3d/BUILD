@@ -74,6 +74,7 @@ cc_library(
         "//mediapipe/calculators/core:stream_to_side_packet_calculator", 
         "//mediapipe/calculators/image:opencv_encoded_image_to_image_frame_calculator",
         "//mediapipe/gpu:gl_scaler_calculator",
+        "//mediapipe/gpu:image_frame_to_gpu_buffer_calculator",
         "//mediapipe/graphs/object_detection_3d/calculators:annotations_to_model_matrices_calculator",
         "//mediapipe/graphs/object_detection_3d/calculators:gl_animation_overlay_calculator",
         "//mediapipe/modules/objectron:objectron_detection_1stage_gpu",
