@@ -45,7 +45,7 @@ cc_binary(
 cc_binary(
     name = "objectron_gpu",
     data = [
-        "//mediapipe/modules/objectron:object_detection_3d.tflite",
+        # "//mediapipe/modules/objectron:object_detection_3d.tflite",
         "//mediapipe/modules/objectron:object_detection_3d_camera.tflite",
         "//mediapipe/modules/objectron:object_detection_3d_chair.tflite",
         "//mediapipe/modules/objectron:object_detection_3d_chair_1stage.tflite",
