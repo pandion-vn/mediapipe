@@ -125,30 +125,30 @@ node {
   }
 }
 
-node {
-  calculator: "SidePacketToStreamCalculator"
-  input_stream: "TICK:input_video"
-  input_side_packet: "box_texture_encoded_content_packet"
-  output_stream: "AT_TICK:box_texture_encoded_content_stream"
-}
+# node {
+#   calculator: "SidePacketToStreamCalculator"
+#   input_stream: "TICK:input_video"
+#   input_side_packet: "box_texture_encoded_content_packet"
+#   output_stream: "AT_TICK:box_texture_encoded_content_stream"
+# }
 
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
-  input_stream: "box_texture_encoded_content_stream"
-  output_stream: "box_texture_image_frame_stream_cpu"
+  input_side_packet: "box_texture_encoded_content_packet"
+  output_side_packet: "box_texture_image_frame_cpu"
 }
 
 node: {
   calculator: "ImageFrameToGpuBufferCalculator"
-  input_stream: "box_texture_image_frame_stream_cpu"
-  output_stream: "box_texture_image_frame_stream"
-}
-
-node {
-  calculator: "StreamToSidePacketCalculator"
-  input_stream: "box_texture_image_frame_stream"
+  input_side_packet: "box_texture_image_frame_cpu"
   output_side_packet: "box_texture_image_frame"
 }
+
+# node {
+#   calculator: "StreamToSidePacketCalculator"
+#   input_stream: "box_texture_image_frame_stream"
+#   output_side_packet: "box_texture_image_frame"
+# }
 
 # node {
 #   calculator: "LocalFileContentsCalculator"
@@ -172,30 +172,30 @@ node {
   }
 }
 
-node {
-  calculator: "SidePacketToStreamCalculator"
-  input_stream: "TICK:input_video"
-  input_side_packet: "obj_texture_encoded_content_packet"
-  output_stream: "AT_TICK:obj_texture_encoded_content_stream"
-}
+# node {
+#   calculator: "SidePacketToStreamCalculator"
+#   input_stream: "TICK:input_video"
+#   input_side_packet: "obj_texture_encoded_content_packet"
+#   output_stream: "AT_TICK:obj_texture_encoded_content_stream"
+# }
 
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
-  input_stream: "obj_texture_encoded_content_stream"
-  output_stream: "obj_texture_image_frame_stream_cpu"
+  input_side_packet: "obj_texture_encoded_content_packet"
+  output_side_packet: "obj_texture_image_frame_cpu"
 }
 
 node: {
   calculator: "ImageFrameToGpuBufferCalculator"
-  input_stream: "obj_texture_image_frame_stream_cpu"
-  output_stream: "obj_texture_image_frame_stream"
-}
-
-node {
-  calculator: "StreamToSidePacketCalculator"
-  input_stream: "obj_texture_image_frame_stream"
+  input_side_packet: "obj_texture_image_frame_cpu"
   output_side_packet: "obj_texture_image_frame"
 }
+
+# node {
+#   calculator: "StreamToSidePacketCalculator"
+#   input_stream: "obj_texture_image_frame_stream"
+#   output_side_packet: "obj_texture_image_frame"
+# }
 
 # node {
 #   calculator: "LocalFileContentsCalculator"
