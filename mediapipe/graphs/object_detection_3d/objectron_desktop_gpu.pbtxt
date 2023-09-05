@@ -165,7 +165,7 @@ node {
   input_stream: "VIDEO:input_video_4x3"
   input_stream: "MODEL_MATRICES:model_matrices"
   input_stream: "MASK_MODEL_MATRICES:mask_model_matrices"
-  output_stream: "output_video"
+  output_stream: "IMAGE_GPU:output_video"
   input_side_packet: "TEXTURE:box_texture"
   input_side_packet: "ANIMATION_ASSET:box_asset_name"
   input_side_packet: "MASK_TEXTURE:obj_texture"
