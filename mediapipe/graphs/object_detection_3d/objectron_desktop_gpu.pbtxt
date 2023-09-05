@@ -127,8 +127,9 @@ node {
 
 node {
   calculator: "SidePacketToStreamCalculator"
+  input_stream: "TICK:input_video"
   input_side_packet: "box_texture_encoded_content_packet"
-  output_stream: "AT_PRESTREAM:box_texture_encoded_content_stream"
+  output_stream: "AT_TICK:box_texture_encoded_content_stream"
 }
 
 node {
@@ -161,8 +162,9 @@ node {
 
 node {
   calculator: "SidePacketToStreamCalculator"
+  input_stream: "TICK:input_video"
   input_side_packet: "obj_texture_encoded_content_packet"
-  output_stream: "AT_PRESTREAM:obj_texture_encoded_content_stream"
+  output_stream: "AT_TICK:obj_texture_encoded_content_stream"
 }
 
 node {
