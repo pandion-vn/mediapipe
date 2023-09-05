@@ -117,12 +117,18 @@ node {
 node {
   calculator: "LocalFileContentsCalculator"
   input_side_packet: "FILE_PATH:box_texture_path"
-  output_side_packet: "CONTENTS:box_texture"
+  output_side_packet: "CONTENTS:box_texture_encoded_content"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
       text_mode: false
     }
   }
+}
+
+node {
+  calculator: "OpenCvEncodedImageToImageFrameCalculator"
+  input_stream: "box_texture_encoded_content"
+  output_stream: "box_texture_image_frame"
 }
 
 node {
@@ -139,12 +145,18 @@ node {
 node {
   calculator: "LocalFileContentsCalculator"
   input_side_packet: "FILE_PATH:obj_texture_path"
-  output_side_packet: "CONTENTS:obj_texture"
+  output_side_packet: "CONTENTS:obj_texture_encoded_content"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
       text_mode: false
     }
   }
+}
+
+node {
+  calculator: "OpenCvEncodedImageToImageFrameCalculator"
+  input_stream: "obj_texture_encoded_content"
+  output_stream: "obj_texture_image_frame"
 }
 
 node {
@@ -166,9 +178,9 @@ node {
   input_stream: "MODEL_MATRICES:model_matrices"
   input_stream: "MASK_MODEL_MATRICES:mask_model_matrices"
   output_stream: "OUTPUT:output_video"
-  input_side_packet: "TEXTURE:box_texture"
+  input_side_packet: "TEXTURE:obj_texture_image_frame"
   input_side_packet: "ANIMATION_ASSET:box_asset_name"
-  input_side_packet: "MASK_TEXTURE:obj_texture"
+  input_side_packet: "MASK_TEXTURE:box_texture_image_frame"
   input_side_packet: "MASK_ASSET:obj_asset_name"
   node_options: {
     [type.googleapis.com/mediapipe.GlAnimationOverlayCalculatorOptions] {
