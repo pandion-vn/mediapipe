@@ -120,7 +120,7 @@ node {
   output_side_packet: "CONTENTS:box_texture_encoded_content"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: false
+      text_mode: true
     }
   }
 }
@@ -137,7 +137,7 @@ node {
   output_side_packet: "CONTENTS:box_asset_name"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: false
+      text_mode: true
     }
   }
 }
@@ -148,7 +148,7 @@ node {
   output_side_packet: "CONTENTS:obj_texture_encoded_content"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: false
+      text_mode: true
     }
   }
 }
@@ -165,7 +165,7 @@ node {
   output_side_packet: "CONTENTS:obj_asset_name"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: false
+      text_mode: true
     }
   }
 }
