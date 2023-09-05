@@ -5,9 +5,9 @@ input_stream: "input_video"
 input_stream: "input_width"
 input_stream: "input_height"
 input_side_packet: "box_texture_path"
-input_side_packet: "box_asset_name_path"
+input_side_packet: "box_asset_name"
 input_side_packet: "obj_texture_path"
-input_side_packet: "obj_asset_name_path"
+input_side_packet: "obj_asset_name"
 output_stream: "output_video"
 
 # Crops the image from the center to the size WIDTHxHEIGHT.
@@ -150,16 +150,16 @@ node {
   output_side_packet: "box_texture_image_frame"
 }
 
-node {
-  calculator: "LocalFileContentsCalculator"
-  input_side_packet: "FILE_PATH:box_asset_name_path"
-  output_side_packet: "CONTENTS:box_asset_name"
-  options: {
-    [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: true
-    }
-  }
-}
+# node {
+#   calculator: "LocalFileContentsCalculator"
+#   input_side_packet: "FILE_PATH:box_asset_name_path"
+#   output_side_packet: "CONTENTS:box_asset_name"
+#   options: {
+#     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
+#       text_mode: true
+#     }
+#   }
+# }
 
 node {
   calculator: "LocalFileContentsCalculator"
@@ -197,16 +197,16 @@ node {
   output_side_packet: "obj_texture_image_frame"
 }
 
-node {
-  calculator: "LocalFileContentsCalculator"
-  input_side_packet: "FILE_PATH:obj_asset_name_path"
-  output_side_packet: "CONTENTS:obj_asset_name"
-  options: {
-    [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: true
-    }
-  }
-}
+# node {
+#   calculator: "LocalFileContentsCalculator"
+#   input_side_packet: "FILE_PATH:obj_asset_name_path"
+#   output_side_packet: "CONTENTS:obj_asset_name"
+#   options: {
+#     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
+#       text_mode: true
+#     }
+#   }
+# }
 
 # Render everything together. First we render the 3D bounding box animation,
 # then we render the occlusion mask.
