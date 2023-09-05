@@ -51,7 +51,8 @@ node {
   input_side_packet: "CUSTOM_OP_RESOLVER:opresolver"
   options: {
     [mediapipe.TfLiteInferenceCalculatorOptions.ext] {
-      model_path: "object_detection_3d.tflite"
+      # model_path: "object_detection_3d.tflite"
+      model_path: "object_detection_3d_chair_1stage.tflite"
     }
   }
 }
