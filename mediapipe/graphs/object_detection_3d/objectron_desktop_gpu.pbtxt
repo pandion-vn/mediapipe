@@ -135,7 +135,13 @@ node {
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
   input_stream: "box_texture_encoded_content_stream"
-  output_stream: "box_texture_image_frame"
+  output_stream: "box_texture_image_frame_stream"
+}
+
+node {
+  calculator: "StreamToSidePacketCalculator"
+  input_stream: "box_texture_image_frame_stream"
+  output_side_packet: "box_texture_image_frame"
 }
 
 node {
@@ -170,7 +176,13 @@ node {
 node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
   input_stream: "obj_texture_encoded_content_stream"
-  output_stream: "obj_texture_image_frame"
+  output_stream: "obj_texture_image_frame_stream"
+}
+
+node {
+  calculator: "StreamToSidePacketCalculator"
+  input_stream: "obj_texture_image_frame_stream"
+  output_side_packet: "obj_texture_image_frame"
 }
 
 node {
