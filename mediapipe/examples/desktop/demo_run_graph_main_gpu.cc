@@ -33,6 +33,8 @@
 #include "mediapipe/util/resource_util.h"
 
 constexpr char kInputStream[] = "input_video";
+constexpr char kInputWidthStream[] = "input_width";
+constexpr char kInputHeightStream[] = "input_height";
 constexpr char kOutputStream[] = "output_video";
 constexpr char kWindowName[] = "MediaPipe";
 
@@ -48,6 +50,11 @@ ABSL_FLAG(std::string, input_video_path, "",
 ABSL_FLAG(std::string, output_video_path, "",
           "Full path of where to save result (.mp4 only). "
           "If not provided, show result in a window.");
+ABSL_FLAG(std::string, input_width, "",
+          "Width of video");
+ABSL_FLAG(std::string, input_height, "",
+          "Height of video");
+
 
 absl::Status RunMPPGraph() {
   std::string calculator_graph_config_contents;
@@ -150,6 +157,14 @@ absl::Status RunMPPGraph() {
           // Send GPU image packet into the graph.
           MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
               kInputStream, mediapipe::Adopt(gpu_frame.release())
+                                .At(mediapipe::Timestamp(frame_timestamp_us))));
+          
+          MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+              kInputWidthStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width))
+                                .At(mediapipe::Timestamp(frame_timestamp_us))));
+          
+          MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+              kInputHeightStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width))
                                 .At(mediapipe::Timestamp(frame_timestamp_us))));
           return absl::OkStatus();
         }));
