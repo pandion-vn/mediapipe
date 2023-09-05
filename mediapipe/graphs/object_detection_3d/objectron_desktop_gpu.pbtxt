@@ -117,7 +117,7 @@ node {
 node {
   calculator: "LocalFileContentsCalculator"
   input_side_packet: "FILE_PATH:box_texture_path"
-  output_side_packet: "CONTENTS:box_texture_encoded_content"
+  output_side_packet: "CONTENTS:box_texture_encoded_content_packet"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
       text_mode: true
@@ -126,8 +126,14 @@ node {
 }
 
 node {
+  calculator: "SidePacketToStreamCalculator"
+  input_side_packet: "box_texture_encoded_content_packet"
+  output_stream: "AT_PRESTREAM:box_texture_encoded_content_stream"
+}
+
+node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
-  input_stream: "box_texture_encoded_content"
+  input_stream: "box_texture_encoded_content_stream"
   output_stream: "box_texture_image_frame"
 }
 
@@ -145,7 +151,7 @@ node {
 node {
   calculator: "LocalFileContentsCalculator"
   input_side_packet: "FILE_PATH:obj_texture_path"
-  output_side_packet: "CONTENTS:obj_texture_encoded_content"
+  output_side_packet: "CONTENTS:obj_texture_encoded_content_packet"
   options: {
     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
       text_mode: true
@@ -154,8 +160,14 @@ node {
 }
 
 node {
+  calculator: "SidePacketToStreamCalculator"
+  input_side_packet: "obj_texture_encoded_content_packet"
+  output_stream: "AT_PRESTREAM:obj_texture_encoded_content_stream"
+}
+
+node {
   calculator: "OpenCvEncodedImageToImageFrameCalculator"
-  input_stream: "obj_texture_encoded_content"
+  input_stream: "obj_texture_encoded_content_stream"
   output_stream: "obj_texture_image_frame"
 }
 
