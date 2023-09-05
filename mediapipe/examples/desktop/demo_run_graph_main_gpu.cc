@@ -160,11 +160,11 @@ absl::Status RunMPPGraph() {
                                 .At(mediapipe::Timestamp(frame_timestamp_us))));
           
           MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-              kInputWidthStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width))
+              kInputWidthStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width).release())
                                 .At(mediapipe::Timestamp(frame_timestamp_us))));
           
           MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-              kInputHeightStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width))
+              kInputHeightStream, mediapipe::Adopt(absl::GetFlag(FLAGS_input_width).release())
                                 .At(mediapipe::Timestamp(frame_timestamp_us))));
           return absl::OkStatus();
         }));
