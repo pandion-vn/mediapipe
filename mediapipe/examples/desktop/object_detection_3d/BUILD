@@ -54,7 +54,7 @@ cc_binary(
         "//mediapipe/modules/objectron:object_detection_ssd_mobilenetv2_oidv4_fp16.tflite",
     ],
     deps = [
-        "//mediapipe/examples/desktop:simple_run_graph_main_gpu",
+        "//mediapipe/examples/desktop:demo_run_graph_main_gpu",
         "//mediapipe/graphs/object_detection_3d:mobile_calculators",
     ],
 )
