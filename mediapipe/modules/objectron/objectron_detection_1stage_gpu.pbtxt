@@ -52,7 +52,7 @@ node {
   options: {
     [mediapipe.TfLiteInferenceCalculatorOptions.ext] {
       # model_path: "object_detection_3d.tflite"
-      model_path: "object_detection_3d_chair_1stage.tflite"
+      model_path: "mediapipe/models/object_detection_3d_chair_1stage.tflite"
     }
   }
 }
