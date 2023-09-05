@@ -55,6 +55,6 @@ cc_binary(
     ],
     deps = [
         "//mediapipe/examples/desktop:demo_run_graph_main_gpu",
-        "//mediapipe/graphs/object_detection_3d:mobile_calculators",
+        "//mediapipe/graphs/object_detection_3d:mobile_calculators_1stage",
     ],
 )
