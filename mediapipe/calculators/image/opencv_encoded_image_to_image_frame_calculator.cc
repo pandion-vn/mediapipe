@@ -44,8 +44,22 @@ class OpenCvEncodedImageToImageFrameCalculator : public CalculatorBase {
 
 absl::Status OpenCvEncodedImageToImageFrameCalculator::GetContract(
     CalculatorContract* cc) {
-  cc->Inputs().Index(0).Set<std::string>();
-  cc->Outputs().Index(0).Set<ImageFrame>();
+  if (cc->Inputs().NumEntries() != 0) {
+    RET_CHECK(cc->Inputs().NumEntries() == 1);
+    cc->Inputs().Index(0).Set<std::string>();
+  } else {
+    RET_CHECK(cc->InputSidePackets().NumEntries() == 1);
+    cc->InputSidePackets().Index(0).Set<std::string>();
+  }
+  if (cc->Outputs().NumEntries() != 0) {
+    RET_CHECK(cc->Outputs().NumEntries() == 1);
+    cc->Outputs().Index(0).Set<::mediapipe::ImageFrame>();
+  } else {
+    RET_CHECK(cc->OutputSidePackets().NumEntries() == 1);
+    cc->OutputSidePackets().Index(0).Set<::mediapipe::ImageFrame>();
+  }
+  // cc->Inputs().Index(0).Set<std::string>();
+  // cc->Outputs().Index(0).Set<ImageFrame>();
   return absl::OkStatus();
 }
 
@@ -59,6 +73,7 @@ absl::Status OpenCvEncodedImageToImageFrameCalculator::Open(
 absl::Status OpenCvEncodedImageToImageFrameCalculator::Process(
     CalculatorContext* cc) {
   const std::string& contents = cc->Inputs().Index(0).Get<std::string>();
+
   const std::vector<char> contents_vector(contents.begin(), contents.end());
   cv::Mat decoded_mat;
   if (options_.apply_orientation_from_exif_data()) {
@@ -95,7 +110,14 @@ absl::Status OpenCvEncodedImageToImageFrameCalculator::Process(
       image_format, decoded_mat.size().width, decoded_mat.size().height,
       ImageFrame::kGlDefaultAlignmentBoundary);
   output_mat.copyTo(formats::MatView(output_frame.get()));
-  cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp());
+
+  if (cc->Outputs().NumEntries() == 1) {
+      cc->Outputs().Index(0).Add(output_frame.release()).At(cc->InputTimestamp()));
+    } else {
+      cc->OutputSidePackets().Index(0).Set(output_frame.release().At(mediapipe::Timestamp::Unset()));
+    }
+  // cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp());
+  
   return absl::OkStatus();
 }
 
