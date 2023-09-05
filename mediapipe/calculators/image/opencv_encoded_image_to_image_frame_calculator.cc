@@ -114,7 +114,7 @@ absl::Status OpenCvEncodedImageToImageFrameCalculator::Process(
   if (cc->Outputs().NumEntries() == 1) {
       cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp());
     } else {
-      cc->OutputSidePackets().Index(0).Set(Adopt(output_frame.release())).At(mediapipe::Timestamp::Unset());
+      cc->OutputSidePackets().Index(0).Set(Adopt(output_frame.release()));
     }
   // cc->Outputs().Index(0).Add(output_frame.release(), cc->InputTimestamp());
   
