@@ -55,6 +55,13 @@ ABSL_FLAG(std::string, input_width, "",
 ABSL_FLAG(std::string, input_height, "",
           "Height of video");
 
+cv::Mat GetRgb(absl::string_view path) {
+  cv::Mat bgr = cv::imread(file::JoinPath("./", path));
+  cv::Mat rgb(bgr.rows, bgr.cols, CV_8UC3);
+  int from_to[] = {0, 2, 1, 1, 2, 0};
+  cv::mixChannels(&bgr, 1, &rgb, 1, from_to, 3);
+  return rgb;
+}
 
 absl::Status RunMPPGraph() {
   std::string calculator_graph_config_contents;
@@ -74,6 +81,10 @@ absl::Status RunMPPGraph() {
           mediapipe::MakePacket<std::string>(name_and_value[1]);
     }
   }
+  auto obj_texture_input = GetRgb(
+      "mediapipe/examples/android/src/java/com/google/mediapipe/apps/"
+      "objectdetection3d/assets/classic_colors.png");
+  
   LOG(INFO) << "Get calculator graph config contents: "
             << calculator_graph_config_contents;
   mediapipe::CalculatorGraphConfig config =
@@ -89,6 +100,18 @@ absl::Status RunMPPGraph() {
   MP_RETURN_IF_ERROR(graph.SetGpuResources(std::move(gpu_resources)));
   mediapipe::GlCalculatorHelper gpu_helper;
   gpu_helper.InitializeForTest(graph.GetGpuResources().get());
+  gpu_helper.RunInGlContext([&obj_texture_input, &graph, &gpu_helper]() -> absl::Status {
+    // Convert ImageFrame to GpuBuffer.
+    auto texture = gpu_helper.CreateSourceTexture(*obj_texture_input.get());
+    auto gpu_frame = texture.GetFrame<mediapipe::GpuBuffer>();
+    glFlush();
+    texture.Release();
+    // Send GPU image packet into the graph.
+    MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+        kInputStream, mediapipe::Adopt(gpu_frame.release())
+                          .At(mediapipe::Timestamp(frame_timestamp_us))));
+    return absl::OkStatus();
+  }));
 
   LOG(INFO) << "Initialize the camera or load the video.";
   cv::VideoCapture capture;

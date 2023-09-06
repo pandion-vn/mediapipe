@@ -22,6 +22,13 @@ load(
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "hello_world_calculators",
+    deps = [
+        "//mediapipe/calculators/core:pass_through_calculator",
+    ],
+)
+
+cc_library(
     name = "desktop_simple_io_cpu_calculators",
     deps = [
         "//mediapipe/calculators/image:image_transformation_calculator",

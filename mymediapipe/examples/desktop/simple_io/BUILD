@@ -17,6 +17,23 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "simple_graph",
+    srcs = ["main_simple_graph.cc"],
+    deps = [
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework/port:file_helpers",
+        "//mediapipe/framework/port:map_util",
+        "//mediapipe/framework/port:parse_text_proto",
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/framework/port:statusor",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "simple_io",
     srcs = ["main.cc"],
     deps = [
@@ -56,9 +73,9 @@ cc_binary(
 )
 
 cc_binary(
-    name = "simple_io_gpu_demo",
+    name = "simple_graph_demo",
     deps = [
-        "//mediapipe/examples/desktop:demo_run_graph_main",
-        "//myMediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
+        "//mymediapipe/examples/desktop/simple_io:simple_graph",
+        "//mymediapipe/graphs/simple_io:hello_world_calculators",
     ],
 )

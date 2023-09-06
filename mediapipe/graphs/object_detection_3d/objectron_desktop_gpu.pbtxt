@@ -134,14 +134,14 @@ node {
 
 # node {
 #   calculator: "OpenCvEncodedImageToImageFrameCalculator"
-#   input_stream: "box_texture_encoded_content_stream"
-#   output_stream: "box_texture_image_frame_cpu"
+#   input_side_packet: "box_texture_encoded_content_packet"
+#   output_side_packet: "box_texture_image_frame_cpu"
 # }
 
 # node: {
 #   calculator: "ImageFrameToGpuBufferCalculator"
-#   input_stream: "box_texture_image_frame_cpu"
-#   output_stream: "box_texture_image_frame"
+#   input_side_packet: "box_texture_image_frame_cpu"
+#   output_side_packet: "box_texture_image_frame"
 # }
 
 # node {
