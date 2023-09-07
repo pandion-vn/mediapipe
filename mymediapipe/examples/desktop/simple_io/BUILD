@@ -34,6 +34,31 @@ cc_library(
 )
 
 cc_library(
+    name = "simple_graph_gpu",
+    srcs = ["main_simple_graph_gpu.cc"],
+    deps = [
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework/formats:image_frame",
+        "//mediapipe/framework/formats:image_frame_opencv",
+        "//mediapipe/framework/port:file_helpers",
+        "//mediapipe/framework/port:map_util",
+        "//mediapipe/framework/port:parse_text_proto",
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/framework/port:statusor",
+        "//mediapipe/framework/port:opencv_highgui",
+        "//mediapipe/framework/port:opencv_imgproc",
+        "//mediapipe/framework/port:opencv_video",
+        "//mediapipe/gpu:gl_calculator_helper",
+        "//mediapipe/util:resource_util",
+        "//third_party:opencv",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "simple_io",
     srcs = ["main.cc"],
     deps = [
@@ -77,5 +102,13 @@ cc_binary(
     deps = [
         "//mymediapipe/examples/desktop/simple_io:simple_graph",
         "//mymediapipe/graphs/simple_io:hello_world_calculators",
+    ],
+)
+
+cc_binary(
+    name = "simple_graph_gpu_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_io:simple_graph_gpu",
+        "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
 )
