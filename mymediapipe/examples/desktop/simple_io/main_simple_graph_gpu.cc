@@ -26,6 +26,8 @@
 
 constexpr char kWindowName[] = "Simple Graph GPU Demo";
 constexpr char kInputStream[] = "input_video";
+constexpr char kInputWidthStream[] = "input_width";
+constexpr char kInputHeightStream[] = "input_height";
 constexpr char kOutputStream[] = "output_video";
 
 ABSL_FLAG(std::string, calculator_graph_config_file, "",
@@ -61,6 +63,29 @@ ABSL_FLAG(std::string, output_side_packets_file, "",
           "The name of the local file to output all side packets specified "
           "with --output_side_packets. ");
 
+cv::Mat GetRgb(const std::string& path) {
+    cv::Mat bgr = cv::imread(path);
+    cv::Mat rgb;
+    cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
+    return rgb;
+}
+
+mediapipe::ImageFormat::Format GetImageFormat(int image_channels) {
+  if (image_channels == 4) {
+    return mediapipe::ImageFormat::SRGBA;
+  } else if (image_channels == 3) {
+    return mediapipe::ImageFormat::SRGB;
+  } else if (image_channels == 1) {
+    return mediapipe::ImageFormat::GRAY8;
+  }
+  LOG(FATAL) << "Unsupported input image channles: " << image_channels;
+}
+
+mediapipe::Packet MakeImageFramePacket(cv::Mat input) {
+    mediapipe::ImageFrame input_image(GetImageFormat(input.channels()), input.cols,
+                                      input.rows, input.step, input.data, [](uint8_t*) {});
+    return mediapipe::MakePacket<mediapipe::ImageFrame>(std::move(input_image));
+}
 
 absl::Status OutputStreamToLocalFile(mediapipe::OutputStreamPoller& poller) {
     std::ofstream file;
@@ -148,8 +173,15 @@ absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePackets
             std::vector<std::string> name_and_value = absl::StrSplit(kv_pair, '=');
             RET_CHECK(name_and_value.size() == 2);
             RET_CHECK(!mediapipe::ContainsKey(input_side_packets, name_and_value[0]));
-            input_side_packets[name_and_value[0]] =
-                mediapipe::MakePacket<std::string>(name_and_value[1]);
+            
+            if (name_and_value[0].find("_image") != std::string::npos) {
+                // LOG(INFO) << "Input side packet is image: " << name_and_value[0];
+                // cv::Mat cv_mat = GetRgb(name_and_value[1]);
+                // input_side_packets[name_and_value[0]] = MakeImageFramePacket(cv_mat);
+            } else {
+                input_side_packets[name_and_value[0]] =
+                    mediapipe::MakePacket<std::string>(name_and_value[1]);
+            }
         }
     }
     return input_side_packets;
@@ -170,6 +202,7 @@ absl::StatusOr<mediapipe::CalculatorGraphConfig> GetGraphConfig() {
 
     return config;
 }
+
 absl::StatusOr<mediapipe::GlCalculatorHelper> GetGpuHelper(mediapipe::CalculatorGraph &graph) {
     LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_resources, mediapipe::GpuResources::Create());
@@ -235,13 +268,11 @@ std::unique_ptr<mediapipe::ImageFrame> WrapMatToImageFrame(cv::Mat& camera_frame
 
 absl::StatusOr<std::unique_ptr<mediapipe::GpuBuffer>> 
     ImageFrameToGpuBuffer(std::unique_ptr<mediapipe::ImageFrame> &input_frame, 
-                          mediapipe::GlCalculatorHelper &gpu_helper,
-                          size_t frame_timestamp_us,
-                          mediapipe::CalculatorGraph &graph) {
+                          mediapipe::GlCalculatorHelper &gpu_helper) {
     std::unique_ptr<mediapipe::GpuBuffer> gpu_buffer;
 
     MP_RETURN_IF_ERROR(
-        gpu_helper.RunInGlContext([&input_frame, &frame_timestamp_us, &graph, &gpu_helper, &gpu_buffer]() -> absl::Status {
+        gpu_helper.RunInGlContext([&input_frame, &gpu_helper, &gpu_buffer]() -> absl::Status {
             // Convert ImageFrame to GpuBuffer.
             auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
             gpu_buffer = texture.GetFrame<mediapipe::GpuBuffer>();
@@ -304,10 +335,22 @@ absl::Status RunMPPGraph() {
 
     LOG(INFO) << "Initialize the calculator graph.";
     mediapipe::CalculatorGraph graph;
-    MP_RETURN_IF_ERROR(graph.Initialize(config, input_side_packets));
+    MP_RETURN_IF_ERROR(graph.Initialize(config));
 
     LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_helper, GetGpuHelper(graph));
+
+    LOG(INFO) << "Add image packet (GpuBuffer) into graph.";
+    cv::Mat cv_mat = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/classic_colors.png");
+    auto box_frame = WrapMatToImageFrame(cv_mat);
+    ASSIGN_OR_RETURN(auto box_gpu_frame, ImageFrameToGpuBuffer(box_frame, gpu_helper));
+    input_side_packets["box_texture_image"] = mediapipe::Adopt(box_gpu_frame.release());
+    
+    cv::Mat cv_mat1 = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/chair/texture.jpg");
+    auto box_frame1 = WrapMatToImageFrame(cv_mat1);
+    ASSIGN_OR_RETURN(auto box_gpu_frame1, ImageFrameToGpuBuffer(box_frame1, gpu_helper));
+    input_side_packets["obj_texture_image"] = mediapipe::Adopt(box_gpu_frame1.release());
+    
 
     LOG(INFO) << "Initialize the camera or load the video.";
     const bool load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
@@ -318,11 +361,12 @@ absl::Status RunMPPGraph() {
     LOG(INFO) << "Output stream poller";
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                      graph.AddOutputStreamPoller(kOutputStream));
-    MP_RETURN_IF_ERROR(graph.StartRun({}));
+    MP_RETURN_IF_ERROR(graph.StartRun(input_side_packets));
 
     LOG(INFO) << "Start grabbing and processing frames.";
     bool grab_frames = true;
     while (grab_frames) {
+        LOG(INFO) << "Capture frame.";
         // Prepare and add graph input packet.
         size_t frame_timestamp_us =
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
@@ -332,10 +376,17 @@ absl::Status RunMPPGraph() {
         // Convert to ImageFrame
         auto input_frame = WrapMatToImageFrame(camera_frame);
         // Convert to GpuBuffer
-        ASSIGN_OR_RETURN(auto gpu_frame, ImageFrameToGpuBuffer(
-                                            input_frame, gpu_helper, frame_timestamp_us, graph));
+        ASSIGN_OR_RETURN(auto gpu_frame, ImageFrameToGpuBuffer(input_frame, gpu_helper));
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
                                 kInputStream, mediapipe::Adopt(gpu_frame.release())
+                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+        
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                kInputWidthStream, mediapipe::Adopt(new int(1920))
+                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+          
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                kInputHeightStream, mediapipe::Adopt(new int(1080))
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
 
         // Check poller packet

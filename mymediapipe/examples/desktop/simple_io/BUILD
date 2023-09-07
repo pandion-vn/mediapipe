@@ -112,3 +112,11 @@ cc_binary(
         "//mymediapipe/graphs/simple_io:desktop_simple_io_gpu_calculators",
     ],
 )
+
+cc_binary(
+    name = "objectron3d_graph_gpu_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_io:simple_graph_gpu",
+        "//mediapipe/graphs/object_detection_3d:desktop_gpu_calculators",
+    ],
+)

@@ -4,9 +4,9 @@
 input_stream: "input_video"
 input_stream: "input_width"
 input_stream: "input_height"
-input_side_packet: "box_texture_path"
+input_side_packet: "box_texture_image"
 input_side_packet: "box_asset_name"
-input_side_packet: "obj_texture_path"
+input_side_packet: "obj_texture_image"
 input_side_packet: "obj_asset_name"
 output_stream: "output_video"
 
@@ -216,9 +216,9 @@ node {
   input_stream: "MODEL_MATRICES:model_matrices"
   input_stream: "MASK_MODEL_MATRICES:mask_model_matrices"
   output_stream: "OUTPUT:output_video"
-  input_side_packet: "TEXTURE:obj_texture_image_frame"
+  input_side_packet: "TEXTURE:obj_texture_image"
   input_side_packet: "ANIMATION_ASSET:box_asset_name"
-  input_side_packet: "MASK_TEXTURE:box_texture_image_frame"
+  input_side_packet: "MASK_TEXTURE:box_texture_image"
   input_side_packet: "MASK_ASSET:obj_asset_name"
   node_options: {
     [type.googleapis.com/mediapipe.GlAnimationOverlayCalculatorOptions] {

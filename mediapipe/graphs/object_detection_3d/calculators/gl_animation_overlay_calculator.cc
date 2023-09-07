@@ -45,6 +45,7 @@ namespace {
 typedef ImageFrame AssetTextureFormat;
 #else
 typedef GpuBuffer AssetTextureFormat;
+// typedef ImageFrame AssetTextureFormat;
 #endif
 
 enum { ATTRIB_VERTEX, ATTRIB_TEXTURE_POSITION, ATTRIB_NORMAL, NUM_ATTRIBUTES };
@@ -572,11 +573,14 @@ absl::Status GlAnimationOverlayCalculator::Open(CalculatorContext *cc) {
     LOG(ERROR) << "Failed to load animation asset.";
     return absl::UnknownError("Failed to load animation asset.");
   }
+  LOG(INFO) << "Loaded animation asset.";
 
   return helper_.RunInGlContext([this, &cc]() -> absl::Status {
     if (cc->InputSidePackets().HasTag("MASK_TEXTURE")) {
       const auto &mask_texture =
           cc->InputSidePackets().Tag("MASK_TEXTURE").Get<AssetTextureFormat>();
+      
+      LOG(INFO) << "Loaded input side packet: MASK_TEXTURE";
       mask_texture_ = helper_.CreateSourceTexture(mask_texture);
     }
 
@@ -584,11 +588,12 @@ absl::Status GlAnimationOverlayCalculator::Open(CalculatorContext *cc) {
     if (cc->InputSidePackets().HasTag("TEXTURE")) {
       const auto &input_texture =
           cc->InputSidePackets().Tag("TEXTURE").Get<AssetTextureFormat>();
+      LOG(INFO) << "Loaded input side packet: TEXTURE";
       texture_ = helper_.CreateSourceTexture(input_texture);
     }
 
-    VLOG(2) << "Input texture size: " << texture_.width() << ", "
-            << texture_.height() << std::endl;
+    LOG(INFO) << "Input texture size: " << texture_.width() << ", "
+              << texture_.height() << std::endl;
 
     return absl::OkStatus();
   });
