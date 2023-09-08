@@ -275,7 +275,7 @@ absl::StatusOr<mediapipe::CalculatorGraphConfig> GetGraphConfig() {
 }
 
 absl::StatusOr<mediapipe::GlCalculatorHelper> GetGpuHelper(mediapipe::CalculatorGraph &graph) {
-    LOG(INFO) << "Initialize the GPU.";
+    // LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_resources, mediapipe::GpuResources::Create());
     MP_RETURN_IF_ERROR(graph.SetGpuResources(std::move(gpu_resources)));
 
@@ -429,10 +429,12 @@ absl::Status RunMPPGraph() {
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
                                 kInputHeightStream, mediapipe::Adopt(new int(480))
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
+        LOG(INFO) << "AddPacketToInputStream";
 
         // Check poller packet
         mediapipe::Packet packet;
         if (!poller.Next(&packet)) break;
+        LOG(INFO) << "GpuBufferToImageFrame";
 
         // Get output GpuBuffer frame
         ASSIGN_OR_RETURN(auto output_frame, GpuBufferToImageFrame(packet, gpu_helper));
