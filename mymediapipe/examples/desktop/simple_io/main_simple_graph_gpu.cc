@@ -66,30 +66,6 @@ ABSL_FLAG(std::string, output_side_packets_file, "",
           "The name of the local file to output all side packets specified "
           "with --output_side_packets. ");
 
-// cv::Mat GetRgb(const std::string& path) {
-//     cv::Mat bgr = cv::imread(path);
-//     cv::Mat rgb;
-//     cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
-//     return rgb;
-// }
-
-// mediapipe::ImageFormat::Format GetImageFormat(int image_channels) {
-//   if (image_channels == 4) {
-//     return mediapipe::ImageFormat::SRGBA;
-//   } else if (image_channels == 3) {
-//     return mediapipe::ImageFormat::SRGB;
-//   } else if (image_channels == 1) {
-//     return mediapipe::ImageFormat::GRAY8;
-//   }
-//   LOG(FATAL) << "Unsupported input image channles: " << image_channels;
-// }
-
-// mediapipe::Packet MakeImageFramePacket(cv::Mat input) {
-//     mediapipe::ImageFrame input_image(GetImageFormat(input.channels()), input.cols,
-//                                       input.rows, input.step, input.data, [](uint8_t*) {});
-//     return mediapipe::MakePacket<mediapipe::ImageFrame>(std::move(input_image));
-// }
-
 absl::Status OutputStreamToLocalFile(mediapipe::OutputStreamPoller& poller) {
     std::ofstream file;
     file.open(absl::GetFlag(FLAGS_output_stream_file));
