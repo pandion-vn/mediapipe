@@ -410,7 +410,11 @@ absl::Status RunMPPGraph() {
             writer.write(output_frame_mat);
 
         } else {
-            LOG(INFO) << "Display output";
+            // LOG(INFO) << "Display output";
+            cv::imshow(kWindowName, output_frame_mat);
+            // Press any key to exit.
+            const int pressed_key = cv::waitKey(5);
+            if (pressed_key >= 0 && pressed_key != 255) grab_frames = false;
         }
 
         // Check OpenCV key press
