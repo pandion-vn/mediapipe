@@ -368,7 +368,7 @@ absl::Status RunMPPGraph() {
 
     LOG(INFO) << "Initialize the calculator graph.";
     mediapipe::CalculatorGraph graph;
-    // MP_RETURN_IF_ERROR(graph.Initialize(config));
+    MP_RETURN_IF_ERROR(graph.Initialize(config));
 
     LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_helper, GetGpuHelper(graph));
