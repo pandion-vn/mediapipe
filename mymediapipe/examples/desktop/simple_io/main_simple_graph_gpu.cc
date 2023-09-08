@@ -233,6 +233,12 @@ absl::StatusOr<mediapipe::Packet> CreateRGBPacket(const std::string& path,
     // input_side_packets["box_texture_image"] = ;
 }
 
+mediapipe::Packet CreateFloatArrayPacket(const std::vector<float>& data) {
+    float* floats = new float[data.size()];
+    std::copy(data.begin(), data.end(), floats);
+    return mediapipe::Adopt(reinterpret_cast<float(*)[]>(floats));
+}
+
 absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePacketsJson(mediapipe::GlCalculatorHelper &gpu_helper) {
     std::map<std::string, mediapipe::Packet> input_side_packets;
     if (!absl::GetFlag(FLAGS_input_side_packets).empty()) {
@@ -246,13 +252,13 @@ absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePackets
         ASSIGN_OR_RETURN(input_side_packets["box_texture"], CreateRGBPacket(data["box_texture_image"], gpu_helper));
         input_side_packets["allowed_labels"] = mediapipe::MakePacket<std::string>(data["allowed_labels"]);
         input_side_packets["max_num_objects"] = mediapipe::MakePacket<int>(data["max_num_objects"].get<int>());
-        // float model_scale[3] = {0.1, 0.05, 0.1};
-        // input_side_packets["model_scale"] = mediapipe::Adopt(reinterpret_cast<float(*)[]>(model_scale));
-        // float model_transformation[16] = {1.0, 0.0, 0.0, 0.0, 
-        //                                   0.0, 1.0, 0.0, -10.0, 
-        //                                   0.0, 0.0, -1.0, 0.0, 
-        //                                   0.0, 0.0, 0.0, 1.0};
-        // input_side_packets["model_transformation"] = mediapipe::Adopt(reinterpret_cast<float(*)[]>(model_transformation));
+        std::vector<float> model_scale = {0.1, 0.05, 0.1};
+        input_side_packets["model_scale"] = CreateFloatArrayPacket(model_scale);
+        std::vector<float> model_transformation = {1.0, 0.0,  0.0,  0.0, 
+                                                   0.0, 1.0,  0.0, -10.0, 
+                                                   0.0, 0.0, -1.0,  0.0, 
+                                                   0.0, 0.0,  0.0,  1.0};
+        input_side_packets["model_transformation"] = CreateFloatArrayPacket(model_transformation);
     }
     
     return input_side_packets;
