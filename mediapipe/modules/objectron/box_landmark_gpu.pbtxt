@@ -61,7 +61,8 @@ node {
   output_stream: "TENSORS:output_tensors"
   options: {
     [mediapipe.InferenceCalculatorOptions.ext] {
-      model_path: "object_detection_3d.tflite"
+      # model_path: "object_detection_3d.tflite"
+      model_path: "mediapipe/models/object_detection_3d_chair.tflite"
       delegate { gpu {} }
     }
   }
