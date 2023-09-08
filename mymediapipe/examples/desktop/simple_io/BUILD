@@ -66,6 +66,38 @@ cc_library(
 )
 
 cc_library(
+    name = "instant_tracking",
+    hdrs = [
+        "json.hpp",
+        "utils.h",
+    ],
+    srcs = [
+        "main_instant_tracking.cc",
+        "utils.cc",
+    ],
+    deps = [
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework/formats:image_frame",
+        "//mediapipe/framework/formats:image_frame_opencv",
+        "//mediapipe/framework/port:file_helpers",
+        "//mediapipe/framework/port:map_util",
+        "//mediapipe/framework/port:parse_text_proto",
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/framework/port:statusor",
+        "//mediapipe/framework/port:opencv_highgui",
+        "//mediapipe/framework/port:opencv_imgproc",
+        "//mediapipe/framework/port:opencv_video",
+        "//mediapipe/gpu:gl_calculator_helper",
+        "//mediapipe/util:resource_util",
+        "//third_party:opencv",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "simple_io",
     srcs = ["main.cc"],
     deps = [
@@ -125,5 +157,13 @@ cc_binary(
     deps = [
         "//mymediapipe/examples/desktop/simple_io:simple_graph_gpu",
         "//mediapipe/graphs/object_detection_3d:desktop_gpu_calculators",
+    ],
+)
+
+cc_binary(
+    name = "instant_motion_gpu_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_io:instant_tracking",
+        "//mediapipe/graphs/instant_motion_tracking:instant_motion_tracking_deps",
     ],
 )

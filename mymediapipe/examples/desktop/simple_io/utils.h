@@ -1,6 +1,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include <cmath>
 #include <cstdlib>
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 #include "mediapipe/framework/port/opencv_highgui_inc.h"
@@ -11,6 +12,7 @@
 #include "mediapipe/framework/calculator_graph.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
 
+double degreesToRadians(double degrees);
 cv::Mat GetRgbImage(const std::string& path);
 mediapipe::ImageFormat::Format GetImageFormat(int image_channels);
 std::unique_ptr<mediapipe::ImageFrame> WrapMatToImageFrame(cv::Mat& camera_frame);

@@ -1,5 +1,11 @@
 #include "utils.h"
 
+double degreesToRadians(double degrees)
+{
+    return degrees * M_PI / 180;
+}
+
+
 cv::Mat GetRgbImage(const std::string& path) {
     cv::Mat bgr = cv::imread(path);
     cv::Mat rgb;

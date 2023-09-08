@@ -1,0 +1,7 @@
+{
+    "aspect_ratio": "Chair",
+    "asset_3d": 5,
+    "gif_asset_name": "0.1, 0.05, 0.1",
+    "texture_3d": "1.0, 0.0, 0.0, 0.0, 0.0,   1.0, 0.0, -10.0, 0.0,   0.0, -1.0, 0.0, 0.0,   0.0, 0.0, 1.0",
+    "vertical_fov_radians": "mymediapipe/assets/objectron/chair/model.obj.uuu"    
+}
