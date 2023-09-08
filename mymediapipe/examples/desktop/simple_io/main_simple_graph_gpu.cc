@@ -386,7 +386,7 @@ absl::Status RunMPPGraph() {
     // ASSIGN_OR_RETURN(auto box_gpu_frame1, ImageFrameToGpuBuffer(box_frame1, gpu_helper));
     // input_side_packets["obj_texture_image"] = mediapipe::Adopt(box_gpu_frame1.release());
     
-    return absl::OkStatus();
+    // return absl::OkStatus();
 
     LOG(INFO) << "Initialize the camera or load the video.";
     const bool load_video = !absl::GetFlag(FLAGS_input_video_path).empty();
