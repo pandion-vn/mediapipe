@@ -246,8 +246,13 @@ absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePackets
         ASSIGN_OR_RETURN(input_side_packets["box_texture"], CreateRGBPacket(data["box_texture_image"], gpu_helper));
         input_side_packets["allowed_labels"] = mediapipe::MakePacket<std::string>(data["allowed_labels"]);
         input_side_packets["max_num_objects"] = mediapipe::MakePacket<int>(data["max_num_objects"].get<int>());
-        input_side_packets["model_scale"] = mediapipe::MakePacket<float[3]>(0.1, 0.05, 0.1);
-        input_side_packets["model_transformation"] = mediapipe::MakePacket<float[16]>(1.0, 0.0, 0.0, 0.0, 0.0,   1.0, 0.0, -10.0, 0.0,   0.0, -1.0, 0.0, 0.0,   0.0, 0.0, 1.0);
+        float model_scale[3] = {0.1, 0.05, 0.1};
+        input_side_packets["model_scale"] = mediapipe::Adopt(reinterpret_cast<float(*)[]>(model_scale));
+        float model_transformation[16] = {1.0, 0.0, 0.0, 0.0, 
+                                          0.0, 1.0, 0.0, -10.0, 
+                                          0.0, 0.0, -1.0, 0.0, 
+                                          0.0, 0.0, 0.0, 1.0};
+        input_side_packets["model_transformation"] = mediapipe::Adopt(reinterpret_cast<float(*)[]>(model_transformation));
     }
     
     return input_side_packets;
