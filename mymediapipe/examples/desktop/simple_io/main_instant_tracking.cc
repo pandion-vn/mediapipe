@@ -345,6 +345,12 @@ absl::Status RunMPPGraph() {
                      graph.AddOutputStreamPoller(kOutputStream));
     MP_RETURN_IF_ERROR(graph.StartRun(input_side_packets));
 
+    LOG(INFO) << "Input stream packet initial";
+    ASSIGN_OR_RETURN(auto default_gif_texture_packet, CreateRGBPacket("mymediapipe/assets/instantmotiontracking/gif/default_gif_texture.jpg", gpu_helper));
+
+    std::vector<float> model_scale = {0.1, 0.05, 0.1};
+    auto imu_rotation_matrix_packet = CreateFloatArrayPacket(model_scale);
+
     LOG(INFO) << "Start grabbing and processing frames.";
     bool grab_frames = true;
     while (grab_frames) {
@@ -363,13 +369,27 @@ absl::Status RunMPPGraph() {
                                 kInputStream, mediapipe::Adopt(gpu_frame.release())
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
         
-        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                                kInputWidthStream, mediapipe::Adopt(new int(640))
-                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+        // MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+        //                         kInputWidthStream, mediapipe::Adopt(new int(640))
+        //                             .At(mediapipe::Timestamp(frame_timestamp_us))));
           
+        // MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+        //                         kInputHeightStream, mediapipe::Adopt(new int(480))
+        //                             .At(mediapipe::Timestamp(frame_timestamp_us))));
+
+        // sticker_sentinel
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                                kInputHeightStream, mediapipe::Adopt(new int(480))
-                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+                                "sticker_sentinel", mediapipe::Adopt(new int(0)).At(mediapipe::Timestamp(frame_timestamp_us))));
+        // sticker_proto_string
+        // imu_rotation_matrix
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                "imu_rotation_matrix", imu_rotation_matrix_packet.At(mediapipe::Timestamp(frame_timestamp_us))));
+        // gif_texture
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                "gif_texture", default_gif_texture_packet.At(mediapipe::Timestamp(frame_timestamp_us))));
+        // gif_aspect_ratio
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                "gif_aspect_ratio", mediapipe::Adopt(new float(341.0 / 321.0)).At(mediapipe::Timestamp(frame_timestamp_us))));
         LOG(INFO) << "AddPacketToInputStream";
 
         // Check poller packet
