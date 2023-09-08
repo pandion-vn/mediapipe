@@ -382,11 +382,11 @@ absl::Status RunMPPGraph() {
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
         
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                                kInputWidthStream, mediapipe::Adopt(new int(1920))
+                                kInputWidthStream, mediapipe::Adopt(new int(640))
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
           
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                                kInputHeightStream, mediapipe::Adopt(new int(1080))
+                                kInputHeightStream, mediapipe::Adopt(new int(480))
                                     .At(mediapipe::Timestamp(frame_timestamp_us))));
 
         // Check poller packet
