@@ -105,6 +105,7 @@ node {
       model_transformation: [0.0,   1.0,  0.0, -10.0]
       model_transformation: [0.0,   0.0, -1.0,  0.0]
       model_transformation: [0.0,   0.0,  0.0,  1.0]
+    }
   }
 }
 
