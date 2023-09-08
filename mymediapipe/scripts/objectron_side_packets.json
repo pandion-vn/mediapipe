@@ -1,0 +1,13 @@
+{
+    "allowed_labels": "Chair",
+    "max_num_objects_int": "5",
+    "model_scale_arr": "0.1, 0.05, 0.1",
+    "model_transformation_arr": "1.0, 0.0, 0.0, 0.0, 0.0,   1.0, 0.0, -10.0, 0.0,   0.0, -1.0, 0.0, 0.0,   0.0, 0.0, 1.0",
+    "obj_asset_name": "mymediapipe/assets/objectron/chair/model.obj.uuu",
+    "box_asset_name": "mymediapipe/assets/objectron/box.obj.uuu",
+    "obj_texture_image": "mymediapipe/assets/objectron/chair/texture.jpg",
+    "box_texture_image": "mymediapipe/assets/objectron/classic_colors.png"
+    
+    
+    
+}

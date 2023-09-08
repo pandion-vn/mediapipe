@@ -35,6 +35,9 @@ cc_library(
 
 cc_library(
     name = "simple_graph_gpu",
+    hdrs = [
+        "json.hpp",
+    ],
     srcs = ["main_simple_graph_gpu.cc"],
     deps = [
         "//mediapipe/framework:calculator_framework",

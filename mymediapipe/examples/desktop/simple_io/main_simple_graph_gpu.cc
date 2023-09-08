@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "json.hpp"
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "mediapipe/framework/port/status.h"
@@ -23,6 +24,7 @@
 #include "mediapipe/gpu/gpu_buffer.h"
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
 
+using json = nlohmann::json;
 
 constexpr char kWindowName[] = "Simple Graph GPU Demo";
 constexpr char kInputStream[] = "input_video";
@@ -62,6 +64,9 @@ ABSL_FLAG(std::string, output_side_packets, "",
 ABSL_FLAG(std::string, output_side_packets_file, "",
           "The name of the local file to output all side packets specified "
           "with --output_side_packets. ");
+
+
+
 
 cv::Mat GetRgb(const std::string& path) {
     cv::Mat bgr = cv::imread(path);
@@ -187,6 +192,67 @@ absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePackets
     return input_side_packets;
 }
 
+std::unique_ptr<mediapipe::ImageFrame> WrapMatToImageFrame(cv::Mat& camera_frame) {
+    auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
+            mediapipe::ImageFormat::SRGBA, camera_frame.cols, camera_frame.rows,
+            mediapipe::ImageFrame::kGlDefaultAlignmentBoundary);
+        cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
+        camera_frame.copyTo(input_frame_mat);
+    return input_frame;
+}
+
+absl::StatusOr<std::unique_ptr<mediapipe::GpuBuffer>> 
+    ImageFrameToGpuBuffer(std::unique_ptr<mediapipe::ImageFrame> &input_frame, 
+                          mediapipe::GlCalculatorHelper &gpu_helper) {
+    std::unique_ptr<mediapipe::GpuBuffer> gpu_buffer;
+
+    MP_RETURN_IF_ERROR(
+        gpu_helper.RunInGlContext([&input_frame, &gpu_helper, &gpu_buffer]() -> absl::Status {
+            // Convert ImageFrame to GpuBuffer.
+            auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
+            gpu_buffer = texture.GetFrame<mediapipe::GpuBuffer>();
+            glFlush();
+            texture.Release();
+
+            // Send GPU image packet into the graph.
+            // MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+            //     kInputStream, mediapipe::Adopt(gpu_frame.release())
+            //                         .At(mediapipe::Timestamp(frame_timestamp_us))));
+            return absl::OkStatus();
+        })
+    );
+    return gpu_buffer;
+}
+
+absl::StatusOr<mediapipe::Packet> CreateRGBPacket(const std::string& path, 
+                                                  mediapipe::GlCalculatorHelper &gpu_helper) {
+    cv::Mat cv_mat = GetRgb(path);
+    auto box_frame = WrapMatToImageFrame(cv_mat);
+    ASSIGN_OR_RETURN(auto gpu_frame, ImageFrameToGpuBuffer(box_frame, gpu_helper));
+    return mediapipe::Adopt(gpu_frame.release());
+    // input_side_packets["box_texture_image"] = ;
+}
+
+absl::StatusOr<std::map<std::string, mediapipe::Packet>> InitialInputSidePacketsJson(mediapipe::GlCalculatorHelper &gpu_helper) {
+    std::map<std::string, mediapipe::Packet> input_side_packets;
+    if (!absl::GetFlag(FLAGS_input_side_packets).empty()) {
+        std::ifstream f(absl::GetFlag(FLAGS_input_side_packets));
+        json data = json::parse(f);
+        LOG(INFO) << data.dump();
+
+        input_side_packets["obj_asset_name"] = mediapipe::MakePacket<std::string>(data["obj_asset_name"]);
+        input_side_packets["box_asset_name"] = mediapipe::MakePacket<std::string>(data["box_asset_name"]);
+        ASSIGN_OR_RETURN(input_side_packets["obj_texture"], CreateRGBPacket(data["obj_texture_image"], gpu_helper));
+        ASSIGN_OR_RETURN(input_side_packets["box_texture"], CreateRGBPacket(data["box_texture_image"], gpu_helper));
+        input_side_packets["allowed_labels"] = mediapipe::MakePacket<std::string>(data["allowed_labels"]);
+        input_side_packets["max_num_objects"] = mediapipe::MakePacket<int>(data["max_num_objects"].get<int>());
+        input_side_packets["model_scale"] = mediapipe::MakePacket<float[3]>(0.1, 0.05, 0.1);
+        input_side_packets["model_transformation"] = mediapipe::MakePacket<float[16]>(1.0, 0.0, 0.0, 0.0, 0.0,   1.0, 0.0, -10.0, 0.0,   0.0, -1.0, 0.0, 0.0,   0.0, 0.0, 1.0);
+    }
+    
+    return input_side_packets;
+}
+
 absl::StatusOr<mediapipe::CalculatorGraphConfig> GetGraphConfig() {
     std::string calculator_graph_config_contents;
     MP_RETURN_IF_ERROR(mediapipe::file::GetContents(
@@ -257,38 +323,6 @@ absl::StatusOr<cv::Mat> GetFrame(cv::VideoCapture& capture, bool load_video) {
     return camera_frame;
 }
 
-std::unique_ptr<mediapipe::ImageFrame> WrapMatToImageFrame(cv::Mat& camera_frame) {
-    auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
-            mediapipe::ImageFormat::SRGBA, camera_frame.cols, camera_frame.rows,
-            mediapipe::ImageFrame::kGlDefaultAlignmentBoundary);
-        cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
-        camera_frame.copyTo(input_frame_mat);
-    return input_frame;
-}
-
-absl::StatusOr<std::unique_ptr<mediapipe::GpuBuffer>> 
-    ImageFrameToGpuBuffer(std::unique_ptr<mediapipe::ImageFrame> &input_frame, 
-                          mediapipe::GlCalculatorHelper &gpu_helper) {
-    std::unique_ptr<mediapipe::GpuBuffer> gpu_buffer;
-
-    MP_RETURN_IF_ERROR(
-        gpu_helper.RunInGlContext([&input_frame, &gpu_helper, &gpu_buffer]() -> absl::Status {
-            // Convert ImageFrame to GpuBuffer.
-            auto texture = gpu_helper.CreateSourceTexture(*input_frame.get());
-            gpu_buffer = texture.GetFrame<mediapipe::GpuBuffer>();
-            glFlush();
-            texture.Release();
-
-            // Send GPU image packet into the graph.
-            // MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-            //     kInputStream, mediapipe::Adopt(gpu_frame.release())
-            //                         .At(mediapipe::Timestamp(frame_timestamp_us))));
-            return absl::OkStatus();
-        })
-    );
-    return gpu_buffer;
-}
-
 absl::StatusOr<std::unique_ptr<mediapipe::ImageFrame>> GpuBufferToImageFrame(mediapipe::Packet& packet, 
                                                                              mediapipe::GlCalculatorHelper &gpu_helper) {
     std::unique_ptr<mediapipe::ImageFrame> output_frame;
@@ -331,26 +365,28 @@ absl::StatusOr<cv::Mat> ConvertImageFrameToMat(std::unique_ptr<mediapipe::ImageF
 
 absl::Status RunMPPGraph() {
     ASSIGN_OR_RETURN(auto config, GetGraphConfig());
-    ASSIGN_OR_RETURN(auto input_side_packets, InitialInputSidePackets());
 
     LOG(INFO) << "Initialize the calculator graph.";
     mediapipe::CalculatorGraph graph;
-    MP_RETURN_IF_ERROR(graph.Initialize(config));
+    // MP_RETURN_IF_ERROR(graph.Initialize(config));
 
     LOG(INFO) << "Initialize the GPU.";
     ASSIGN_OR_RETURN(auto gpu_helper, GetGpuHelper(graph));
 
-    LOG(INFO) << "Add image packet (GpuBuffer) into graph.";
-    cv::Mat cv_mat = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/classic_colors.png");
-    auto box_frame = WrapMatToImageFrame(cv_mat);
-    ASSIGN_OR_RETURN(auto box_gpu_frame, ImageFrameToGpuBuffer(box_frame, gpu_helper));
-    input_side_packets["box_texture_image"] = mediapipe::Adopt(box_gpu_frame.release());
+    ASSIGN_OR_RETURN(auto input_side_packets, InitialInputSidePacketsJson(gpu_helper));
+
+    // LOG(INFO) << "Add image packet (GpuBuffer) into graph.";
+    // cv::Mat cv_mat = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/classic_colors.png");
+    // auto box_frame = WrapMatToImageFrame(cv_mat);
+    // ASSIGN_OR_RETURN(auto box_gpu_frame, ImageFrameToGpuBuffer(box_frame, gpu_helper));
+    // input_side_packets["box_texture_image"] = mediapipe::Adopt(box_gpu_frame.release());
     
-    cv::Mat cv_mat1 = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/chair/texture.jpg");
-    auto box_frame1 = WrapMatToImageFrame(cv_mat1);
-    ASSIGN_OR_RETURN(auto box_gpu_frame1, ImageFrameToGpuBuffer(box_frame1, gpu_helper));
-    input_side_packets["obj_texture_image"] = mediapipe::Adopt(box_gpu_frame1.release());
+    // cv::Mat cv_mat1 = GetRgb("mediapipe/examples/android/src/java/com/google/mediapipe/apps/objectdetection3d/assets/chair/texture.jpg");
+    // auto box_frame1 = WrapMatToImageFrame(cv_mat1);
+    // ASSIGN_OR_RETURN(auto box_gpu_frame1, ImageFrameToGpuBuffer(box_frame1, gpu_helper));
+    // input_side_packets["obj_texture_image"] = mediapipe::Adopt(box_gpu_frame1.release());
     
+    return absl::OkStatus();
 
     LOG(INFO) << "Initialize the camera or load the video.";
     const bool load_video = !absl::GetFlag(FLAGS_input_video_path).empty();

@@ -82,6 +82,25 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "desktop_gpu_1stage_calculators",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mediapipe/calculators/core:packet_resampler_calculator",
+        "//mediapipe/calculators/image:image_cropping_calculator",
+        "//mediapipe/calculators/util:local_file_contents_calculator",
+        "//mediapipe/calculators/core:side_packet_to_stream_calculator",
+        "//mediapipe/calculators/core:stream_to_side_packet_calculator", 
+        "//mediapipe/calculators/image:opencv_encoded_image_to_image_frame_calculator",
+        "//mediapipe/gpu:gl_scaler_calculator",
+        "//mediapipe/gpu:image_frame_to_gpu_buffer_calculator",
+        "//mediapipe/graphs/object_detection_3d/calculators:annotations_to_model_matrices_calculator",
+        "//mediapipe/graphs/object_detection_3d/calculators:gl_animation_overlay_calculator",
+        "//mediapipe/modules/objectron:objectron_detection_1stage_gpu",
+        "//mediapipe/modules/objectron:objectron_tracking_1stage_gpu",
+    ],
+)
+
 mediapipe_binary_graph(
     name = "mobile_gpu_binary_graph",
     graph = "object_occlusion_tracking.pbtxt",
