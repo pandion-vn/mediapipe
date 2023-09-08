@@ -5,8 +5,8 @@ input_stream: "input_video"
 input_stream: "WIDTH:input_width"
 input_stream: "HEIGHT:input_height"
 input_side_packet: "LABELS_CSV:allowed_labels"
-input_side_packet: "MODEL_SCALE:model_scale"
-input_side_packet: "MODEL_TRANSFORMATION:model_transformation"
+# input_side_packet: "MODEL_SCALE:model_scale"
+# input_side_packet: "MODEL_TRANSFORMATION:model_transformation"
 input_side_packet: "TEXTURE:box_texture"
 input_side_packet: "MAX_NUM_OBJECTS:max_num_objects"
 input_side_packet: "ANIMATION_ASSET:box_asset_name"
@@ -95,9 +95,17 @@ node {
 node {
   calculator: "AnnotationsToModelMatricesCalculator"
   input_stream: "ANNOTATIONS:lifted_objects"
-  input_side_packet: "MODEL_SCALE:model_scale"
-  input_side_packet: "MODEL_TRANSFORMATION:model_transformation"
+  # input_side_packet: "MODEL_SCALE:model_scale"
+  # input_side_packet: "MODEL_TRANSFORMATION:model_transformation"
   output_stream: "MODEL_MATRICES:mask_model_matrices"
+  node_options: {
+    [type.googleapis.com/mediapipe.AnnotationsToModelMatricesCalculatorOptions] {
+      model_scale: [0.1, 0.05, 0.1]
+      model_transformation: [1.0,   0.0,  0.0,  0.0]
+      model_transformation: [0.0,   1.0,  0.0, -10.0]
+      model_transformation: [0.0,   0.0, -1.0,  0.0]
+      model_transformation: [0.0,   0.0,  0.0,  1.0]
+  }
 }
 
 # Render everything together. First we render the 3D bounding box animation,
