@@ -62,7 +62,8 @@ node {
   options: {
     [mediapipe.InferenceCalculatorOptions.ext] {
       # model_path: "object_detection_3d.tflite"
-      model_path: "mediapipe/models/object_detection_3d_chair.tflite"
+      # model_path: "mediapipe/models/object_detection_3d_chair.tflite"
+      model_path: "mediapipe/models/object_detection_3d_cup.tflite"
       delegate { gpu {} }
     }
   }

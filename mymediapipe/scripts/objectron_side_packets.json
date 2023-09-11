@@ -1,13 +1,10 @@
 {
-    "allowed_labels": "Chair",
+    "allowed_labels": "Coffee cup,Mug",
     "max_num_objects": 5,
-    "model_scale_arr": "0.1, 0.05, 0.1",
-    "model_transformation_arr": "1.0, 0.0, 0.0, 0.0, 0.0,   1.0, 0.0, -10.0, 0.0,   0.0, -1.0, 0.0, 0.0,   0.0, 0.0, 1.0",
-    "obj_asset_name": "mymediapipe/assets/objectron/chair/model.obj.uuu",
+    "model_scale_arr": "500, 500, 500",
+    "model_transformation_arr": "1.0,  0.0, 0.0,    0.0, 0.0,  0.0, 1.0, -0.001, 0.0, -1.0, 0.0,    0.0, 0.0,  0.0, 0.0,    1.0",
+    "obj_asset_name": "mymediapipe/assets/objectron/cup/model.obj.uuu",
+    "obj_texture_image": "mymediapipe/assets/objectron/cup/texture.jpg",
     "box_asset_name": "mymediapipe/assets/objectron/box.obj.uuu",
-    "obj_texture_image": "mymediapipe/assets/objectron/chair/texture.jpg",
     "box_texture_image": "mymediapipe/assets/objectron/classic_colors.png"
-    
-    
-    
 }

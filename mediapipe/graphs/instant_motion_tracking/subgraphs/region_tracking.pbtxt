@@ -17,6 +17,7 @@
 
 # Images in/out of graph with tracked and scaled normalized anchor data
 type: "RegionTrackingSubgraph"
+
 input_stream: "VIDEO:input_video"
 input_stream: "SENTINEL:sticker_sentinel"
 input_stream: "ANCHORS:initial_anchor_data"

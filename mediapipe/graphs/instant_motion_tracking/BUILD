@@ -29,6 +29,17 @@ cc_library(
         "//mediapipe/graphs/instant_motion_tracking/subgraphs:region_tracking",
         "//mediapipe/graphs/object_detection_3d/calculators:gl_animation_overlay_calculator",
     ],
+
+
+cc_library(
+    name = "desktop_instant_motion_tracking_deps",
+    deps = [
+        "//mediapipe/graphs/instant_motion_tracking/calculators:matrices_manager_calculator",
+        "//mediapipe/graphs/instant_motion_tracking/calculators:sticker_manager_calculator",
+        "//mediapipe/graphs/instant_motion_tracking/subgraphs:region_tracking",
+        "//mediapipe/graphs/object_detection_3d/calculators:gl_animation_overlay_calculator",
+    ],
+)
 )
 
 mediapipe_binary_graph(
