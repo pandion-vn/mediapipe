@@ -20,6 +20,7 @@
 #include "mediapipe/framework/port/opencv_video_inc.h"
 #include "mediapipe/framework/formats/image_frame.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"
+#include "mediapipe/graphs/instant_motion_tracking/calculators/sticker_buffer.pb.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
 #include "mediapipe/gpu/gpu_buffer.h"
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
@@ -381,6 +382,22 @@ absl::Status RunMPPGraph() {
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
                                 "sticker_sentinel", mediapipe::Adopt(new int(0)).At(mediapipe::Timestamp(frame_timestamp_us))));
         // sticker_proto_string
+        mediapipe::StickerRoll stickerRoll;
+        mediapipe::Sticker* sticker = stickerRoll.add_sticker();
+        // mediapipe::Sticker sticker;
+        sticker->set_id(0);
+        sticker->set_x(0);
+        sticker->set_y(0);
+        sticker->set_rotation(0);
+        sticker->set_scale(1);
+        sticker->set_render_id(0);
+        // stickerRoll.add_sticker(sticker);
+        std::string data;
+        stickerRoll.SerializeToString(&data);
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                                "sticker_proto_string", mediapipe::MakePacket<std::string>(data)
+                                                        .At(mediapipe::Timestamp(frame_timestamp_us))));
+
         // imu_rotation_matrix
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
                                 "imu_rotation_matrix", imu_rotation_matrix_packet.At(mediapipe::Timestamp(frame_timestamp_us))));

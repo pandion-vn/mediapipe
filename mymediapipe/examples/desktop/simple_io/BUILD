@@ -88,6 +88,7 @@ cc_library(
         "//mediapipe/framework/port:opencv_highgui",
         "//mediapipe/framework/port:opencv_imgproc",
         "//mediapipe/framework/port:opencv_video",
+        "//mediapipe/graphs/instant_motion_tracking/calculators:sticker_buffer_cc_proto",
         "//mediapipe/gpu:gl_calculator_helper",
         "//mediapipe/util:resource_util",
         "//third_party:opencv",
