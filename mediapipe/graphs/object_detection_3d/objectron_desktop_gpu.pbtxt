@@ -123,7 +123,7 @@ node: {
   input_side_packet: "MASK_ASSET:obj_asset_name"
   node_options: {
     [type.googleapis.com/mediapipe.GlAnimationOverlayCalculatorOptions] {
-      aspect_ratio: 0.75
+      aspect_ratio: 1.0
       vertical_fov_degrees: 70.
       animation_speed_fps: 25
     }

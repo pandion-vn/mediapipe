@@ -695,6 +695,7 @@ absl::Status GlAnimationOverlayCalculator::Process(CalculatorContext *cc) {
       GLCHECK(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                         GL_RENDERBUFFER, renderbuffer_));
       GLCHECK(glBindRenderbuffer(GL_RENDERBUFFER, 0));
+      LOG(ERROR) << "Depth buffer created";
       depth_buffer_created_ = true;
     }
 
@@ -727,6 +728,7 @@ absl::Status GlAnimationOverlayCalculator::Process(CalculatorContext *cc) {
       const auto &input_texture =
           cc->Inputs().Tag("TEXTURE").Get<AssetTextureFormat>();
       texture_ = helper_.CreateSourceTexture(input_texture);
+      LOG(INFO) << "Load dynamic texture if it exists";
     }
 
     MP_RETURN_IF_ERROR(GlBind(current_frame, texture_));
@@ -736,6 +738,7 @@ absl::Status GlAnimationOverlayCalculator::Process(CalculatorContext *cc) {
         MP_RETURN_IF_ERROR(GlRender(current_frame, model_matrix.get()));
       }
     } else {
+      // LOG(INFO) << "Just draw one object to a static model matrix.";
       // Just draw one object to a static model matrix.
       MP_RETURN_IF_ERROR(GlRender(current_frame, kModelMatrix));
     }

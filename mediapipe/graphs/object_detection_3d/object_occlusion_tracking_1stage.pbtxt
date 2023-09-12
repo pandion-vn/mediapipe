@@ -112,7 +112,7 @@ node {
 
 # Render everything together. First we render the 3D bounding box animation,
 # then we render the occlusion mask.
-node:{
+node: {
   calculator:"GlAnimationOverlayCalculator"
   input_stream:"VIDEO:input_video_4x3"
   input_stream:"MODEL_MATRICES:model_matrices"
