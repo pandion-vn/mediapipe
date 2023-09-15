@@ -17,8 +17,9 @@ node {
         [type.googleapis.com/mediapipe.GlAnimationOverlayCalculatorOptions] {
             # Output resolution is 480x640 with the aspect ratio of 0.75
             aspect_ratio: 0.75
-            vertical_fov_degrees: 20.
+            vertical_fov_degrees: 70.
             animation_speed_fps: 25
+            z_clipping_plane_far: 2000.
         }
     }
 }

@@ -246,8 +246,8 @@ absl::Status RunMPPGraph() {
     // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/instantmotiontracking/gif/default_gif_texture.png", gpu_helper));
     // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/instantmotiontracking/gif/gif.obj.uuu");
     // OK
-    ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/objectron/classic_colors.png", gpu_helper));
-    input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/objectron/box.obj.uuu");
+    // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/objectron/classic_colors.png", gpu_helper));
+    // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/objectron/box.obj.uuu");
     // OK
     // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/objectron/chair/texture.jpg", gpu_helper));
     // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/objectron/chair/model.obj.uuu");
@@ -260,6 +260,18 @@ absl::Status RunMPPGraph() {
     // OK
     // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/objectron/sneaker/texture.jpg", gpu_helper));
     // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/objectron/sneaker/model.obj.uuu");
+    // OK
+    // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/objectron/classic_colors.png", gpu_helper));
+    // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/ironman/cube.obj.uuu");
+    // OK
+    // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/instantmotiontracking/robot/robot_texture.png", gpu_helper));
+    // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/ironman/untitled.obj.uuu");
+    // OK
+    // ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/instantmotiontracking/robot/robot_texture.png", gpu_helper));
+    // input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/cube/cube.obj.uuu");
+    // OK
+    ASSIGN_OR_RETURN(input_side_packets["texture_3d"], CreateRGBPacket("mymediapipe/assets/instantmotiontracking/robot/robot_texture.png", gpu_helper));
+    input_side_packets["asset_3d"] = mediapipe::MakePacket<std::string>("mymediapipe/assets/sword/Sting-Sword.obj.uuu");
 
     LOG(INFO) << "Output stream poller";
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
