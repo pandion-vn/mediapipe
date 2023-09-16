@@ -19,20 +19,99 @@ namespace mediapipe {
 // If you find this useful send me an email at peterekepeter at gmail dot com, 
 // I've seen this shader pop up before in other works, but I'm curious where it ends up.
 // If you want to use it, feel free to do so, there is no need to credit but it is appreciated.
-class LensFlareShaderCalculator : public GlSimpleCalculator {
+class LensFlareShaderCalculator : public CalculatorBase {
 public:
-    absl::Status GlSetup() override;
-    absl::Status GlRender(const GlTexture& src, const GlTexture& dst) override;
-    absl::Status GlTeardown() override;
+    LensFlareShaderCalculator() : initialized_(false) {}
+    LensFlareShaderCalculator(const LensFlareShaderCalculator&) = delete;
+    LensFlareShaderCalculator& operator=(const LensFlareShaderCalculator&) = delete;
+    ~LensFlareShaderCalculator() override = default;
+
+    static absl::Status GetContract(CalculatorContract* cc);
+    absl::Status Open(CalculatorContext* cc) override;
+    absl::Status Process(CalculatorContext* cc) override;
+    absl::Status Close(CalculatorContext* cc) override;
+    
+    absl::Status GlSetup();
+    absl::Status GlBind();
+    absl::Status GlRender(const GlTexture& src, const GlTexture& dst, double timestamp);
+    absl::Status GlTeardown();
+    
+    GpuBufferFormat GetOutputFormat() { return GpuBufferFormat::kBGRA32; }
+
+protected:
+    // Forward invocations of RunInGlContext to the helper.
+    // The decltype part just says that this method returns whatever type the
+    // helper method invocation returns. In C++14 we could remove it and use
+    // return type deduction, i.e.:
+    //   template <typename F> auto RunInGlContext(F&& f) { ... }
+    template <typename F>
+    auto RunInGlContext(F&& f)
+        -> decltype(std::declval<GlCalculatorHelper>().RunInGlContext(f)) {
+    return helper_.RunInGlContext(std::forward<F>(f));
+    }
+
+    GlCalculatorHelper helper_;
+    bool initialized_;
 
 private:
     GLuint program_ = 0;
     GLint frame_;
     GLint projection_;
     GLint model_;
+    GLint texture_;
 };
 
 REGISTER_CALCULATOR(LensFlareShaderCalculator);
+
+// static
+absl::Status LensFlareShaderCalculator::GetContract(CalculatorContract* cc) {
+  TagOrIndex(&cc->Inputs(), "VIDEO", 0).Set<GpuBuffer>();
+  TagOrIndex(&cc->Outputs(), "VIDEO", 0).Set<GpuBuffer>();
+  // Currently we pass GL context information and other stuff as external
+  // inputs, which are handled by the helper.
+  return GlCalculatorHelper::UpdateContract(cc);
+}
+
+absl::Status LensFlareShaderCalculator::Open(CalculatorContext* cc) {
+  // Inform the framework that we always output at the same timestamp
+  // as we receive a packet at.
+  cc->SetOffset(mediapipe::TimestampDiff(0));
+
+  // Let the helper access the GL context information.
+  return helper_.Open(cc);
+}
+
+absl::Status LensFlareShaderCalculator::Process(CalculatorContext* cc) {
+  return RunInGlContext([this, cc]() -> absl::Status {
+    const auto& input = TagOrIndex(cc->Inputs(), "VIDEO", 0).Get<GpuBuffer>();
+    if (!initialized_) {
+        MP_RETURN_IF_ERROR(GlSetup());
+        initialized_ = true;
+    }
+
+    auto src = helper_.CreateSourceTexture(input);
+    auto dst = helper_.CreateDestinationTexture(src.width(), src.height(),
+                                                GetOutputFormat());
+
+    MP_RETURN_IF_ERROR(GlBind());
+    // Run core program.
+    MP_RETURN_IF_ERROR(GlRender(src, dst, cc->InputTimestamp().Seconds()));
+
+    auto output = dst.GetFrame<GpuBuffer>();
+
+    src.Release();
+    dst.Release();
+
+    TagOrIndex(&cc->Outputs(), "VIDEO", 0)
+        .Add(output.release(), cc->InputTimestamp());
+
+    return absl::OkStatus();
+  });
+}
+
+absl::Status LensFlareShaderCalculator::Close(CalculatorContext* cc) {
+  return RunInGlContext([this]() -> absl::Status { return GlTeardown(); });
+}
 
 absl::Status LensFlareShaderCalculator::GlSetup() {
     // Load vertex and fragment shaders
@@ -47,13 +126,17 @@ absl::Status LensFlareShaderCalculator::GlSetup() {
     };
 
     const GLchar* vert_src = R"(
+        uniform mat4 projection_mat;
+        uniform mat4 model_mat;
+
         attribute vec4 position;
         attribute vec4 tex_coord;
+
         varying vec2 v_tex_coord;
 
         void main() {
             v_tex_coord = tex_coord.xy;
-            gl_Position = position;
+            gl_Position = projection_mat * model_mat * position;
         }
     )";
     const GLchar* frag_src = R"(
@@ -63,8 +146,7 @@ absl::Status LensFlareShaderCalculator::GlSetup() {
         uniform sampler2D texture;
 
         void main() {
-            // gl_FragColor = texture2D(texture, v_tex_coord);
-            gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+            gl_FragColor = texture2D(texture, v_tex_coord);
         }
     )";
 
@@ -73,141 +155,26 @@ absl::Status LensFlareShaderCalculator::GlSetup() {
                     (const GLchar**)&attr_name[0], attr_location, &program_);
     RET_CHECK(program_) << "Problem initializing the program.";
 
-    // model_ = glGetUniformLocation(program_, "model");
-    // projection_ = glGetUniformLocation(program_, "projection");
-    // frame_ = glGetUniformLocation(program_, "sprite");
-    GLint frame_ = glGetUniformLocation(program_, "texture");
+    model_ = glGetUniformLocation(program_, "model_mat");
+    projection_ = glGetUniformLocation(program_, "projection_mat");
+    texture_ = glGetUniformLocation(program_, "texture");
+
+    RET_CHECK_NE(projection_, -1)
+        << "Failed to find `projection_mat` uniform!";
+    RET_CHECK_NE(model_, -1)
+        << "Failed to find `model_mat` uniform!";
+    RET_CHECK_NE(texture_, -1) << "Failed to find `texture` uniform!";
     
     return absl::OkStatus();
 }
 
-absl::Status LensFlareShaderCalculator::GlRender(const GlTexture& src, const GlTexture& dst) {
-    // static const GLfloat square_vertices[] = {
-    //     -1.0f, -1.0f,  // bottom left
-    //     1.0f,  -1.0f,  // bottom right
-    //     -1.0f, 1.0f,   // top left
-    //     1.0f,  1.0f,   // top right
-    // };
-    // static const float texture_vertices[] = {
-    //     0.0f, 0.0f,  // bottom left
-    //     1.0f, 0.0f,  // bottom right
-    //     0.0f, 1.0f,  // top left
-    //     1.0f, 1.0f,  // top right
-    // };
-    // configure VAO/VBO
-    // unsigned int VBO;
-    static const float vertices[] = { 
-        // pos      // tex
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 
+absl::Status LensFlareShaderCalculator::GlBind() {
+    return absl::OkStatus();
+}
 
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
-    };
+absl::Status LensFlareShaderCalculator::GlRender(const GlTexture& src, const GlTexture& dst, 
+                                                 double timestamp) {
 
-    static const GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f,
-                                         -0.5f, -0.5f, 0.0f,
-                                          0.5f, -0.5f, 0.0f };
-
-    // program
-    glUseProgram(program_);
-    glEnable(GL_BLEND);
-    glFrontFace(GL_CCW);
-
-    // render OVERDRAW
-    glBlendFunc(GL_ONE, GL_ZERO);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    // glUniform1i(frame_, 1);
-
-    // parameters
-    // glUniform1i(glGetUniformLocation(this->ID, name), value);
-    // glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(src.width()), static_cast<float>(src.height()), 0.0f, -1.0f, 1.0f);
-    // glUniformMatrix4fv(projection_, 1, false, glm::value_ptr(projection));
-    // glUniform1i(frame_, 1);
-    // glUniform1f(pixel_w_, 1.0 / src.width());
-    // glUniform1f(pixel_h_, 1.0 / src.height());
-    
-    // glm::vec2 position = glm::vec2(0.0f, 0.0f);
-    // glm::vec2 size = glm::vec2(src.width(), src.height());
-    // float rotate = 0.0f;
-    // glm::vec3 color = glm::vec3(1.0f);
-
-    // glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::translate(model, glm::vec3(position, 0.0f));  // first translate (transformations are: scale happens first, then rotation, and then final translation happens; reversed order)
-    // model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f)); // move origin of rotation to center of quad
-    // model = glm::rotate(model, glm::radians(rotate), glm::vec3(0.0f, 0.0f, 1.0f)); // then rotate
-    // model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // move origin back
-    // model = glm::scale(model, glm::vec3(size, 1.0f)); // last scale
-
-    // glUniformMatrix4fv(model_, 1, false, glm::value_ptr(model));
-
-    glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, 0, vVertices );
-    glEnableVertexAttribArray ( 0 );
-    glDrawArrays ( GL_TRIANGLES, 0, 3 );
-
-    // vertex storage
-    // GLuint vbo[2];
-    // glGenBuffers(2, vbo);
-    // GLuint vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
-    // unsigned int quadVAO;
-    // unsigned int VBO;
-    // glGenVertexArrays(1, &quadVAO);
-    // glGenBuffers(1, &VBO);
-
-    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // glBindVertexArray(quadVAO);
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
-
-    // vbo 0
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-    // glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(GLfloat), square_vertices,
-    //             GL_STATIC_DRAW);
-    // glEnableVertexAttribArray(ATTRIB_VERTEX);
-    // glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, nullptr);
-
-    // vbo 1
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    // glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(GLfloat), texture_vertices,
-    //             GL_STATIC_DRAW);
-    // glEnableVertexAttribArray(ATTRIB_TEXTURE_POSITION);
-    // glVertexAttribPointer(ATTRIB_TEXTURE_POSITION, 2, GL_FLOAT, 0, 0, nullptr);
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, this->ID);
-
-    // glBindVertexArray(this->quadVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-    // glBindVertexArray(0);
-
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
-
-    glUseProgram(0);
-    glFlush();
-
-    // draw
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    // cleanup
-    // glDisableVertexAttribArray(ATTRIB_VERTEX);
-    // glDisableVertexAttribArray(ATTRIB_TEXTURE_POSITION);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
-    // glDeleteVertexArrays(1, &vao);
-    // glDeleteBuffers(2, vbo);
-    // glDeleteVertexArrays(1, &quadVAO);
-    
     return absl::OkStatus();
 }
 

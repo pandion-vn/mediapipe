@@ -3,17 +3,17 @@ input_side_packet: "texture_3d"
 input_side_packet: "asset_3d"
 output_stream: "output_video"
 
-node: {
-    calculator: "TriangleShaderCalculator"
-    input_stream: "VIDEO:input_video"
-    output_stream: "output_video"
-}
-
 # node: {
-#     calculator: "LensFlareShaderCalculator"
+#     calculator: "TriangleShaderCalculator"
 #     input_stream: "VIDEO:input_video"
 #     output_stream: "output_video"
 # }
+
+node: {
+    calculator: "LensFlareShaderCalculator"
+    input_stream: "VIDEO:input_video"
+    output_stream: "output_video"
+}
 
 # Renders the final 3d stickers and overlays them on top of the input image.
 # node {
