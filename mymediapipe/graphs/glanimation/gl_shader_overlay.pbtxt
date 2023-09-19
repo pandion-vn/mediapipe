@@ -1,0 +1,16 @@
+input_stream: "input_video"
+input_side_packet: "texture_3d"
+input_side_packet: "asset_3d"
+output_stream: "output_video"
+
+# node: {
+#     calculator: "TriangleShaderCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+node: {
+    calculator: "GlShaderCalculator"
+    input_stream: "VIDEO:input_video"
+    output_stream: "output_video"
+}

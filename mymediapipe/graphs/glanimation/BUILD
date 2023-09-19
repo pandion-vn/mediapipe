@@ -36,3 +36,13 @@ cc_library(
         # "//mediapipe/modules/objectron:objectron_gpu",
     ],
 )
+
+cc_library(
+    name = "gl_shader_calculators",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mediapipe/calculators/core:flow_limiter_calculator",
+        "//mediapipe/calculators/image:image_cropping_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_shader_calculator",
+    ],
+)

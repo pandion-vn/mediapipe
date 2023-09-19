@@ -38,3 +38,11 @@ cc_binary(
         "//mymediapipe/graphs/glanimation:shader_calculators",
     ],
 )
+
+cc_binary(
+    name = "gl_shader_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_shader:simple_shader",
+        "//mymediapipe/graphs/glanimation:gl_shader_calculators",
+    ],
+)
