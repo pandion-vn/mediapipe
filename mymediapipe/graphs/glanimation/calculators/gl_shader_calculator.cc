@@ -145,10 +145,7 @@ absl::Status GlShaderCalculator::GlSetup() {
         //     vec2 uvd = uv*(length(uv));
             
         //     float dist=length(main); dist = pow(dist,.1);
-            
-            
         //     float f1 = max(0.01-pow(length(uv+1.2*pos),1.9),.0)*7.0;
-
         //     float f2 = max(1.0/(1.0+32.0*pow(length(uvd+0.8*pos),2.0)),.0)*00.1;
         //     float f22 = max(1.0/(1.0+32.0*pow(length(uvd+0.85*pos),2.0)),.0)*00.08;
         //     float f23 = max(1.0/(1.0+32.0*pow(length(uvd+0.9*pos),2.0)),.0)*00.06;
@@ -306,7 +303,7 @@ absl::Status GlShaderCalculator::GlSetup() {
         }
     )";
 
-    const GLchar* frag_src = R"(
+    const GLchar* frag_src2 = R"(
         precision mediump float;
 
         varying vec2 pos;
@@ -580,6 +577,8 @@ absl::Status GlShaderCalculator::GlSetup() {
             gl_FragColor = texture2D(texture, pos) * clamp(col, 0.0, 1.0);
         }
     )";
+    const GLchar* frag_src = R"(
+    )";
 
     // shader program
     GlhCreateProgram(vert_src, frag_src, NUM_ATTRIBUTES,
@@ -627,6 +626,13 @@ absl::Status GlShaderCalculator::GlRender(const GlTexture& src, const GlTexture&
 
     // program
     glUseProgram(program_);
+    
+    // Set up the GL state.
+    // glEnable(GL_BLEND);
+    // glFrontFace(GL_CCW);
+    // glBlendFunc(GL_ONE, GL_ZERO);
+    // glDisable(GL_DEPTH_TEST);
+    // glDepthMask(GL_FALSE);
 
     //Vertex data of character
     // float vertexData[36]={1.0,0.4,0.9,1.0,....};

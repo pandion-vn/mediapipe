@@ -25,6 +25,8 @@ cc_library(
         "//mediapipe/gpu:gl_calculator_helper",
         "//mediapipe/util:resource_util",
         "//third_party:opencv",
+        # "//third_party:opengl",
+        # "//third_party:opengl_es",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/strings",
@@ -44,5 +46,13 @@ cc_binary(
     deps = [
         "//mymediapipe/examples/desktop/simple_shader:simple_shader",
         "//mymediapipe/graphs/glanimation:gl_shader_calculators",
+    ],
+)
+
+cc_binary(
+    name = "opengl_shader_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_shader:simple_shader",
+        "//mymediapipe/graphs/glanimation:opengl_shader_calculators",
     ],
 )

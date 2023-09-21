@@ -46,3 +46,14 @@ cc_library(
         "//mymediapipe/graphs/glanimation/calculators:gl_shader_calculator",
     ],
 )
+
+
+cc_library(
+    name = "opengl_shader_calculators",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mediapipe/calculators/core:flow_limiter_calculator",
+        "//mediapipe/calculators/image:image_cropping_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:opengl_shader_calculator",
+    ],
+)

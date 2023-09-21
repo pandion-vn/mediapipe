@@ -6,6 +6,20 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "opengl_shader_calculator",
+    srcs = ["opengl_shader_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_calculator",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
     name = "gl_shader_calculator",
     srcs = ["gl_shader_calculator.cc"],
     deps = [

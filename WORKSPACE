@@ -363,6 +363,7 @@ new_local_repository(
     name = "macos_opengl_es",
     build_file = "@//third_party:opengl_es_macos.BUILD",
     path = "third_party/opengl_es",
+    # path = "/usr/local",
 )
 
 new_local_repository(
