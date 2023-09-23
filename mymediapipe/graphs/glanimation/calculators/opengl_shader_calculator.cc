@@ -1,117 +1,119 @@
 #include "mediapipe/framework/port/ret_check.h"
 #include "mediapipe/framework/port/status.h"
-#include "mediapipe/gpu/gl_simple_calculator.h"
 #include "mediapipe/gpu/gl_simple_shaders.h"
 #include "mediapipe/gpu/shader_util.h"
+#include "gl_base_calculator.h"
 
 namespace mediapipe {
 
-enum { ATTRIB_VERTEX, ATTRIB_TEXTURE_POSITION, NUM_ATTRIBUTES };
+enum { ATTRIB_VERTEX, NUM_ATTRIBUTES };
 
-class OpenGlShaderCalculator : public CalculatorBase {
+class OpenGlShaderCalculator : public GlBaseCalculator {
 public:
-    OpenGlShaderCalculator() : initialized_(false) {}
-    OpenGlShaderCalculator(const OpenGlShaderCalculator&) = delete;
-    OpenGlShaderCalculator& operator=(const OpenGlShaderCalculator&) = delete;
-    ~OpenGlShaderCalculator() override = default;
-
-    static absl::Status GetContract(CalculatorContract* cc);
-    absl::Status Open(CalculatorContext* cc) override;
-    absl::Status Process(CalculatorContext* cc) override;
-    absl::Status Close(CalculatorContext* cc) override;
-
-    absl::Status GlSetup();
-    absl::Status GlBind();
-    absl::Status GlRender(const GlTexture& src, const GlTexture& dst, double timestamp);
-    absl::Status GlRenderDrawArrays(GLint& positionLocation);
-    absl::Status GlRenderDrawElements(GLint& positionLocation);
-    absl::Status GlTeardown();
-
-    GpuBufferFormat GetOutputFormat() { return GpuBufferFormat::kBGRA32; }
-
-protected:
-    // Forward invocations of RunInGlContext to the helper.
-    // The decltype part just says that this method returns whatever type the
-    // helper method invocation returns. In C++14 we could remove it and use
-    // return type deduction, i.e.:
-    //   template <typename F> auto RunInGlContext(F&& f) { ... }
-    template <typename F>
-    auto RunInGlContext(F&& f)
-        -> decltype(std::declval<GlCalculatorHelper>().RunInGlContext(f)) {
-    return helper_.RunInGlContext(std::forward<F>(f));
-    }
-
-    GlCalculatorHelper helper_;
-    bool initialized_;
-
+    absl::Status GlSetup() override;
+    absl::Status GlBind() override;
+    absl::Status GlRender(const GlTexture& src, const GlTexture& dst, double timestamp) override;
+    absl::Status GlCleanup() override;
+    absl::Status GlTeardown() override;
 private:
     GLuint program_ = 0;
     GLint texture_;
-
+    GLuint VBO, VAO, EBO;
 };
 
 REGISTER_CALCULATOR(OpenGlShaderCalculator);
 
-// static
-absl::Status OpenGlShaderCalculator::GetContract(CalculatorContract* cc) {
-  TagOrIndex(&cc->Inputs(), "VIDEO", 0).Set<GpuBuffer>();
-  TagOrIndex(&cc->Outputs(), "VIDEO", 0).Set<GpuBuffer>();
-  // Currently we pass GL context information and other stuff as external
-  // inputs, which are handled by the helper.
-  return GlCalculatorHelper::UpdateContract(cc);
-}
-
-absl::Status OpenGlShaderCalculator::Open(CalculatorContext* cc) {
-  // Inform the framework that we always output at the same timestamp
-  // as we receive a packet at.
-  cc->SetOffset(mediapipe::TimestampDiff(0));
-
-  // Let the helper access the GL context information.
-  return helper_.Open(cc);
-}
-
-absl::Status OpenGlShaderCalculator::Process(CalculatorContext* cc) {
-  return RunInGlContext([this, cc]() -> absl::Status {
-    const auto& input = TagOrIndex(cc->Inputs(), "VIDEO", 0).Get<GpuBuffer>();
-    if (!initialized_) {
-        MP_RETURN_IF_ERROR(GlSetup());
-        initialized_ = true;
-    }
-
-    auto src = helper_.CreateSourceTexture(input);
-    auto dst = helper_.CreateDestinationTexture(src.width(), src.height(),
-                                                GetOutputFormat());
-
-    MP_RETURN_IF_ERROR(GlBind());
-    // Run core program.
-    MP_RETURN_IF_ERROR(GlRender(src, dst, cc->InputTimestamp().Seconds()));
-
-    auto output = dst.GetFrame<GpuBuffer>();
-
-    src.Release();
-    dst.Release();
-
-    TagOrIndex(&cc->Outputs(), "VIDEO", 0)
-        .Add(output.release(), cc->InputTimestamp());
-
-    return absl::OkStatus();
-  });
-}
-
-absl::Status OpenGlShaderCalculator::Close(CalculatorContext* cc) {
-  return RunInGlContext([this]() -> absl::Status { return GlTeardown(); });
-}
-
 absl::Status OpenGlShaderCalculator::GlSetup() {
+    // Load vertex and fragment shaders
+    const GLint attr_location[NUM_ATTRIBUTES] = {
+        ATTRIB_VERTEX,
+    };
+
+    const GLchar* attr_name[NUM_ATTRIBUTES] = {
+        "position",
+    };
+
+    const GLchar* vert_src = R"(
+        attribute vec4 position;
+
+        void main()
+        {
+            gl_Position = position;
+        }
+    )";
+
+    const GLchar* frag_src = R"(
+        precision mediump float;
+
+        void main()
+        {
+            gl_FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+        } 
+    )";
+
+    // shader program
+    GlhCreateProgram(vert_src, frag_src, NUM_ATTRIBUTES,
+                    (const GLchar**)&attr_name[0], attr_location, &program_);
+    RET_CHECK(program_) << "Problem initializing the program.";
+
     return absl::OkStatus();
 }
 
 absl::Status OpenGlShaderCalculator::GlBind() {
+
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f
+    };
+    glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // GLint position_ = glGetAttribLocation(program_, "position");
+    glEnableVertexAttribArray(ATTRIB_VERTEX);
+    glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // glEnableVertexAttribArray(0);
+
+    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+
+    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+    glBindVertexArray(0); 
+
     return absl::OkStatus();
 }
 
 absl::Status OpenGlShaderCalculator::GlRender(const GlTexture& src, const GlTexture& dst, 
                                           double timestamp) {
+    
+    // draw our first triangle
+    glUseProgram(program_);
+    glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glBindVertexArray(0); // no need to unbind it every time 
+
+    return absl::OkStatus();    
+}
+
+absl::Status OpenGlShaderCalculator::GlCleanup() {
+    // cleanup
+    glDisableVertexAttribArray(ATTRIB_VERTEX);
+    // glDisableVertexAttribArray(ATTRIB_TEXTURE_POSITION);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+
+    glUseProgram(0);
+    glFlush();
+
     return absl::OkStatus();    
 }
 

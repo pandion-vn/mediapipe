@@ -82,6 +82,8 @@ GL_BASE_LINK_OPTS = select({
     "//mediapipe:macos": [
         "-framework OpenGL",
         "-framework CoreVideo",
+        "-lGLESv2",
+        "-lEGL",
     ],
 })
 
