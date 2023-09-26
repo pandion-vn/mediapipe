@@ -54,6 +54,10 @@ cc_library(
     deps = [
         "//mediapipe/calculators/core:flow_limiter_calculator",
         "//mediapipe/calculators/image:image_cropping_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_02_dot_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_03_triangle_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_05_triangle_uniform_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_06_triangle_transformation_calculator",
         "//mymediapipe/graphs/glanimation/calculators:opengl_shader_calculator",
     ],
 )

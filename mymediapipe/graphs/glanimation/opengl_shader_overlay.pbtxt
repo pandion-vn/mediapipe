@@ -4,13 +4,31 @@ input_side_packet: "asset_3d"
 output_stream: "output_video"
 
 # node: {
-#     calculator: "TriangleShaderCalculator"
+#     calculator: "Gl02DotCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl03TriangleCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl05TriangleUniformCalculator"
 #     input_stream: "VIDEO:input_video"
 #     output_stream: "output_video"
 # }
 
 node: {
-    calculator: "OpenGlShaderCalculator"
+    calculator: "Gl06TriangleTransformationCalculator"
     input_stream: "VIDEO:input_video"
     output_stream: "output_video"
 }
+
+# node: {
+#     calculator: "OpenGlShaderCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }

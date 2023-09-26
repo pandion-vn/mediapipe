@@ -35,6 +35,62 @@ cc_library(
 )
 
 cc_library(
+    name = "gl_02_dot_calculator",
+    srcs = ["gl_02_dot_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_03_triangle_calculator",
+    srcs = ["gl_03_triangle_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_05_triangle_uniform_calculator",
+    srcs = ["gl_05_triangle_uniform_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_06_triangle_transformation_calculator",
+    srcs = ["gl_06_triangle_transformation_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
     name = "gl_shader_calculator",
     srcs = ["gl_shader_calculator.cc"],
     deps = [
