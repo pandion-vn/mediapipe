@@ -21,8 +21,20 @@ output_stream: "output_video"
 #     output_stream: "output_video"
 # }
 
+# node: {
+#     calculator: "Gl06TriangleTransformationCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl09TriangleInterpolationCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
 node: {
-    calculator: "Gl06TriangleTransformationCalculator"
+    calculator: "Gl10TriangleTextureCalculator"
     input_stream: "VIDEO:input_video"
     output_stream: "output_video"
 }

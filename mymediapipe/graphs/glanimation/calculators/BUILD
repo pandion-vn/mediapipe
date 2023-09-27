@@ -19,6 +19,13 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "stb_image",
+    srcs = ["lib/stb_image.h"],
+    hdrs = ["lib/stb_image.h"],
+    visibility = ["//visibility:public"],
+    deps = [],
+)
 
 cc_library(
     name = "opengl_shader_calculator",
@@ -86,6 +93,35 @@ cc_library(
         "//mediapipe/gpu:shader_util",
         "//third_party:opengl_glm",
         ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_09_triangle_interpolation_calculator",
+    srcs = ["gl_09_triangle_interpolation_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_10_triangle_texture_calculator",
+    srcs = ["gl_10_triangle_texture_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":stb_image",
     ],
     alwayslink = 1,
 )

@@ -58,6 +58,8 @@ cc_library(
         "//mymediapipe/graphs/glanimation/calculators:gl_03_triangle_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_05_triangle_uniform_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_06_triangle_transformation_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_09_triangle_interpolation_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_10_triangle_texture_calculator",
         "//mymediapipe/graphs/glanimation/calculators:opengl_shader_calculator",
     ],
 )

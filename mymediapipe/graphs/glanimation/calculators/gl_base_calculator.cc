@@ -50,8 +50,8 @@ absl::Status GlBaseCalculator::Process(CalculatorContext* cc) {
                                                 GetOutputFormat());
 
     helper_.BindFramebuffer(dst);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(src.target(), src.name());
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(src.target(), src.name());
 
     MP_RETURN_IF_ERROR(GlBind());
     // Run core program.
