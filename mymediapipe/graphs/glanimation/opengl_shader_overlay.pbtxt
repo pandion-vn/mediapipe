@@ -33,8 +33,38 @@ output_stream: "output_video"
 #     output_stream: "output_video"
 # }
 
+# node: {
+#     calculator: "Gl10TriangleTextureCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl11CoordinateSystemCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl12CameraViewCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl14LightingMaterialCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
+# node: {
+#     calculator: "Gl15LightingMapsCalculator"
+#     input_stream: "VIDEO:input_video"
+#     output_stream: "output_video"
+# }
+
 node: {
-    calculator: "Gl10TriangleTextureCalculator"
+    calculator: "Gl16ModelLoadingCalculator"
     input_stream: "VIDEO:input_video"
     output_stream: "output_video"
 }

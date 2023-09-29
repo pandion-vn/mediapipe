@@ -20,11 +20,30 @@ cc_library(
 )
 
 cc_library(
-    name = "stb_image",
-    srcs = ["lib/stb_image.h"],
-    hdrs = ["lib/stb_image.h"],
+    name = "gl_base_lib",
+    srcs = [
+        "lib/stb_image.h",
+        "lib/shader.h",
+        "lib/camera.h",
+        "lib/mesh.h",
+        "lib/model.h",
+        "lib/util.cc",
+        "lib/tiny_obj_loader.cc",
+    ],
+    hdrs = [
+        "lib/stb_image.h",
+        "lib/shader.h",
+        "lib/camera.h",
+        "lib/mesh.h",
+        "lib/model.h",
+        "lib/rapidobj.hpp",
+        "lib/tiny_obj_loader.h",
+        "lib/util.h",
+    ],
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = [
+        "//mediapipe/gpu:shader_util",
+    ],
 )
 
 cc_library(
@@ -121,7 +140,82 @@ cc_library(
         "//mediapipe/gpu:shader_util",
         "//third_party:opengl_glm",
         ":gl_base_calculator",
-        ":stb_image",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_11_coordinate_system_calculator",
+    srcs = ["gl_11_coordinate_system_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_12_camera_view_calculator",
+    srcs = ["gl_12_camera_view_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_14_lighting_material_calculator",
+    srcs = ["gl_14_lighting_material_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_15_lighting_maps_calculator",
+    srcs = ["gl_15_lighting_maps_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_16_model_loading_calculator",
+    srcs = ["gl_16_model_loading_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
     ],
     alwayslink = 1,
 )

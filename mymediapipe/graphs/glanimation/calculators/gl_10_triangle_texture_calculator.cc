@@ -7,7 +7,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include "lib/stb_image.h"
 
 
@@ -174,10 +176,10 @@ absl::Status Gl10TriangleTextureCalculator::GlBind() {
 
     GLfloat texture_coords[] = {
         // texture coords square
-        1.0f, 1.0f,     // top right
-        1.0f, 0.0f,     // bottom right
+        2.0f, 2.0f,     // top right
+        2.0f, 0.0f,     // bottom right
         0.0f, 0.0f,     // bottom left
-        0.0f, 1.0f,     // top left
+        0.0f, 2.0f,     // top left
         // 1.0f, 0.0f, // lower-right corner
         // 0.0f, 0.0f, // lower-left corner
         // 0.5f, 1.0f, // top-center corner

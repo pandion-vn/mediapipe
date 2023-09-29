@@ -60,6 +60,11 @@ cc_library(
         "//mymediapipe/graphs/glanimation/calculators:gl_06_triangle_transformation_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_09_triangle_interpolation_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_10_triangle_texture_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_11_coordinate_system_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_12_camera_view_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_14_lighting_material_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_15_lighting_maps_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_16_model_loading_calculator",
         "//mymediapipe/graphs/glanimation/calculators:opengl_shader_calculator",
     ],
 )
