@@ -12,7 +12,7 @@
 
 namespace mediapipe {
 
-enum { ATTRIB_VERTEX, ATTRIB_COLOR, ATTRIB_TEXTURE_COORDS, NUM_ATTRIBUTES };
+enum { ATTRIB_VERTEX, ATTRIB_TEXTURE_COORDS, NUM_ATTRIBUTES };
 enum { M_TEXTURE0, M_TEXTURE1, M_TEXTURE2, M_TEXTURE3, NUM_TEXTURES};
 
 // https://learnopengl.com/Getting-started/Camera
@@ -27,7 +27,7 @@ private:
     GLuint program_ = 0;
     GLint texture0_, texture1_, texture2_;
     GLint model_, view_, projection_;
-    GLuint VBO[3], VAO, EBO, TextureBO[2];
+    GLuint VBO[2], VAO, EBO, TextureBO[2];
 };
 
 REGISTER_CALCULATOR(Gl12CameraViewCalculator);
@@ -37,19 +37,19 @@ absl::Status Gl12CameraViewCalculator::GlSetup() {
     // Load vertex and fragment shaders
     const GLint attr_location[NUM_ATTRIBUTES] = {
         ATTRIB_VERTEX,
-        ATTRIB_COLOR,
+        // ATTRIB_COLOR,
         ATTRIB_TEXTURE_COORDS,
     };
 
     const GLchar* attr_name[NUM_ATTRIBUTES] = {
         "position",
-        "color",
+        // "color",
         "tex_coord",
     };
 
     const GLchar* vert_src = R"(
         attribute vec3 position;
-        attribute vec3 color;
+        // attribute vec3 color;
         attribute vec2 tex_coord;
 
         // uniform float gScale;
@@ -58,33 +58,34 @@ absl::Status Gl12CameraViewCalculator::GlSetup() {
         uniform mat4 view;
         uniform mat4 projection;
 
-        varying vec3 ourColor;
+        // varying vec3 ourColor;
         varying vec2 ourTexCoord;
 
         void main()
         {
             gl_Position = projection * view * model * vec4(position, 1.0);
-            ourColor = color;
+            // ourColor = color;
             ourTexCoord = tex_coord;
         }
     )";
 
     const GLchar* frag_src = R"(
         precision mediump float;
-        varying vec3 ourColor;
+        // varying vec3 ourColor;
         varying vec2 ourTexCoord;
         uniform sampler2D texture0;
-        uniform sampler2D texture1;
-        uniform sampler2D texture2;
+        // uniform sampler2D texture1;
+        // uniform sampler2D texture2;
 
         void main()
         {
             // gl_FragColor = vec4(1.0, 0.5, 0.2, 1.0);
             // gl_FragColor = vec4(ourColor, 1.0);
-            // gl_FragColor = texture2D(ourTexture, ourTexCoord) * vec4(ourColor, 1.0);
-            vec4 color = mix(texture2D(texture0, ourTexCoord), texture2D(texture1, ourTexCoord), 0.4);
-            vec4 color1 = mix(color, texture2D(texture2, ourTexCoord), 0.2);
-            gl_FragColor = color1;
+            gl_FragColor = mix(texture2D(texture0, ourTexCoord), vec4(1.0), 0.5);
+            // gl_FragColor = texture2D(texture0, ourTexCoord) * vec4(ourColor, 1.0);
+            // vec4 color = mix(texture2D(texture0, ourTexCoord), texture2D(texture1, ourTexCoord), 0.4);
+            // vec4 color1 = mix(color, texture2D(texture2, ourTexCoord), 0.2);
+            // gl_FragColor = color1;
         } 
     )";
 
@@ -104,10 +105,10 @@ absl::Status Gl12CameraViewCalculator::GlSetup() {
 
     texture0_ = glGetUniformLocation(program_, "texture0");
     RET_CHECK_NE(texture0_, -1) << "Failed to find `texture` uniform!";
-    texture1_ = glGetUniformLocation(program_, "texture1");
-    RET_CHECK_NE(texture1_, -1) << "Failed to find `texture` uniform!";
-    texture2_ = glGetUniformLocation(program_, "texture2");
-    RET_CHECK_NE(texture2_, -1) << "Failed to find `texture` uniform!";
+    // texture1_ = glGetUniformLocation(program_, "texture1");
+    // RET_CHECK_NE(texture1_, -1) << "Failed to find `texture` uniform!";
+    // texture2_ = glGetUniformLocation(program_, "texture2");
+    // RET_CHECK_NE(texture2_, -1) << "Failed to find `texture` uniform!";
 
     // generate texture
     glGenTextures(2, TextureBO);
@@ -157,133 +158,60 @@ absl::Status Gl12CameraViewCalculator::GlSetup() {
 
     // configure global opengl state
     // -----------------------------
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
     std::cout << "DONE setup" << std::endl;
     return absl::OkStatus();
 }
 
 absl::Status Gl12CameraViewCalculator::GlBind() {
-
-    // glm::mat4 transform = glm::mat4(1.0);
-    // transform = glm::translate(transform, glm::vec3(0.3, -0.3, 0.0));
-
     // Initial potition of dot
     GLfloat vertices[] = {
-        // positions      
-        //  0.5f,  0.5f, 0.0f,  // top right
-        //  0.5f, -0.5f, 0.0f,  // bottom right
-        // -0.5f, -0.5f, 0.0f,  // bottom left
-        // -0.5f,  0.5f, 0.0f,  // top left
-
         // cube positions
-        -0.5f, -0.5f, -0.5f, 
-        0.5f, -0.5f, -0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+        -0.5f,  0.5f, -0.5f,  
+        -0.5f, -0.5f, -0.5f,  
 
-        -0.5f, -0.5f,  0.5f, 
-        0.5f, -0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f,  
+        -0.5f, -0.5f,  0.5f,  
 
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f, -0.5f,  
+        -0.5f, -0.5f, -0.5f,  
+        -0.5f, -0.5f, -0.5f,  
+        -0.5f, -0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f,  
 
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
 
-        -0.5f, -0.5f, -0.5f, 
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f, -0.5f,  0.5f,  
+        -0.5f, -0.5f,  0.5f,  
+        -0.5f, -0.5f, -0.5f,  
 
-        -0.5f,  0.5f, -0.5f, 
-        0.5f,  0.5f, -0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
-    };
-
-    GLfloat colors[] = {
-        // colors
-        // 1.0f, 0.0f, 0.0f, // top right
-        // 0.0f, 1.0f, 0.0f, // bottom right
-        // 0.0f, 0.0f, 1.0f, // bottom left
-        // 1.0f, 1.0f, 0.0f, // top left
-
-        // cube colors
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
-
-        1.0f, 0.0f, 0.0f, // top right
-        0.0f, 1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, 0.0f, // top left
+        -0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f, -0.5f,  
     };
 
     GLfloat texture_coords[] = {
-        // texture coords square
-        // 1.0f, 1.0f,     // top right
-        // 1.0f, 0.0f,     // bottom right
-        // 0.0f, 0.0f,     // bottom left
-        // 0.0f, 1.0f,     // top left
-        // 1.0f, 0.0f, // lower-right corner
-        // 0.0f, 0.0f, // lower-left corner
-        // 0.5f, 1.0f, // top-center corner
-
         // cube coords
         0.0f, 0.0f,
         1.0f, 0.0f,
@@ -323,17 +251,22 @@ absl::Status Gl12CameraViewCalculator::GlBind() {
         0.0f, 1.0f
     };
 
-    GLuint indices[] = {
-        0, 1, 3,        // first triangle
-        1, 2, 3,        // second triangle
-    };
     glUseProgram(program_);
+
+    // Disable backface culling to allow occlusion effects.
+    // Some options for solid arbitrary 3D geometry rendering
+    GLCHECK(glEnable(GL_BLEND));
+    GLCHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GLCHECK(glEnable(GL_DEPTH_TEST));
+    GLCHECK(glFrontFace(GL_CW));
+    GLCHECK(glDepthMask(GL_TRUE));
+    GLCHECK(glDepthFunc(GL_LESS));
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
     // Generate Vertext Buffer Object for vertex
-    glGenBuffers(3, VBO);
+    glGenBuffers(2, VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
     // Bind data
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -342,28 +275,28 @@ absl::Status Gl12CameraViewCalculator::GlBind() {
     glEnableVertexAttribArray(ATTRIB_VERTEX);
 
     // Generate indices bufer object for element array
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    // glGenBuffers(1, &EBO);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Generate Vertext Buffer Object for color
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
     // color attribute
-    glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(ATTRIB_COLOR);
+    // glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), nullptr);
+    // glEnableVertexAttribArray(ATTRIB_COLOR);
 
     // Generate Vertex Buffer Object for texture coords
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coords), texture_coords, GL_STATIC_DRAW);
     // texture coord attribute
     glVertexAttribPointer(ATTRIB_TEXTURE_COORDS, 2, GL_FLOAT, GL_FALSE, 0 * sizeof(float), nullptr);
     glEnableVertexAttribArray(ATTRIB_TEXTURE_COORDS);
 
     glUniform1i(texture0_, M_TEXTURE0);
-    glUniform1i(texture1_, M_TEXTURE1);
-    glUniform1i(texture2_, M_TEXTURE2);
+    // glUniform1i(texture1_, M_TEXTURE1);
+    // glUniform1i(texture2_, M_TEXTURE2);
 
     return absl::OkStatus();
 }
@@ -396,14 +329,14 @@ absl::Status Gl12CameraViewCalculator::GlRender(const GlTexture& src, const GlTe
     glUniformMatrix4fv(projection_, 1, GL_FALSE, glm::value_ptr(projection));
 
     // drawring 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, TextureBO[0]);
-    glBindTexture(src.target(), src.name());
+    // glBindTexture(src.target(), src.name());
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, TextureBO[0]);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, TextureBO[0]);
 
-    glActiveTexture(GL_TEXTURE2);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, TextureBO[1]);
     // glBindTexture(src.target(), src.name());
 
@@ -443,11 +376,11 @@ absl::Status Gl12CameraViewCalculator::GlRender(const GlTexture& src, const GlTe
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, 0);
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // glActiveTexture(GL_TEXTURE2);
+    // glBindTexture(GL_TEXTURE_2D, 0);
 
 
     return absl::OkStatus();    
@@ -456,7 +389,7 @@ absl::Status Gl12CameraViewCalculator::GlRender(const GlTexture& src, const GlTe
 absl::Status Gl12CameraViewCalculator::GlCleanup() {
     // cleanup
     glDisableVertexAttribArray(ATTRIB_VERTEX);
-    glDisableVertexAttribArray(ATTRIB_COLOR);
+    // glDisableVertexAttribArray(ATTRIB_COLOR);
     glDisableVertexAttribArray(ATTRIB_TEXTURE_COORDS);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(3, VBO);

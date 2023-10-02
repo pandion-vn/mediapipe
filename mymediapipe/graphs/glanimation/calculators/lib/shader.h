@@ -6,7 +6,7 @@
 class Shader
 {
 public:
-    GLuint ID;
+    GLuint ID = 0;
     Shader(const GLchar* vert_src, const GLchar* frag_src) {
         mediapipe::GlhCreateProgram(vert_src, frag_src, 0, nullptr, nullptr, &ID);
         // RET_CHECK(ID) << " Problem initializing the program.";
@@ -17,9 +17,10 @@ public:
         glUseProgram(ID); 
     }
 
-    void tearDown() const {
+    void tearDown() {
         if (ID) {
             glDeleteProgram(ID);
+            ID = 0;
         }
     }
 

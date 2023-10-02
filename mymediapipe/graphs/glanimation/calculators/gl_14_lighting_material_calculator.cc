@@ -380,7 +380,7 @@ absl::Status Gl14LightingMaterialCalculator::GlBind() {
     // Bind data
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     // vertex position attribute
-    glVertexAttribPointer(LIGHTING_ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(LIGHTING_ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(LIGHTING_ATTRIB_VERTEX);
 
     // Generate Vertext Buffer Object for normals
@@ -388,13 +388,13 @@ absl::Status Gl14LightingMaterialCalculator::GlBind() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
 
     // normal attribute
-    glVertexAttribPointer(LIGHTING_ATTRIB_NORMAL, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(LIGHTING_ATTRIB_NORMAL, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(LIGHTING_ATTRIB_NORMAL);
 
     glGenVertexArrays(1, &lightCubeVAO);
     glBindVertexArray(lightCubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-    glVertexAttribPointer(CUBE_ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(CUBE_ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(CUBE_ATTRIB_VERTEX);
     // glUniform1i(texture0_, M_TEXTURE0);
     // glUniform1i(texture1_, M_TEXTURE1);
@@ -413,7 +413,7 @@ absl::Status Gl14LightingMaterialCalculator::GlRender(const GlTexture& src, cons
     glViewport(0, 0, src_width, src_height);
 
     // camera
-    Camera camera(glm::vec3(1.0f, -1.0f, 10.0f));
+    Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 
     lightingShader->use();
 
@@ -424,10 +424,10 @@ absl::Status Gl14LightingMaterialCalculator::GlRender(const GlTexture& src, cons
     lightingShader->setVec3("viewPos", camera.Position);
 
     // light properties
-    glm::vec3 lightColor;
-    lightColor.x = static_cast<float>(sin(timestamp * 2.0));
-    lightColor.y = static_cast<float>(sin(timestamp * 0.7));
-    lightColor.z = static_cast<float>(sin(timestamp * 1.3));
+    glm::vec3 lightColor(1.0f);
+    // lightColor.x = static_cast<float>(sin(timestamp * 2.0));
+    // lightColor.y = static_cast<float>(sin(timestamp * 0.7));
+    // lightColor.z = static_cast<float>(sin(timestamp * 1.3));
     glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); // decrease the influence
     glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
     lightingShader->setVec3("light.ambient", ambientColor);
@@ -447,6 +447,8 @@ absl::Status Gl14LightingMaterialCalculator::GlRender(const GlTexture& src, cons
 
     // world transformation
     glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    model = glm::rotate(model, (float) timestamp * glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 1.0f));
     lightingShader->setMat4("model", model);
 
     // drawring 

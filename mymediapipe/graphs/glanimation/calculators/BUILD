@@ -6,19 +6,6 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 ### General calculator superclasses
-
-cc_library(
-    name = "gl_base_calculator",
-    srcs = ["gl_base_calculator.cc"],
-    hdrs = ["gl_base_calculator.h"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//mediapipe/gpu:gl_calculator_helper",
-        "//mediapipe/framework:calculator_framework",
-        "//mediapipe/framework/port:status",
-    ],
-)
-
 cc_library(
     name = "gl_base_lib",
     srcs = [
@@ -27,6 +14,7 @@ cc_library(
         "lib/camera.h",
         "lib/mesh.h",
         "lib/model.h",
+        "lib/framebuffer_target.h",
         "lib/util.cc",
         # "lib/tiny_obj_loader.cc",
     ],
@@ -36,6 +24,7 @@ cc_library(
         "lib/camera.h",
         "lib/mesh.h",
         "lib/model.h",
+        "lib/framebuffer_target.h",
         # "lib/rapidobj.hpp",
         # "lib/tiny_obj_loader.h",
         "lib/util.h",
@@ -43,6 +32,20 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//mediapipe/gpu:shader_util",
+    ],
+)
+
+cc_library(
+    name = "gl_base_calculator",
+    srcs = ["gl_base_calculator.cc"],
+    hdrs = ["gl_base_calculator.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mediapipe/gpu:gl_calculator_helper",
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework:calculator_framework",
+        "//mediapipe/framework/port:status",
+        ":gl_base_lib",
     ],
 )
 

@@ -5,72 +5,72 @@ output_stream: "output_video"
 
 # node: {
 #     calculator: "Gl02DotCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl03TriangleCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl05TriangleUniformCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl06TriangleTransformationCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl09TriangleInterpolationCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl10TriangleTextureCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl11CoordinateSystemCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl12CameraViewCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl14LightingMaterialCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 # node: {
 #     calculator: "Gl15LightingMapsCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }
 
 node: {
     calculator: "Gl16ModelLoadingCalculator"
-    input_stream: "VIDEO:input_video"
-    output_stream: "output_video"
+    input_stream: "IMAGE_GPU:input_video"
+    output_stream: "IMAGE_GPU:output_video"
 }
 
 # node: {
 #     calculator: "OpenGlShaderCalculator"
-#     input_stream: "VIDEO:input_video"
-#     output_stream: "output_video"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
 # }

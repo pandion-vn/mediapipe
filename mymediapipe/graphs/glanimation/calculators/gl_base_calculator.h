@@ -12,16 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MEDIAPIPE_GPU_GL_SIMPLE_CALCULATOR_H_
-#define MEDIAPIPE_GPU_GL_SIMPLE_CALCULATOR_H_
+#ifndef MEDIAPIPE_GL_BASE_CALCULATOR_H_
+#define MEDIAPIPE_GL_BASE_CALCULATOR_H_
 
 #include <utility>  // for declval
 
 #include "mediapipe/framework/calculator_framework.h"
+#include "mediapipe/framework/port/ret_check.h"
 #include "mediapipe/framework/port/status.h"
+#include "mediapipe/framework/port/status_macros.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
+#include "lib/framebuffer_target.h"
 
 namespace mediapipe {
+
+#if defined(GL_DEBUG)
+#define GLCHECK(command) \
+  command;               \
+  if (int err = glGetError()) LOG(ERROR) << "GL error detected: " << err;
+#else
+#define GLCHECK(command) command
+#endif
 
 // This class saves some boilerplate for the common case of processing one
 // input stream of frames and outputting it as one output stream of frames,
@@ -45,13 +56,12 @@ namespace mediapipe {
 // If your calculator shares a context with other calculators, GlBind() will be
 // called before each GlRender(); if it has its own context, it will be called
 // only once.
-
 class GlBaseCalculator : public CalculatorBase {
 public:
     GlBaseCalculator() : initialized_(false) {}
     GlBaseCalculator(const GlBaseCalculator&) = delete;
     GlBaseCalculator& operator=(const GlBaseCalculator&) = delete;
-    ~GlBaseCalculator() override = default;
+    ~GlBaseCalculator();
 
     static absl::Status GetContract(CalculatorContract* cc);
     absl::Status Open(CalculatorContext* cc) override;
@@ -100,13 +110,14 @@ protected:
     template <typename F>
     auto RunInGlContext(F&& f)
         -> decltype(std::declval<GlCalculatorHelper>().RunInGlContext(f)) {
-        return helper_.RunInGlContext(std::forward<F>(f));
+        return gpu_helper_.RunInGlContext(std::forward<F>(f));
     }
+    std::unique_ptr<FrameBufferTarget> framebuffer_target_;
 
-    GlCalculatorHelper helper_;
+    GlCalculatorHelper gpu_helper_;
     bool initialized_;
 };
 
 }  // namespace mediapipe
 
-#endif  // MEDIAPIPE_GPU_GL_SIMPLE_CALCULATOR_H_
+#endif  // MEDIAPIPE_GL_BASE_CALCULATOR_H_

@@ -16,10 +16,25 @@
 
 namespace mediapipe {
 
+static constexpr char kImageGpuTag[] = "IMAGE_GPU";
+
+// A calculator that renders a visual effect for multiple faces.
+//
+// Inputs:
+//   IMAGE_GPU (`GpuBuffer`, required):
+//     A buffer containing input image.
+// Output:
+//   IMAGE_GPU (`GpuBuffer`, required):
+//     A buffer with a visual effect being rendered for multiple faces.
+
+
 // static
 absl::Status GlBaseCalculator::GetContract(CalculatorContract* cc) {
-    TagOrIndex(&cc->Inputs(), "VIDEO", 0).Set<GpuBuffer>();
-    TagOrIndex(&cc->Outputs(), "VIDEO", 0).Set<GpuBuffer>();
+    MP_RETURN_IF_ERROR(GlCalculatorHelper::UpdateContract(cc))
+        << "Failed to update contract for the GPU helper!";
+
+    cc->Inputs().Tag(kImageGpuTag).Set<GpuBuffer>();
+    cc->Outputs().Tag(kImageGpuTag).Set<GpuBuffer>();
     // Currently we pass GL context information and other stuff as external
     // inputs, which are handled by the helper.
     return GlCalculatorHelper::UpdateContract(cc);
@@ -31,52 +46,72 @@ absl::Status GlBaseCalculator::Open(CalculatorContext* cc) {
     cc->SetOffset(mediapipe::TimestampDiff(0));
 
     // Let the helper access the GL context information.
-    return helper_.Open(cc);
+    MP_RETURN_IF_ERROR(gpu_helper_.Open(cc)) 
+        << "Failed to open the GPU helper!";
+    return RunInGlContext([this, cc]() -> absl::Status {
+        ASSIGN_OR_RETURN(framebuffer_target_, FrameBufferTarget::Create(),
+                         _ << "Failed to create a framebuffer target!");
+        return absl::OkStatus();
+    });
 }
 
 absl::Status GlBaseCalculator::Process(CalculatorContext* cc) {
-  return RunInGlContext([this, cc]() -> absl::Status {
-    const auto& input = TagOrIndex(cc->Inputs(), "VIDEO", 0).Get<GpuBuffer>();
-    if (!initialized_) {
-        MP_RETURN_IF_ERROR(GlSetup());
-        initialized_ = true;
+    // The `IMAGE_GPU` stream is required to have a non-empty packet. In case
+    // this requirement is not met, there's nothing to be processed at the
+    // current timestamp.
+    if (cc->Inputs().Tag(kImageGpuTag).IsEmpty()) {
+        return absl::OkStatus();
     }
 
-    auto src = helper_.CreateSourceTexture(input);
-    int dst_width;
-    int dst_height;
-    GetOutputDimensions(src.width(), src.height(), &dst_width, &dst_height);
-    auto dst = helper_.CreateDestinationTexture(dst_width, dst_height,
-                                                GetOutputFormat());
+    return RunInGlContext([this, cc]() -> absl::Status {
+        const auto& input_gpu_buffer = cc->Inputs().Tag(kImageGpuTag).Get<GpuBuffer>();
+        if (!initialized_) {
+            MP_RETURN_IF_ERROR(GlSetup());
+            initialized_ = true;
+        }
 
-    helper_.BindFramebuffer(dst);
-    // glActiveTexture(GL_TEXTURE1);
-    // glBindTexture(src.target(), src.name());
+        GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);
+        int dst_width = input_gl_texture.width();
+        int dst_height = input_gl_texture.height();
+        GlTexture output_gl_texture = gpu_helper_.CreateDestinationTexture(dst_width, dst_height);
 
-    MP_RETURN_IF_ERROR(GlBind());
-    // Run core program.
-    MP_RETURN_IF_ERROR(GlRender(src, dst, cc->InputTimestamp().Seconds()));
+        // Set the destination texture as the color buffer. Then, clear both the
+        // color and the depth buffers for the render target.
+        framebuffer_target_->SetColorbuffer(dst_width, dst_height, output_gl_texture.target(), output_gl_texture.name());
+        framebuffer_target_->Clear();
 
-    MP_RETURN_IF_ERROR(GlCleanup());
+        MP_RETURN_IF_ERROR(GlBind());
+        // Run core program.
+        MP_RETURN_IF_ERROR(GlRender(input_gl_texture, 
+                                    output_gl_texture, 
+                                    cc->InputTimestamp().Seconds()));
 
-    // glBindTexture(src.target(), 0);
+        MP_RETURN_IF_ERROR(GlCleanup());
+        
+        std::unique_ptr<GpuBuffer> output_gpu_buffer = output_gl_texture.GetFrame<GpuBuffer>();
 
-    glFlush();
+        cc->Outputs()
+            .Tag(kImageGpuTag)
+            .AddPacket(mediapipe::Adopt<GpuBuffer>(output_gpu_buffer.release())
+                            .At(cc->InputTimestamp()));
 
-    auto output = dst.GetFrame<GpuBuffer>();
+        output_gl_texture.Release();
+        input_gl_texture.Release();
 
-    src.Release();
-    dst.Release();
-
-    TagOrIndex(&cc->Outputs(), "VIDEO", 0)
-        .Add(output.release(), cc->InputTimestamp());
-
-    return absl::OkStatus();
-  });
+        return absl::OkStatus();
+    });
 }
 
 absl::Status GlBaseCalculator::Close(CalculatorContext* cc) {
-    return RunInGlContext([this]() -> absl::Status { return GlTeardown(); });
+    return RunInGlContext([this]() -> absl::Status { 
+        return GlTeardown(); 
+    });
+}
+
+GlBaseCalculator::~GlBaseCalculator() {
+  RunInGlContext([this] {
+    framebuffer_target_.reset();
+  });
 }
 
 }  // namespace mediapipe

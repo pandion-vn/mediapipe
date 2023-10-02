@@ -414,7 +414,7 @@ absl::Status Gl11CoordinateSystemCalculator::GlRender(const GlTexture& src, cons
         glm::vec3(-1.3f,  1.0f, -1.5f)  
     };
     glBindVertexArray(VAO);
-    for(unsigned int i = 0; i < 10; i++)
+    for(unsigned int i = 0; i < 11; i++)
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions[i]);
@@ -423,8 +423,8 @@ absl::Status Gl11CoordinateSystemCalculator::GlRender(const GlTexture& src, cons
             angle = timestamp * 25.0f;
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         glUniformMatrix4fv(model_, 1, GL_FALSE, glm::value_ptr(model));
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // std::cout << "glDrawArrays texture" << std::endl;

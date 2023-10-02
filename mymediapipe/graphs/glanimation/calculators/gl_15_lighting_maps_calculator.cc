@@ -146,10 +146,7 @@ absl::Status Gl15LightingMapsCalculator::GlSetup() {
 
     diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/container2.png");
 
-    // configure global opengl state
-    glEnable(GL_DEPTH_TEST);
-
-    std::cout << "DONE setup" << std::endl;
+    LOG(INFO) << "DONE setup";
     return absl::OkStatus();
 }
 
@@ -317,19 +314,17 @@ absl::Status Gl15LightingMapsCalculator::GlBind() {
 }
 
 absl::Status Gl15LightingMapsCalculator::GlRender(const GlTexture& src, const GlTexture& dst, 
-                                                      double timestamp) {
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+                                                  double timestamp) {
 
     int src_width = src.width();
     int src_height = src.height();
-    glViewport(0, 0, src_width, src_height);
 
     // camera
-    Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
+    Camera camera(glm::vec3(0.0f, 0.0f, 2.0f));
 
     lightingShader->use();
-    lightingShader->setInt("material.diffuse", 0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
     // lighting
     glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -356,28 +351,32 @@ absl::Status Gl15LightingMapsCalculator::GlRender(const GlTexture& src, const Gl
     lightingShader->setFloat("material.shininess", 32.0f);
 
     // view/projection transformations
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)src_width / (float)src_height, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom) * 30, (float)src_width / (float)src_height, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
     lightingShader->setMat4("projection", projection);
     lightingShader->setMat4("view", view);
 
     // world transformation
     glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    model = glm::rotate(model, (float) timestamp * glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 1.0f));
     lightingShader->setMat4("model", model);
 
+    framebuffer_target_->Bind();
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
+    lightingShader->setInt("material.diffuse", 0);
 
     // drawring 
     // render the cube
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    framebuffer_target_->Unbind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // glUseProgram(cubeShader_);
     lightCubeShader->use();
     lightCubeShader->setMat4("projection", projection);
     lightCubeShader->setMat4("view", view);
@@ -387,9 +386,17 @@ absl::Status Gl15LightingMapsCalculator::GlRender(const GlTexture& src, const Gl
     model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
     lightCubeShader->setMat4("model", model);
 
+    framebuffer_target_->Bind();
     glBindVertexArray(lightCubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    framebuffer_target_->Unbind();
 
+    // Restore the GL state.
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(0);
+    glFlush();
 
     return absl::OkStatus();    
 }
