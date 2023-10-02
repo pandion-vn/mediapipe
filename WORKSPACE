@@ -342,6 +342,12 @@ new_local_repository(
 )
 
 new_local_repository(
+    name = "linux_assimp",
+    build_file = "@//third_party:assimp.BUILD",
+    path = "third_party/assimp",
+)
+
+new_local_repository(
     name = "macos_opengl_libs",
     build_file = "@//third_party:opengl_libs_macos.BUILD",
     path = "/usr/local",

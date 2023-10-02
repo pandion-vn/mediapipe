@@ -128,6 +128,25 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "aarch64_cpu",
+    values = {"cpu": "aarch64"},
+)
+
+config_setting(
+    name = "x86_cpu",
+    values = {"cpu": "x86"},
+)
+
+alias(
+    name = "assimp",
+    actual = select({
+        ":aarch64_cpu": "@linux_assimp//:assimp_aarch64",
+        "//conditions:default": "@linux_assimp//:assimp_linux_x86_64",
+    }),
+    visibility = ["//visibility:public"],
+)
+
 alias(
     name = "opengl_glfw",
     actual = select({

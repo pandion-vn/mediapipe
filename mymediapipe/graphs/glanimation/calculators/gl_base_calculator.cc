@@ -59,7 +59,7 @@ absl::Status GlBaseCalculator::Process(CalculatorContext* cc) {
 
     MP_RETURN_IF_ERROR(GlCleanup());
 
-    glBindTexture(src.target(), 0);
+    // glBindTexture(src.target(), 0);
 
     glFlush();
 

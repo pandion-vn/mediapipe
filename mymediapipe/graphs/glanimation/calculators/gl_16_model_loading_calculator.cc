@@ -72,7 +72,8 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
 
         void main()
         {
-            fragColor = texture(texture_diffuse1, TexCoords);
+            fragColor = texture2D(texture_diffuse1, TexCoords);
+            // fragColor = vec4(1.0);
         } 
     )";
 
@@ -104,32 +105,44 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
     ourShader = new Shader(vert_src, frag_src);
 
     // load models
-    ourModel = new Model("mymediapipe/assets/opengl/backpack/backpack.obj");
+    ourModel = new Model("mymediapipe/assets/opengl/minecraft_block/Grass_Block.obj");
 
-    // configure global opengl state
-    glEnable(GL_DEPTH_TEST);
+    // stbi_set_flip_vertically_on_load(true);
+    // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/viking/viking_room.png");
 
     std::cout << "DONE setup" << std::endl;
     return absl::OkStatus();
 }
 
 absl::Status Gl16ModelLoadingCalculator::GlBind() {
+
+    // ourShader->use();
+    
     return absl::OkStatus();
 }
 
 absl::Status Gl16ModelLoadingCalculator::GlRender(const GlTexture& src, const GlTexture& dst, 
                                                       double timestamp) {
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+    // Set up the GL state.
+    glEnable(GL_DEPTH_TEST);
+    // glDepthMask(GL_TRUE);
+
+    // glClearColor(0.f, 0.f, 0.f, 0.f);
+    // glClearDepthf(1.f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     int src_width = src.width();
     int src_height = src.height();
-    glViewport(0, 0, src_width, src_height);
+    // glViewport(0, 0, src_width, src_height);
 
     // camera
-    Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
+    Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 
-    ourShader->use();
+    // ourShader->use();
+    // ourShader->setInt("texture_diffuse1", 0);
 
     // view/projection transformations
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)src_width / (float)src_height, 0.1f, 100.0f);
@@ -141,7 +154,13 @@ absl::Status Gl16ModelLoadingCalculator::GlRender(const GlTexture& src, const Gl
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    // model = glm::rotate(model, glm::radians(70.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, (float) timestamp * glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
     ourShader->setMat4("model", model);
+
+    // bind diffuse map
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
 
     ourModel->Draw(*ourShader);
 
@@ -149,7 +168,15 @@ absl::Status Gl16ModelLoadingCalculator::GlRender(const GlTexture& src, const Gl
 }
 
 absl::Status Gl16ModelLoadingCalculator::GlCleanup() {
+    // Restore the GL state.
     // cleanup
+    // Restore the GL state.
+    // glDepthMask(GL_FALSE);
+    // glDisable(GL_DEPTH_TEST);
+    // glDisable(GL_BLEND);
+
+    // glUseProgram(0);
+    // glFlush();
     return absl::OkStatus();    
 }
 
