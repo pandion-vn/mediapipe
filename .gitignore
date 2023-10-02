@@ -2,6 +2,7 @@ bazel-*
 mediapipe/MediaPipe.xcodeproj
 mediapipe/MediaPipe.tulsiproj/*.tulsiconf-user
 mediapipe/provisioning_profile.mobileprovision
+third_party/assimp/lib/linux_x86_64/libassimp.a
 node_modules/
 .configure.bazelrc
 .user.bazelrc

@@ -172,11 +172,11 @@ absl::Status Gl16ModelLoadingCalculator::GlCleanup() {
     // cleanup
     // Restore the GL state.
     // glDepthMask(GL_FALSE);
-    // glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
     // glDisable(GL_BLEND);
 
     // glUseProgram(0);
-    // glFlush();
+    glFlush();
     return absl::OkStatus();    
 }
 
