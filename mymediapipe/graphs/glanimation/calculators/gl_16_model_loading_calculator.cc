@@ -49,14 +49,22 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
         uniform mat4 projection;
 
         // out vec3 outFragPos;
+        out vec3 outFragPos;
+        out vec3 outNormal;
         out vec2 outTexCoords;
 
         void main()
         {
             // outFragPos = vec3(model * vec4(position, 1.0));
-            outTexCoords = texcoords;
+            // outTexCoords = texcoords;
             // gl_Position = projection * view * vec4(outFragPos, 1.0);
-            gl_Position = projection * view * model * vec4(position, 1.0);
+            // gl_Position = projection * view * model * vec4(position, 1.0);
+
+            outFragPos = vec3(model * vec4(position, 1.0));
+            outNormal = mat3(transpose(inverse(model))) * normal;
+            outTexCoords = texcoords;
+            
+            gl_Position = projection * view * vec4(outFragPos, 1.0);
         }
     )";
 
@@ -67,7 +75,8 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
 
         out vec4 fragColor;
 
-        // in vec3 outFragPos;
+        in vec3 outFragPos;
+        in vec3 outNormal;
         in vec2 outTexCoords;
 
         uniform sampler2D texture_diffuse1;
@@ -75,8 +84,22 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
 
         void main()
         {
+            // ambient 
+            // vec3 light_ambient = vec3(0.2, 0.2, 0.2);
+            // vec3 material_ambient = vec3(1.0, 0.5, 0.31);
+            // vec3 ambient = light_ambient * material_ambient;
+            // vec3 light_position = vec3(1.2, 1.0, 2.0);
+            // vec3 light_diffuse = vec3(0.5, 0.5, 0.5);
+            
+            // diffuse 
+            // vec3 norm = normalize(outNormal);
+            // vec3 lightDir = normalize(light_position - outFragPos);
+            // float diff = max(dot(norm, lightDir), 0.0);
+            // vec3 diffuse = light_diffuse * diff * texture(texture_diffuse1, outTexCoords).rgb;
+
+            // vec3 result = ambient + diffuse;
+            // fragColor = vec4(result, 1.0);
             fragColor = texture(texture_diffuse1, outTexCoords);
-            // fragColor = vec4(1.0);
         } 
     )";
 
@@ -111,10 +134,14 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
     // load models
     // ourModel = new Model("mymediapipe/assets/opengl/backpack1/backpack.obj");
     // ourModel = new Model("mymediapipe/assets/opengl/box-wood/box.obj");
-    ourModel = new Model("mymediapipe/assets/opengl/planet/planet.obj");
+    // ourModel = new Model("mymediapipe/assets/opengl/cube2/cube2.obj");
+    // ourModel = new Model("mymediapipe/assets/opengl/planet/planet.obj");
+    // ourModel = new Model("mymediapipe/assets/opengl/rock/rock.obj");
+    ourModel = new Model("mymediapipe/assets/opengl/cyborg/cyborg.obj");
+    // ourModel = new Model("mymediapipe/assets/obj/IronMan.obj");
 
     // stbi_set_flip_vertically_on_load(true);
-    // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/box-wood/Box-wood_TEX.png");
+    // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
 
     std::cout << "DONE setup" << std::endl;
     return absl::OkStatus();
@@ -149,18 +176,26 @@ absl::Status Gl16ModelLoadingCalculator::GlRender(const GlTexture& src, const Gl
     model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
     ourShader->setMat4("model", model);
 
-    ourModel->Draw(*ourShader, *framebuffer_target_);
+    // std::cout << "GlRender Bind" << std::endl;
+    framebuffer_target_->Bind();
+    // bind diffuse map
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
+    // ourShader->setInt("texture_diffuse1", 0);
+    ourModel->Draw(*ourShader);
+    framebuffer_target_->Unbind();
+    // std::cout << "GlRender Unbind" << std::endl;
 
     return absl::OkStatus();    
 }
 
 absl::Status Gl16ModelLoadingCalculator::GlCleanup() {
     // cleanup
-    glDepthMask(GL_FALSE);
+    // std::cout << "GlCleanup" << std::endl;
     glDisable(GL_DEPTH_TEST);
-
-    glUseProgram(0);
-    glFlush();
+    glDepthMask(GL_FALSE);
+    // glFlush();
+    // std::cout << "GlCleanup end" << std::endl;
     return absl::OkStatus();    
 }
 

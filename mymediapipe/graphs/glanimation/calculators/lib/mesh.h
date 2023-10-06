@@ -50,29 +50,25 @@ public:
     }
 
     // render the mesh
-    void Draw(Shader &shader, FrameBufferTarget &framebuffer_target) {
+    void Draw(Shader &shader) {
         // bind appropriate textures
         unsigned int diffuseNr  = 1;
         unsigned int specularNr = 1;
         unsigned int normalNr   = 1;
         unsigned int heightNr   = 1;
         // draw mesh
-        framebuffer_target.Bind();
         for (unsigned int i = 0; i < textures.size(); i++) {
-            // framebuffer_target.SetColorbuffer(1080, 720, GL_TEXTURE_2D, textures[i].id);
-
-            // std::cout << "Active texture: " << GL_TEXTURE0 << std::endl;
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             // retrieve texture number (the N in diffuse_textureN)
             std::string number;
             std::string name = textures[i].type;
             if (name == "texture_diffuse")
                 number = std::to_string(diffuseNr++);
-            else if(name == "texture_specular")
+            else if (name == "texture_specular")
                 number = std::to_string(specularNr++); // transfer unsigned int to string
-            else if(name == "texture_normal")
+            else if (name == "texture_normal")
                 number = std::to_string(normalNr++); // transfer unsigned int to string
-             else if(name == "texture_height")
+             else if (name == "texture_height")
                 number = std::to_string(heightNr++); // transfer unsigned int to string
 
             // std::cout << "Bind texture location: " << (name + number).c_str() << std::endl;
@@ -86,7 +82,6 @@ public:
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
         // glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(vertices.size()));
 
-        framebuffer_target.Unbind();
         glBindVertexArray(0);
 
         // always good practice to set everything back to defaults once configured.

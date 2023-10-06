@@ -27,6 +27,9 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(target, handle);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, handle, /*level*/ 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, target, handle, /*level*/ 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, target, handle, /*level*/ 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, target, handle, /*level*/ 0);
         glBindTexture(target, 0);
 
         // If the existing depth buffer has different dimensions, delete it.
@@ -42,7 +45,7 @@ public:
             RET_CHECK(renderbuffer_handle_)
                 << "Failed to initialize an OpenGL renderbuffer!";
             glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_handle_);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, src_width, src_height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, src_width, src_height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer_handle_);
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
         }
