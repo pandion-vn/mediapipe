@@ -141,7 +141,7 @@ config_setting(
 alias(
     name = "assimp",
     actual = select({
-        ":aarch64_cpu": "@linux_assimp//:assimp_aarch64",
+        ":aarch64_cpu": "@linux_assimp//:assimp_linux_aarch64",
         "//conditions:default": "@linux_assimp//:assimp_linux_x86_64",
     }),
     visibility = ["//visibility:public"],
