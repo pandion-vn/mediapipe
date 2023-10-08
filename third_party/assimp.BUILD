@@ -33,7 +33,9 @@ cc_library(
     name = "assimp_linux_aarch64",
     hdrs = glob([
       "include/assimp/*.h*",
+      "include/assimp/*.inl",
       "include/assimp/**/*.h*",
+      "contrib/utf8cpp/**/*.h*",
     ]),
     srcs = glob([
       "lib/linux_aarch64/libassimp.a",    
@@ -48,6 +50,7 @@ cc_library(
     ],
     includes = [
       "include/",
+      "contrib/",
     ],
     linkstatic = 1,
     visibility = ["//visibility:public"],
