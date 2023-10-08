@@ -247,14 +247,19 @@ absl::Status RunMPPGraph() {
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
 
         // Get camera frame
-        ASSIGN_OR_RETURN(auto camera_frame, GetFrame(capture, load_video));
+        auto status_or_camera_frame = GetFrame(capture, load_video);
+        if (!status_or_camera_frame.ok()) {
+            LOG(ERROR) << status_or_camera_frame.status().message();
+            break;
+        }
+        
         // Convert to ImageFrame
-        auto input_frame = WrapMatToImageFrame(camera_frame);
+        auto input_frame = WrapMatToImageFrame(status_or_camera_frame.value());
         // Convert to GpuBuffer
         ASSIGN_OR_RETURN(auto gpu_frame, ImageFrameToGpuBuffer(input_frame, gpu_helper));
         MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
-                                kInputStream, mediapipe::Adopt(gpu_frame.release())
-                                    .At(mediapipe::Timestamp(frame_timestamp_us))));
+                                        kInputStream, mediapipe::Adopt(gpu_frame.release())
+                                .At(mediapipe::Timestamp(frame_timestamp_us))));
         
         // Check poller packet
         mediapipe::Packet packet;
@@ -289,9 +294,10 @@ absl::Status RunMPPGraph() {
     }
     LOG(INFO) << "Shutting down.";
     
-    // return absl::OkStatus();
-    // return OutputSidePackets(graph);
-    MP_RETURN_IF_ERROR(graph.CloseInputStream(kInputStream));
+    
+    // MP_RETURN_IF_ERROR(graph.CloseInputStream(kInputStream));
+    MP_RETURN_IF_ERROR(graph.CloseAllInputStreams());
+    graph.CloseAllPacketSources();
     return graph.WaitUntilDone();
     // return absl::OkStatus();
 }

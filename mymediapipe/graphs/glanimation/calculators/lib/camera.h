@@ -12,7 +12,7 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW         = -75.0f;
+const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
@@ -53,7 +53,9 @@ public:
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : 
+    Camera(float posX, float posY, float posZ, 
+           float upX, float upY, float upZ, 
+           float yaw, float pitch) : 
         Front(glm::vec3(0.0f, 0.0f, -1.0f)), 
         MovementSpeed(SPEED), 
         MouseSensitivity(SENSITIVITY), 

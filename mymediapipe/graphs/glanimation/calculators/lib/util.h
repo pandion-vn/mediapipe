@@ -4,7 +4,17 @@
 #include "mediapipe/gpu/gl_base.h"
 #include "mediapipe/gpu/shader_util.h"
 #include "stb_image.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
+#include "assimp/quaternion.h"
+#include "assimp/vector3.h"
+#include "assimp/matrix4x4.h"
 
-GLuint loadTexture(char const *path);
+GLuint loadTexture(char const *path, bool gamma=false);
+GLuint TextureFromFile(const char *path, const std::string &directory, bool gamma=false);
+glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from);
+glm::vec2 GetGLMVec2(const aiVector3D& vec);
+glm::vec3 GetGLMVec3(const aiVector3D& vec);
+glm::quat GetGLMQuat(const aiQuaternion& pOrientation);
 
 #endif

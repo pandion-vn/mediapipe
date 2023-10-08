@@ -31,6 +31,14 @@ struct Texture {
     std::string path;
 };
 
+struct BoneInfo {
+	/*id is index in finalBoneMatrices*/
+	int id;
+
+	/*offset matrix transforms vertex from model space to bone space*/
+	glm::mat4 offset;
+};
+
 class Mesh {
 public:
     // mesh Data
@@ -58,7 +66,6 @@ public:
         unsigned int heightNr   = 1;
         // draw mesh
         for (unsigned int i = 0; i < textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             // retrieve texture number (the N in diffuse_textureN)
             std::string number;
             std::string name = textures[i].type;
@@ -71,11 +78,11 @@ public:
              else if (name == "texture_height")
                 number = std::to_string(heightNr++); // transfer unsigned int to string
 
-            // std::cout << "Bind texture location: " << (name + number).c_str() << std::endl;
-            // now set the sampler to the correct texture unit
-            shader.setInt((name + number).c_str(), i);
+            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
+            // now set the sampler to the correct texture unit
+            shader.setInt((name + number).c_str(), i);
         }
         glBindVertexArray(VAO);
 

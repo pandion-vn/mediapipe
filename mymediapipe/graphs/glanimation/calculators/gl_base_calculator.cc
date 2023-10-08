@@ -26,8 +26,6 @@ static constexpr char kImageGpuTag[] = "IMAGE_GPU";
 // Output:
 //   IMAGE_GPU (`GpuBuffer`, required):
 //     A buffer with a visual effect being rendered for multiple faces.
-
-
 // static
 absl::Status GlBaseCalculator::GetContract(CalculatorContract* cc) {
     MP_RETURN_IF_ERROR(GlCalculatorHelper::UpdateContract(cc))
@@ -68,6 +66,7 @@ absl::Status GlBaseCalculator::Process(CalculatorContext* cc) {
         if (!initialized_) {
             MP_RETURN_IF_ERROR(GlSetup());
             initialized_ = true;
+            animation_start_time_ = cc->InputTimestamp().Seconds();
         }
 
         GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);

@@ -15,6 +15,9 @@ cc_library(
         "lib/mesh.h",
         "lib/model.h",
         "lib/framebuffer_target.h",
+        "lib/bone.h",
+        "lib/animation.h",
+        "lib/animator.h",
         "lib/util.cc",
         # "lib/tiny_obj_loader.cc",
     ],
@@ -25,12 +28,17 @@ cc_library(
         "lib/mesh.h",
         "lib/model.h",
         "lib/framebuffer_target.h",
+        "lib/bone.h",
+        "lib/animation.h",
+        "lib/animator.h",
         # "lib/rapidobj.hpp",
         # "lib/tiny_obj_loader.h",
         "lib/util.h",
     ],
     visibility = ["//visibility:public"],
     deps = [
+        "//third_party:assimp",
+        "//third_party:opengl_glm",
         "//mediapipe/gpu:shader_util",
     ],
 )
@@ -211,6 +219,22 @@ cc_library(
 cc_library(
     name = "gl_16_model_loading_calculator",
     srcs = ["gl_16_model_loading_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        "//third_party:assimp",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_17_skeletal_animation_calculator",
+    srcs = ["gl_17_skeletal_animation_calculator.cc"],
     deps = [
         "//mediapipe/framework/port:ret_check",
         "//mediapipe/framework/port:status",

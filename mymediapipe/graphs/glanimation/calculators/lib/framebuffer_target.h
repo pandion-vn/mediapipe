@@ -27,9 +27,9 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(target, handle);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, handle, /*level*/ 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, target, handle, /*level*/ 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, target, handle, /*level*/ 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, target, handle, /*level*/ 0);
+        // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, target, handle, /*level*/ 0);
+        // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, target, handle, /*level*/ 0);
+        // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, target, handle, /*level*/ 0);
         glBindTexture(target, 0);
 
         // If the existing depth buffer has different dimensions, delete it.

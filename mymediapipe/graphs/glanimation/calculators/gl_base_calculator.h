@@ -116,6 +116,7 @@ protected:
 
     GlCalculatorHelper gpu_helper_;
     bool initialized_;
+    double animation_start_time_;
 };
 
 }  // namespace mediapipe
