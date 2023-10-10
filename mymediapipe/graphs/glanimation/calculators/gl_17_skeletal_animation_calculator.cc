@@ -160,17 +160,14 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
     ourShader = new Shader(vert_src, frag_src);
 
     // load models
-    // ourModel = new Model("mymediapipe/assets/opengl/backpack1/backpack.obj");
-    // ourModel = new Model("mymediapipe/assets/opengl/box-wood/box.obj");
-    // ourModel = new Model("mymediapipe/assets/opengl/cube2/cube2.obj");
-    // ourModel = new Model("mymediapipe/assets/opengl/planet/planet.obj");
-    // ourModel = new Model("mymediapipe/assets/opengl/rock/rock.obj");
-    // ourModel = new Model("mymediapipe/assets/opengl/cyborg/cyborg.obj");
-    // ourModel = new Model("mymediapipe/assets/obj/IronMan.obj");
-
-    stbi_set_flip_vertically_on_load(true);
-    ourModel = new Model("mymediapipe/assets/opengl/vampire/dancing_vampire.dae");
-    danceAnimation = new Animation("mymediapipe/assets/opengl/vampire/dancing_vampire.dae", ourModel);
+    // stbi_set_flip_vertically_on_load(true);
+    // ourModel = new Model("mymediapipe/assets/opengl/vampire/dancing_vampire.dae");
+    ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
+    
+    // danceAnimation = new Animation("mymediapipe/assets/opengl/vampire/dancing_vampire.dae", ourModel);
+    // danceAnimation = new Animation("mymediapipe/assets/opengl/aj/jump.dae", ourModel);
+    danceAnimation = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
+    
 	animator = new Animator();
     // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
 

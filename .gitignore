@@ -4,6 +4,7 @@ mediapipe/MediaPipe.tulsiproj/*.tulsiconf-user
 mediapipe/provisioning_profile.mobileprovision
 third_party/assimp/lib/linux_x86_64/libassimp.a
 third_party/assimp/lib/linux_aarch64/libassimp.a
+mymediapipe/assets/opengl/
 node_modules/
 .configure.bazelrc
 .user.bazelrc
