@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 #include "lib/stb_image.h"
 #include "lib/shader.h"
@@ -45,13 +46,13 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
     R"(
         #version 320 es
         precision highp float;
-        in vec3 position;
-        in vec3 normal;
-        in vec2 texcoords;
-        in vec3 tangent;
-        in vec3 bitangent;
-        in ivec4 boneIds;
-        in vec4 weights;
+        layout (location = 0) in vec3 position;
+        layout (location = 1) in vec3 normal;
+        layout (location = 2) in vec2 texcoords;
+        layout (location = 3) in vec3 tangent;
+        layout (location = 4) in vec3 bitangent;
+        layout (location = 5) in ivec4 boneIds;
+        layout (location = 6) in vec4 weights;
 
         uniform mat4 model;
         uniform mat4 view;
@@ -63,38 +64,35 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
 
 
         // out vec3 outFragPos;
-        out vec3 outFragPos;
+        out vec4 outFragPos;
         out vec3 outNormal;
         out vec2 outTexCoords;
 
         void main()
         {
-            // outFragPos = vec3(model * vec4(position, 1.0));
-            // outTexCoords = texcoords;
-            // gl_Position = projection * view * vec4(outFragPos, 1.0);
-            // gl_Position = projection * view * model * vec4(position, 1.0);
-
-            // outFragPos = vec3(model * vec4(position, 1.0));
-            // outNormal = mat3(transpose(inverse(model))) * normal;
-            outTexCoords = texcoords;
-            
-            // gl_Position = projection * view * vec4(outFragPos, 1.0);
-
-            vec4 totalPosition = vec4(0.0f);
+            vec4 updatedPosition = vec4(0.0f);
+            vec3 updatedNormal = vec3(0.0f);
             for (int i = 0 ; i < MAX_BONE_INFLUENCE ; i++) {
+                // Current bone-weight pair is non-existing
                 if (boneIds[i] == -1) 
                     continue;
+                // Ignore all bones over count MAX_BONES
                 if (boneIds[i] >= MAX_BONES) {
-                    totalPosition = vec4(position, 1.0f);
+                    updatedPosition = vec4(position, 1.0f);
                     break;
                 }
+                // Set pos
                 vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(position, 1.0f);
-                totalPosition += localPosition * weights[i];
+                updatedPosition += localPosition * weights[i];
+                // Set normal
                 vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normal;
+                updatedNormal += localNormal * weights[i];
             }
-            
-            mat4 viewModel = view * model;
-            gl_Position =  projection * viewModel * totalPosition;
+            gl_Position = (projection * view * model) * updatedPosition;
+            outFragPos = vec4(model * vec4(vec3(updatedPosition), 1.0));
+            outNormal = updatedNormal;
+            // outNormal = mat3(transpose(inverse(model))) * normal;
+            outTexCoords = texcoords;
         }
     )";
 
@@ -105,7 +103,7 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
 
         out vec4 fragColor;
 
-        in vec3 outFragPos;
+        in vec4 outFragPos;
         in vec3 outNormal;
         in vec2 outTexCoords;
 
@@ -170,13 +168,13 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
     // ourModel = new Model("mymediapipe/assets/opengl/cyborg/cyborg.obj");
     // ourModel = new Model("mymediapipe/assets/obj/IronMan.obj");
 
-    // stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(true);
     ourModel = new Model("mymediapipe/assets/opengl/vampire/dancing_vampire.dae");
     danceAnimation = new Animation("mymediapipe/assets/opengl/vampire/dancing_vampire.dae", ourModel);
-	animator = new Animator(danceAnimation);
+	animator = new Animator();
     // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
 
-    std::cout << "DONE setup" << std::endl;
+    LOG(INFO) << "DONE setup";
     return absl::OkStatus();
 }
 
@@ -191,13 +189,14 @@ absl::Status Gl17SkeletalAnimationCalculator::GlRender(const GlTexture& src, con
     int src_width = dst.width();
     int src_height = dst.height();
     double deltaTime = timestamp - animation_start_time_;
-    // std::cout << "deltatime: " << deltaTime << std::endl;
+    std::cout << "FPS: " << (1.0f / deltaTime) << std::endl;
     animation_start_time_ = timestamp;
 
+    animator->PlayAnimation(danceAnimation);
     animator->UpdateAnimation(deltaTime);
 
     // camera
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    Camera camera(glm::vec3(0.0f, -9.0f, 80.0f));
     ourShader->use();
 
     // view/projection transformations
@@ -210,14 +209,19 @@ absl::Status Gl17SkeletalAnimationCalculator::GlRender(const GlTexture& src, con
     ourShader->setMat4("view", view);
 
     auto transforms = animator->GetFinalBoneMatrices();
-    for (int i = 0; i < transforms.size(); ++i)
+    // std::cout << "Transform size: " << transforms.size() << std::endl;
+    for (int i = 0; i < transforms.size(); ++i) {
         ourShader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+        // std::cout << "Transform " << i << ": " << glm::to_string(transforms[i]) << std::endl;
+    }
+    // ourShader->setMat4("finalBonesMatrices", transforms);
 
     // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));	// it's a bit too big for our scene, so scale it down
-    // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(-6.0f, 2.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+    // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     // model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
     ourShader->setMat4("model", model);
 

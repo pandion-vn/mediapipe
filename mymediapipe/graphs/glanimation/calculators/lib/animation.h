@@ -16,12 +16,17 @@ public:
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
         assert(scene && scene->mRootNode);
+
         auto animation = scene->mAnimations[0];
         m_Duration = animation->mDuration;
         m_TicksPerSecond = animation->mTicksPerSecond;
+
         aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
         globalTransformation = globalTransformation.Inverse();
+
         ReadHierarchyData(m_RootNode, scene->mRootNode);
+        // Reset all root transformations
+        m_RootNode.transformation = glm::mat4(1.0f);
         ReadMissingBones(animation, *model);
     }
 
@@ -42,7 +47,7 @@ public:
     inline float GetTicksPerSecond() { return m_TicksPerSecond; }
     inline float GetDuration() { return m_Duration;}
     inline const AssimpNodeData& GetRootNode() { return m_RootNode; }
-    inline const std::map<std::string,BoneInfo>& GetBoneIDMap()  { 
+    inline const std::map<std::string, BoneInfo>& GetBoneIDMap()  { 
         return m_BoneInfoMap;
     }
 
@@ -64,8 +69,7 @@ private:
                 boneInfoMap[boneName].id = boneCount;
                 boneCount++;
             }
-            m_Bones.push_back(Bone(channel->mNodeName.data,
-                boneInfoMap[channel->mNodeName.data].id, channel));
+            m_Bones.push_back(Bone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel));
         }
 
         m_BoneInfoMap = boneInfoMap;

@@ -66,6 +66,12 @@ private:
         // retrieve the directory path of the filepath
         dirPath = filename.substr(0, filename.find_last_of('/'));
 
+        std::cout << "scene->HasAnimations() 1: " << scene->HasAnimations() << std::endl;
+        std::cout << "scene->mNumMeshes 1: " << scene->mNumMeshes << std::endl;
+        std::cout << "scene->mAnimations[0]->mNumChannels 1: " << scene->mAnimations[0]->mNumChannels << std::endl;
+        std::cout << "scene->mAnimations[0]->mDuration 1: " << scene->mAnimations[0]->mDuration << std::endl;
+        std::cout << "scene->mAnimations[0]->mTicksPerSecond 1: " << scene->mAnimations[0]->mTicksPerSecond << std::endl;
+
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
 
@@ -123,14 +129,16 @@ private:
             // texture coordinates
             if (mesh->mTextureCoords[0]) {
                 // does the mesh contain texture coordinates?
-                glm::vec2 vec;
+                // glm::vec2 vec;
                 // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
                 // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
                 vertex.TexCoords = GetGLMVec2(mesh->mTextureCoords[0][i]);
-                // tangent
-                vertex.Tangent = GetGLMVec3(mesh->mTangents[i]);
-                // bitangent
-                vertex.Bitangent = GetGLMVec3(mesh->mBitangents[i]);
+                if (mesh->HasTangentsAndBitangents()) {
+                    // tangent
+                    vertex.Tangent = GetGLMVec3(mesh->mTangents[i]);
+                    // bitangent
+                    vertex.Bitangent = GetGLMVec3(mesh->mBitangents[i]);
+                }
             }
             else
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
@@ -138,6 +146,7 @@ private:
             vertices.push_back(vertex);
         }
         std::cout << "Number of mesh: " << mesh->mNumFaces << std::endl;
+        
         // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
         for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
@@ -177,7 +186,10 @@ private:
         auto& boneInfoMap = m_BoneInfoMap;
         int& boneCount = m_BoneCounter;
 
-        for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+        // Set the max bones to 100
+		unsigned int numBones = mesh->mNumBones > 100 ? 100 : mesh->mNumBones;
+
+        for (int boneIndex = 0; boneIndex < numBones; ++boneIndex) {
             int boneID = -1;
             std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
             if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
