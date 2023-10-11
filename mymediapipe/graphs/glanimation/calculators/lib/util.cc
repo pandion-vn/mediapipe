@@ -6,6 +6,7 @@ GLuint loadTexture(char const *path, bool gamma) {
     glGenTextures(1, &textureID);
     
     int width, height, nrComponents;
+    // stbi_set_flip_vertically_on_load(1);
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data) {
         GLenum format;
@@ -26,14 +27,12 @@ GLuint loadTexture(char const *path, bool gamma) {
         glGenerateMipmap(GL_TEXTURE_2D);
         // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
-
-        stbi_image_free(data);
     }
     else
     {
         std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
     }
+    stbi_image_free(data);
 
     return textureID;
 }
@@ -89,6 +88,40 @@ GLuint TextureFromFile(const char *path, const std::string &directory, bool gamm
     // }
 
     // return textureID;
+}
+
+GLuint TextureFromEmbedded(const aiTexture* paiTexture) {
+    std::cout << "Embeddeded diffuse texture type: " << paiTexture->achFormatHint << std::endl;
+    int bufferSize  = paiTexture->mWidth;
+    void* pData     = paiTexture->pcData;
+    int width, height, nrComponents;
+    void* image_data = stbi_load_from_memory((const stbi_uc*)pData, bufferSize, &width, &height, &nrComponents, 0);
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    if (image_data) {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+        std::cout << "size width: " << width << " height: " << height << " channels: " << nrComponents << std::endl;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, image_data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else {
+        std::cout << "Texture failed to load embedded data" << std::endl;
+    }
+
+    stbi_image_free(image_data);
+    return textureID;
 }
 
 glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {

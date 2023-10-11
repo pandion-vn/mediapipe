@@ -12,6 +12,7 @@
 #include "lib/shader.h"
 #include "lib/camera.h"
 #include "lib/model.h"
+#include "lib/video_scene.h"
 #include "lib/animation.h"
 #include "lib/animator.h"
 // #include "lib/util.h"
@@ -23,7 +24,7 @@ enum { ATTRIB_VERTEX, ATTRIB_NORMAL, ATTRIB_TEXTURE_COORDS, LIGHTING_NUM_ATTRIBU
 // https://learnopengl.com/Model-Loading/Mesh
 // https://learnopengl.com/Model-Loading/Model
 // https://learnopengl.com/Guest-Articles/2020/Skeletal-Animation
-class Gl17SkeletalAnimationCalculator : public GlBaseCalculator {
+class Gl18CameraSkeletalAnimationCalculator : public GlBaseCalculator {
 public:
     absl::Status GlSetup() override;
     absl::Status GlBind() override;
@@ -31,17 +32,20 @@ public:
     absl::Status GlCleanup() override;
     absl::Status GlTeardown() override;
 private:
-    GLuint VBO[3], cubeVAO, lightCubeVAO, EBO, TextureBO[2];
+    // GLuint VBO[3], cubeVAO, lightCubeVAO, EBO, TextureBO[2];
     Shader *ourShader;
     Model *ourModel;
-    Animation *danceAnimation;
+    VideoScene *videoScene;
+    Animation *animation1, *animation2, *animation3, *animation4, *animation5;
     Animator *animator;
-    GLuint diffuseMapTexture;
+    int counting;
+    // GLuint diffuseMapTexture;
+    // GLuint VBO[2], VAO;
 };
 
-REGISTER_CALCULATOR(Gl17SkeletalAnimationCalculator);
+REGISTER_CALCULATOR(Gl18CameraSkeletalAnimationCalculator);
 
-absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
+absl::Status Gl18CameraSkeletalAnimationCalculator::GlSetup() {
     const GLchar* vert_src = 
     R"(
         #version 320 es
@@ -132,72 +136,63 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
         } 
     )";
 
-    const GLchar* cube_vert_src = R"(
-        #version 310 es
-        precision highp float;
-        in vec3 position;
-
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main()
-        {            
-            gl_Position = projection * view * model * vec4(position, 1.0);
-        }
-    )";
-
-    const GLchar* cube_frag_src = R"(
-        #version 310 es
-        precision highp float;
-        out vec4 fragColor;
-
-        void main()
-        {
-            gl_FragColor = vec4(1.0);
-        } 
-    )";
-
     ourShader = new Shader(vert_src, frag_src);
 
     // load models
-    // stbi_set_flip_vertically_on_load(true);
-    // ourModel = new Model("mymediapipe/assets/opengl/vampire/dancing_vampire.dae");
-    // ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
-    ourModel = new Model("mymediapipe/assets/opengl/vanguard/vanguard.glb");
+    ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
     
-    // danceAnimation = new Animation("mymediapipe/assets/opengl/vampire/dancing_vampire.dae", ourModel);
-    // danceAnimation = new Animation("mymediapipe/assets/opengl/aj/jump.dae", ourModel);
-    // danceAnimation = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
-    danceAnimation = new Animation("mymediapipe/assets/opengl/vanguard/vanguard@bellydance.glb", ourModel);
+    animation1 = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
+    animation2 = new Animation("mymediapipe/assets/opengl/aj/jump.dae", ourModel);
+    animation3 = new Animation("mymediapipe/assets/opengl/aj/breathing_idle.dae", ourModel);
+    animation4 = new Animation("mymediapipe/assets/opengl/aj/left_strafe_walking.dae", ourModel);
     
 	animator = new Animator();
     // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
+
+    videoScene = new VideoScene();
+    videoScene->Setup();
+
+    counting = 0;
 
     LOG(INFO) << "DONE setup";
     return absl::OkStatus();
 }
 
-absl::Status Gl17SkeletalAnimationCalculator::GlBind() {    
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
+absl::Status Gl18CameraSkeletalAnimationCalculator::GlBind() {    
+    glEnable(GL_BLEND);
+    // glEnable(GL_DEPTH_TEST);
+    // glDepthMask(GL_TRUE);
     return absl::OkStatus();
 }
 
-absl::Status Gl17SkeletalAnimationCalculator::GlRender(const GlTexture& src, const GlTexture& dst, double timestamp) {
+absl::Status Gl18CameraSkeletalAnimationCalculator::GlRender(const GlTexture& src, const GlTexture& dst, double timestamp) {
     // make sure we clear the framebuffer's content
     int src_width = dst.width();
     int src_height = dst.height();
     double deltaTime = timestamp - animation_start_time_;
-    std::cout << "FPS: " << (1.0f / deltaTime) << std::endl;
+    // std::cout << "FPS: " << (1.0f / deltaTime) << std::endl;
     animation_start_time_ = timestamp;
 
-    animator->PlayAnimation(danceAnimation);
+    if (counting > 550) 
+        counting = 0;
+    else if (counting > 300)
+        animator->PlayAnimation(animation4);
+    else if (counting > 250)
+        animator->PlayAnimation(animation3);
+    else if (counting > 200)
+        animator->PlayAnimation(animation2);
+    else
+        animator->PlayAnimation(animation1);
+    
+    counting++;
     animator->UpdateAnimation(deltaTime);
 
     // camera
-    // Camera camera(glm::vec3(0.0f, -9.0f, 80.0f));
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f)); // vanguard
+    Camera camera(glm::vec3(0.0f, -9.0f, 80.0f)); // aj
+    // Camera camera(glm::vec3(0.0f, 0.0f, 3.0f)); // vanguard
+
+    videoScene->Draw(*framebuffer_target_, src.target(), src.name());
+
     ourShader->use();
 
     // view/projection transformations
@@ -219,35 +214,43 @@ absl::Status Gl17SkeletalAnimationCalculator::GlRender(const GlTexture& src, con
 
     // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f)); // translate it down so it's at the center of the scene
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-    // model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-    model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
+    model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f)); // translate it down so it's at the center of the scene
+    // model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+    // model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
     // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     // model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
     ourShader->setMat4("model", model);
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
     framebuffer_target_->Bind();
     // bind diffuse map
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
     // ourShader->setInt("texture_diffuse1", 0);
+    ourShader->use();
     ourModel->Draw(*ourShader);
+
     framebuffer_target_->Unbind();
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     return absl::OkStatus();    
 }
 
-absl::Status Gl17SkeletalAnimationCalculator::GlCleanup() {
+absl::Status Gl18CameraSkeletalAnimationCalculator::GlCleanup() {
     // cleanup
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+    // glDisable(GL_DEPTH_TEST);
+    // glDepthMask(GL_FALSE);
+    glDisable(GL_BLEND);
     glFlush();
     return absl::OkStatus();    
 }
 
-absl::Status Gl17SkeletalAnimationCalculator::GlTeardown() {
+absl::Status Gl18CameraSkeletalAnimationCalculator::GlTeardown() {
+    ourShader->tearDown();
     return absl::OkStatus();
 }
 

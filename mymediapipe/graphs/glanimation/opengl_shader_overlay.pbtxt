@@ -69,8 +69,14 @@ output_stream: "output_video"
 #     output_stream: "IMAGE_GPU:output_video"
 # }
 
+# node: {
+#     calculator: "Gl17SkeletalAnimationCalculator"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
+# }
+
 node: {
-    calculator: "Gl17SkeletalAnimationCalculator"
+    calculator: "Gl18CameraSkeletalAnimationCalculator"
     input_stream: "IMAGE_GPU:input_video"
     output_stream: "IMAGE_GPU:output_video"
 }

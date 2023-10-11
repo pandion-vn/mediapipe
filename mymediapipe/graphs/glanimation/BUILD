@@ -66,6 +66,7 @@ cc_library(
         "//mymediapipe/graphs/glanimation/calculators:gl_15_lighting_maps_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_16_model_loading_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_17_skeletal_animation_calculator",
+        "//mymediapipe/graphs/glanimation/calculators:gl_18_camera_skeletal_animation_calculator",
         "//mymediapipe/graphs/glanimation/calculators:opengl_shader_calculator",
     ],
 )

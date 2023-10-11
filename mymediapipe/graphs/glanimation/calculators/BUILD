@@ -14,6 +14,7 @@ cc_library(
         "lib/camera.h",
         "lib/mesh.h",
         "lib/model.h",
+        "lib/video_scene.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
@@ -27,6 +28,7 @@ cc_library(
         "lib/camera.h",
         "lib/mesh.h",
         "lib/model.h",
+        "lib/video_scene.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
@@ -235,6 +237,22 @@ cc_library(
 cc_library(
     name = "gl_17_skeletal_animation_calculator",
     srcs = ["gl_17_skeletal_animation_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
+        "//third_party:assimp",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_18_camera_skeletal_animation_calculator",
+    srcs = ["gl_18_camera_skeletal_animation_calculator.cc"],
     deps = [
         "//mediapipe/framework/port:ret_check",
         "//mediapipe/framework/port:status",

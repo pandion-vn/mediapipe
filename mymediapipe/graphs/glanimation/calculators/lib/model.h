@@ -153,7 +153,11 @@ private:
             // retrieve all indices of the face and store them in the indices vector
             for (unsigned int j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);        
+            // indices.push_back(face.mIndices[0]);
+            // indices.push_back(face.mIndices[1]);
+            // indices.push_back(face.mIndices[2]);
         }
+        std::cout << "Num materials: " << scene->mNumMaterials << std::endl;
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
         // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -164,16 +168,16 @@ private:
         // normal: texture_normalN
 
         // 1. diffuse maps
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         // 2. specular maps
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         // 3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal", scene);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         // 4. height maps
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height", scene);
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
         ExtractBoneWeightForVertices(vertices, mesh, scene);
@@ -219,11 +223,12 @@ private:
 
     // checks all material textures of a given type and loads the textures if they're not loaded yet.
     // the required info is returned as a Texture struct.
-    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName) {
+    std::vector<Texture> loadMaterialTextures(aiMaterial *material, aiTextureType type, std::string typeName, const aiScene *scene) {
         std::vector<Texture> textures;
-        for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
+        for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
             aiString str;
-            mat->GetTexture(type, i, &str);
+            material->GetTexture(type, i, &str);
+
             // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
             bool skip = false;
             for (unsigned int j = 0; j < textures_loaded.size(); j++) {
@@ -236,8 +241,14 @@ private:
 
             if (!skip) {
                 // if texture hasn't been loaded already, load it
+                const aiTexture* paiTexture = scene->GetEmbeddedTexture(str.C_Str());
+
                 Texture texture;
-                texture.id = TextureFromFile(str.C_Str(), this->dirPath);
+                if (paiTexture) {
+                    texture.id = TextureFromEmbedded(paiTexture);
+                } else {
+                    texture.id = TextureFromFile(str.C_Str(), this->dirPath);
+                }
                 texture.type = typeName;
                 texture.path = str.C_Str();
                 textures.push_back(texture);
