@@ -43,6 +43,11 @@ public:
         else return &(*iter);
     }
 
+    void ShowBones() {
+        for (auto& bone : m_Bones) {
+            std::cout << bone.GetBoneName() << " ";
+        }
+    }
     
     inline float GetTicksPerSecond() { return m_TicksPerSecond; }
     inline float GetDuration() { return m_Duration;}

@@ -56,3 +56,19 @@ cc_binary(
         "//mymediapipe/graphs/glanimation:opengl_shader_calculators",
     ],
 )
+
+cc_binary(
+    name = "pose_ani_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_shader:simple_shader",
+        "//mymediapipe/graphs/pose_ani:pose_tracking_gpu_deps",
+    ],
+)
+
+cc_binary(
+    name = "face_mesh_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/simple_shader:simple_shader",
+        "//mymediapipe/graphs/pose_ani:face_mesh_gpu_deps",
+    ],
+)

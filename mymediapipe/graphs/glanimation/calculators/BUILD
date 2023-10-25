@@ -9,17 +9,21 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "gl_base_lib",
     srcs = [
-        "lib/stb_image.h",
+        "lib/stb_image.cc",
         "lib/shader.h",
         "lib/camera.h",
         "lib/mesh.h",
         "lib/model.h",
         "lib/video_scene.h",
+        "lib/model_scene.h",
+        "lib/model_scene_a.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
         "lib/animator.h",
         "lib/util.cc",
+        "lib/my_pose.h",
+        "lib/my_math.h",
         # "lib/tiny_obj_loader.cc",
     ],
     hdrs = [
@@ -29,10 +33,14 @@ cc_library(
         "lib/mesh.h",
         "lib/model.h",
         "lib/video_scene.h",
+        "lib/model_scene.h",
+        "lib/model_scene_a.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
         "lib/animator.h",
+        "lib/my_pose.h",
+        "lib/my_math.h",
         # "lib/rapidobj.hpp",
         # "lib/tiny_obj_loader.h",
         "lib/util.h",
@@ -174,6 +182,46 @@ cc_library(
 )
 
 cc_library(
+    name = "gl_11a_coordinate_system_calculator",
+    srcs = ["gl_11a_coordinate_system_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//mediapipe/framework/formats:matrix_data_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:environment_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:face_geometry_cc_proto",
+        "//third_party:opengl_glm",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_11b_coordinate_system_calculator",
+    srcs = ["gl_11b_coordinate_system_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//mediapipe/framework/formats:matrix_data_cc_proto",
+        "//mediapipe/framework/formats:landmark_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:environment_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:face_geometry_cc_proto",
+        "//mediapipe/modules/face_geometry/libs:procrustes_solver",
+        "//third_party:opengl_glm",
+        "@com_google_absl//absl/memory",
+        "@eigen_archive//:eigen3",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
     name = "gl_12_camera_view_calculator",
     srcs = ["gl_12_camera_view_calculator.cc"],
     deps = [
@@ -260,6 +308,29 @@ cc_library(
         "//mediapipe/gpu:shader_util",
         "//third_party:opengl_glm",
         "//third_party:assimp",
+        ":gl_base_calculator",
+        ":gl_base_lib",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "gl_18a_camera_skeletal_animation_calculator",
+    srcs = ["gl_18a_camera_skeletal_animation_calculator.cc"],
+    deps = [
+        "//mediapipe/framework/port:ret_check",
+        "//mediapipe/framework/port:status",
+        "//mediapipe/gpu:gl_simple_shaders",
+        "//mediapipe/gpu:shader_util",
+        "//mediapipe/framework/formats:matrix_data_cc_proto",
+        "//mediapipe/framework/formats:landmark_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:environment_cc_proto",
+        "//mediapipe/modules/face_geometry/protos:face_geometry_cc_proto",
+        "//mediapipe/modules/face_geometry/libs:procrustes_solver",
+        "//third_party:opengl_glm",
+        "//third_party:assimp",
+        "@com_google_absl//absl/memory",
+        "@eigen_archive//:eigen3",
         ":gl_base_calculator",
         ":gl_base_lib",
     ],

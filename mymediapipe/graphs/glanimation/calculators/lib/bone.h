@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "util.h"
 
 /* Container for bone data */
@@ -69,6 +70,25 @@ public:
         glm::mat4 scale = InterpolateScaling(animationTime);
         m_LocalTransform = translation * rotation * scale;
     }
+
+    void UpdateConsole(float animationTime) {
+        glm::mat4 translation = InterpolatePosition(animationTime);
+        glm::mat4 rotation = InterpolateRotation(animationTime);
+        glm::mat4 scale = InterpolateScaling(animationTime);
+
+        std::cout << "translation: " << glm::to_string(translation) << std::endl;
+        std::cout << "rotmat: " << glm::to_string(rotation) << std::endl;
+        std::cout << "scale: " << glm::to_string(scale) << std::endl;
+        m_LocalTransform = translation * rotation * scale;
+    }
+
+    void UpdateTransform(float animationTime, glm::mat4 &translation, glm::mat4 &rotation, glm::mat4 &scale) {
+        glm::mat4 translation_ = InterpolatePosition(animationTime);
+        // glm::mat4 rotation = InterpolateRotation(animationTime);
+        glm::mat4 scale_ = InterpolateScaling(animationTime);
+        m_LocalTransform = translation_ * rotation * scale_;
+    }
+
     glm::mat4 GetLocalTransform() { return m_LocalTransform; }
     std::string GetBoneName() const { return m_Name; }
     int GetBoneID() { return m_ID; }
@@ -113,7 +133,7 @@ public:
     }
 
 
-private:
+public:
 
     float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime) {
         float scaleFactor = 0.0f;
@@ -135,6 +155,8 @@ private:
         glm::vec3 finalPosition = glm::mix(m_Positions[p0Index].position, 
                                            m_Positions[p1Index].position,
                                            scaleFactor);
+
+        // std::cout << "scaleFactor: " << scaleFactor << std::endl;
         return glm::translate(glm::mat4(1.0f), finalPosition);
     }
 

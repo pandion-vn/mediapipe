@@ -26,7 +26,8 @@ class Model
 {
 public:
     // model data 
-    std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    // std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    std::map<std::string, Texture> textures_loaded;
     std::vector<Mesh>    meshes;
     std::string          dirPath;
     bool                 gammaCorrection;
@@ -66,11 +67,13 @@ private:
         // retrieve the directory path of the filepath
         dirPath = filename.substr(0, filename.find_last_of('/'));
 
-        std::cout << "scene->HasAnimations() 1: " << scene->HasAnimations() << std::endl;
         std::cout << "scene->mNumMeshes 1: " << scene->mNumMeshes << std::endl;
-        std::cout << "scene->mAnimations[0]->mNumChannels 1: " << scene->mAnimations[0]->mNumChannels << std::endl;
-        std::cout << "scene->mAnimations[0]->mDuration 1: " << scene->mAnimations[0]->mDuration << std::endl;
-        std::cout << "scene->mAnimations[0]->mTicksPerSecond 1: " << scene->mAnimations[0]->mTicksPerSecond << std::endl;
+        std::cout << "scene->HasAnimations() 1: " << scene->HasAnimations() << std::endl;
+        if (scene->HasAnimations()) {
+            std::cout << "scene->mAnimations[0]->mNumChannels 1: " << scene->mAnimations[0]->mNumChannels << std::endl;
+            std::cout << "scene->mAnimations[0]->mDuration 1: " << scene->mAnimations[0]->mDuration << std::endl;
+            std::cout << "scene->mAnimations[0]->mTicksPerSecond 1: " << scene->mAnimations[0]->mTicksPerSecond << std::endl;
+        }
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
@@ -225,24 +228,15 @@ private:
     // the required info is returned as a Texture struct.
     std::vector<Texture> loadMaterialTextures(aiMaterial *material, aiTextureType type, std::string typeName, const aiScene *scene) {
         std::vector<Texture> textures;
+        // std::map<std::string, Texture> textures;
         for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
             aiString str;
             material->GetTexture(type, i, &str);
 
             // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-            bool skip = false;
-            for (unsigned int j = 0; j < textures_loaded.size(); j++) {
-                if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {
-                    textures.push_back(textures_loaded[j]);
-                    skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
-                    break;
-                }
-            }
-
-            if (!skip) {
+            if (textures_loaded.find(str.C_Str()) == textures_loaded.end()) {
                 // if texture hasn't been loaded already, load it
                 const aiTexture* paiTexture = scene->GetEmbeddedTexture(str.C_Str());
-
                 Texture texture;
                 if (paiTexture) {
                     texture.id = TextureFromEmbedded(paiTexture);
@@ -252,7 +246,9 @@ private:
                 texture.type = typeName;
                 texture.path = str.C_Str();
                 textures.push_back(texture);
-                textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+                textures_loaded[str.C_Str()] = texture;  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+            } else {
+                textures.push_back(textures_loaded[str.C_Str()]);
             }
         }
         return textures;

@@ -21,6 +21,10 @@ input_side_packet: "ENVIRONMENT:environment"
 # the absence of this packet so that they don't wait for it unnecessarily.
 output_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
 
+# output_stream: "DETECTIONS:multi_face_detection"
+
+# output_stream: "LANDMARKS:face_landmarks"
+
 # Subgraph that detects faces and corresponding landmarks using the face
 # detection pipeline.
 node {
@@ -88,4 +92,12 @@ node {
   input_stream: "IMAGE_SIZE:input_image_size"
   input_side_packet: "ENVIRONMENT:environment"
   output_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
+}
+
+node {
+    calculator: "CommonDebuggerCalculator"
+    input_stream: "DETECTIONS:multi_face_detection"
+    input_stream: "LANDMARKS:face_landmarks"
+    # input_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
+    # input_side_packet: "ENVIRONMENT:environment"
 }

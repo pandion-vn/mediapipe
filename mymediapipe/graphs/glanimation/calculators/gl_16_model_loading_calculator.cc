@@ -99,7 +99,8 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
 
             // vec3 result = ambient + diffuse;
             // fragColor = vec4(result, 1.0);
-            fragColor = texture(texture_diffuse1, outTexCoords);
+            // fragColor = texture(texture_diffuse1, outTexCoords);
+            fragColor = vec4(1.0);
         } 
     )";
 
@@ -137,8 +138,10 @@ absl::Status Gl16ModelLoadingCalculator::GlSetup() {
     // ourModel = new Model("mymediapipe/assets/opengl/cube2/cube2.obj");
     // ourModel = new Model("mymediapipe/assets/opengl/planet/planet.obj");
     // ourModel = new Model("mymediapipe/assets/opengl/rock/rock.obj");
-    ourModel = new Model("mymediapipe/assets/opengl/cyborg/cyborg.obj");
+    // ourModel = new Model("mymediapipe/assets/opengl/face/canonical_face_model.obj");
     // ourModel = new Model("mymediapipe/assets/obj/IronMan.obj");
+    // ourModel = new Model("mymediapipe/assets/opengl/pose/lowpoly_human.glb");
+    ourModel = new Model("mymediapipe/assets/opengl/pose/basemesh_simple_man.dae");
 
     // stbi_set_flip_vertically_on_load(true);
     // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
@@ -163,17 +166,17 @@ absl::Status Gl16ModelLoadingCalculator::GlRender(const GlTexture& src, const Gl
     ourShader->use();
 
     // view/projection transformations
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)src_width / (float)src_height, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)src_width / (float)src_height, 1.0f, 10000.0f);
     glm::mat4 view = camera.GetViewMatrix();
     ourShader->setMat4("projection", projection);
     ourShader->setMat4("view", view);
 
     // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(2.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+    model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene
+    // model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
     // model = glm::rotate(model, glm::radians(70.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-    model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
+    model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 1.0f, 0.0f));  
     ourShader->setMat4("model", model);
 
     framebuffer_target_->Bind();

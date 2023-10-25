@@ -1,0 +1,100 @@
+# MediaPipe graph that performs pose tracking with TensorFlow Lite on GPU.
+
+# GPU buffer. (GpuBuffer)
+input_stream: "input_video"
+
+# Output image with rendered results. (GpuBuffer)
+output_stream: "output_video"
+# Pose landmarks. (NormalizedLandmarkList)
+output_stream: "pose_landmarks"
+
+# Generates side packet to enable segmentation.
+node {
+  calculator: "ConstantSidePacketCalculator"
+  output_side_packet: "PACKET:enable_segmentation"
+  node_options: {
+    [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
+      packet { bool_value: false }
+    }
+  }
+}
+
+# Throttles the images flowing downstream for flow control. It passes through
+# the very first incoming image unaltered, and waits for downstream nodes
+# (calculators and subgraphs) in the graph to finish their tasks before it
+# passes through another image. All images that come in while waiting are
+# dropped, limiting the number of in-flight images in most part of the graph to
+# 1. This prevents the downstream nodes from queuing up incoming images and data
+# excessively, which leads to increased latency and memory usage, unwanted in
+# real-time mobile applications. It also eliminates unnecessarily computation,
+# e.g., the output produced by a node may get dropped downstream if the
+# subsequent nodes are still busy processing previous inputs.
+node {
+  calculator: "FlowLimiterCalculator"
+  input_stream: "input_video"
+  input_stream: "FINISHED:output_video"
+  input_stream_info: {
+    tag_index: "FINISHED"
+    back_edge: true
+  }
+  output_stream: "throttled_input_video"
+}
+
+# Generates an environment that describes the current virtual scene.
+node {
+    calculator: "FaceGeometryEnvGeneratorCalculator"
+    output_side_packet: "ENVIRONMENT:environment"
+    node_options: {
+        [type.googleapis.com/mediapipe.FaceGeometryEnvGeneratorCalculatorOptions] {
+            environment: {
+                origin_point_location: TOP_LEFT_CORNER
+                # origin_point_location: BOTTOM_LEFT_CORNER
+                perspective_camera: {
+                    vertical_fov_degrees: 63.0  # 63 degrees
+                    near: 1.0                   # 1cm
+                    far: 10000.0                # 100m
+                }
+            }
+        }
+    }
+}
+
+# Subgraph that detects poses and corresponding landmarks.
+node {
+  calculator: "PoseLandmarkGpu"
+  input_side_packet: "ENABLE_SEGMENTATION:enable_segmentation"
+  input_stream: "IMAGE:throttled_input_video"
+  output_stream: "LANDMARKS:pose_landmarks"
+  output_stream: "SEGMENTATION_MASK:segmentation_mask"
+  output_stream: "DETECTION:pose_detection"
+  output_stream: "ROI_FROM_LANDMARKS:roi_from_landmarks"
+  output_stream: "WORLD_LANDMARKS:pose_world_landmarks"
+}
+
+# Subgraph that renders pose-landmark annotation onto the input image.
+node {
+  calculator: "PoseRendererGpu"
+  input_stream: "IMAGE:throttled_input_video"
+  input_stream: "LANDMARKS:pose_landmarks"
+  input_stream: "SEGMENTATION_MASK:segmentation_mask"
+  input_stream: "DETECTION:pose_detection"
+  input_stream: "ROI:roi_from_landmarks"
+  output_stream: "IMAGE:pose_render_video"
+}
+
+# node {
+#     calculator: "Gl11bCoordinateSystemCalculator"
+#     input_stream: "IMAGE_GPU:pose_render_video"
+#     input_stream: "NORM_LANDMARKS:pose_landmarks"
+#     # input_stream: "MULTI_FACE_GEOMETRY:multi_face_geometry"
+#     input_side_packet: "ENVIRONMENT:environment"
+#     output_stream: "IMAGE_GPU:output_video"
+# }
+
+node: {
+    calculator: "Gl18aCameraSkeletalAnimationCalculator"
+    input_stream: "IMAGE_GPU:pose_render_video"
+    input_stream: "NORM_LANDMARKS:pose_world_landmarks"
+    input_side_packet: "ENVIRONMENT:environment"
+    output_stream: "IMAGE_GPU:output_video"
+}

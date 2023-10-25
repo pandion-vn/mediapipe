@@ -163,13 +163,13 @@ absl::Status Gl17SkeletalAnimationCalculator::GlSetup() {
     // load models
     // stbi_set_flip_vertically_on_load(true);
     // ourModel = new Model("mymediapipe/assets/opengl/vampire/dancing_vampire.dae");
-    // ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
-    ourModel = new Model("mymediapipe/assets/opengl/vanguard/vanguard.glb");
+    ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
+    // ourModel = new Model("mymediapipe/assets/opengl/vanguard/vanguard.glb");
     
     // danceAnimation = new Animation("mymediapipe/assets/opengl/vampire/dancing_vampire.dae", ourModel);
     // danceAnimation = new Animation("mymediapipe/assets/opengl/aj/jump.dae", ourModel);
-    // danceAnimation = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
-    danceAnimation = new Animation("mymediapipe/assets/opengl/vanguard/vanguard@bellydance.glb", ourModel);
+    danceAnimation = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
+    // danceAnimation = new Animation("mymediapipe/assets/opengl/vanguard/vanguard@bellydance.glb", ourModel);
     
 	animator = new Animator();
     // diffuseMapTexture = loadTexture("mymediapipe/assets/opengl/cube2/Square swirls.png");
@@ -221,8 +221,8 @@ absl::Status Gl17SkeletalAnimationCalculator::GlRender(const GlTexture& src, con
     glm::mat4 model = glm::mat4(1.0f);
     // model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f)); // translate it down so it's at the center of the scene
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-    // model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-    model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
+    model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
+    // model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
     // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     // model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  

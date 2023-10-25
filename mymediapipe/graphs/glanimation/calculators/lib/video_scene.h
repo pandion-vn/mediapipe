@@ -1,17 +1,19 @@
 #ifndef VIDEO_SCENE_H
 #define VIDEO_SCENE_H
 
+#include "shader.h"
+
 class VideoScene {
 public:
     VideoScene() {}
 
     void Setup() {
         static const GLfloat square_vertices[] = {
-        // positions      
-        -1.0f, -1.0f, 0.0f,  // bottom left
-         1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f,  1.0f, 0.0f,  // top left
-         1.0f,  1.0f, 0.0f,  // top right
+            // positions      
+            -1.0f, -1.0f, 0.0f,  // bottom left
+            1.0f, -1.0f, 0.0f,  // bottom right
+            -1.0f,  1.0f, 0.0f,  // top left
+            1.0f,  1.0f, 0.0f,  // top right
         };
         static const float texture_vertices[] = {
             // texture coords square
@@ -43,10 +45,12 @@ public:
         cameraShader = new Shader(camera_vert_src, camera_frag_src);
     }
 
-    void Draw(const FrameBufferTarget &framebuffer_target_, GLenum src_target, GLuint src_name) {
+    void Draw(const FrameBufferTarget &framebuffer_target_, GLenum src_target, GLuint src_name, int src_width, int src_height) {
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
+
         framebuffer_target_.Bind();
+        glViewport(0, 0, src_width, src_height);
         cameraShader->use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(src_target, src_name);
@@ -57,6 +61,7 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
         framebuffer_target_.Unbind();
+        
         glDepthMask(GL_FALSE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);

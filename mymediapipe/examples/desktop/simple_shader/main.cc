@@ -69,6 +69,12 @@ absl::StatusOr<mediapipe::GlCalculatorHelper> GetGpuHelper(mediapipe::Calculator
 
 absl::StatusOr<cv::VideoCapture> InitialCamera(bool load_video, bool save_video) {
     cv::VideoCapture capture;
+
+    // capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+    // capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    // capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+    // capture.set(cv::CAP_PROP_FPS, 30);
+
     if (load_video) {
         LOG(INFO) << "Load the video.";
         capture.open(absl::GetFlag(FLAGS_input_video_path));

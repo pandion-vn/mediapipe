@@ -56,7 +56,23 @@ public:
                 m_InterTime = 0.0;
             }
             // std::cout << "m_CurrentTime :" << m_CurrentTime << std::endl;
+            std::cout << "Calculated all Bone transform" << std::endl;
             CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f), m_CurrentAnimation, m_CurrentTime);
+        }
+    }
+
+    void UpdateAnimationWithBone(float dt, 
+                                 std::vector<glm::vec3> &landmarks,
+                                 std::vector<glm::quat> &rotations) {
+        m_DeltaTime = dt;
+        if (m_CurrentAnimation) {
+            m_CurrentTime = fmod(m_CurrentTime + m_CurrentAnimation->GetTicksPerSecond() * dt, m_CurrentAnimation->GetDuration());
+            CalculateBoneTransformWithBone(&m_CurrentAnimation->GetRootNode(), 
+                                   glm::mat4(1.0f), 
+                                   m_CurrentAnimation, 
+                                   m_CurrentTime,
+                                   landmarks,
+                                   rotations);
         }
     }
 
@@ -135,6 +151,77 @@ public:
             CalculateBoneTransition(&curNode->children[i], globalTransformation, prevAnimation, nextAnimation, haltTime, currentTime, transitionTime);
     }
 
+    void CalculateBoneTransformWithBone(const AssimpNodeData* node, 
+                                        glm::mat4 parentTransform, 
+                                        Animation* animation, 
+                                        float currentTime,
+                                        std::vector<glm::vec3> &landmarks,
+                                        std::vector<glm::quat> &rotations) {
+        std::string nodeName = node->name;
+        // std::cout << "CalculateBoneTransform nodeName :" << nodeName << std::endl;
+        glm::mat4 nodeTransform = node->transformation;
+
+        Bone* bone = animation->FindBone(nodeName);
+
+        if (bone) {
+            glm::mat4 translate = glm::mat4(1.0f);
+            glm::mat4 scale = glm::mat4(1.0f);
+            glm::mat4 rot = glm::mat4(1.0f);
+            if (nodeName == "mixamorig_LeftShoulder") {
+                // translate = glm::translate(glm::mat4(1.0f), landmarks[34]);
+                // rot = glm::toMat4(rotations[34]);
+                // bone->UpdateTransform(currentTime, translate, rot, scale);
+                bone->Update(currentTime);
+            } else if (nodeName == "mixamorig_LeftArm") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[11]);
+                rot = glm::toMat4(rotations[11]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else if (nodeName == "mixamorig_LeftForeArm") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[13]);
+                rot = glm::toMat4(rotations[13]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else if (nodeName == "mixamorig_LeftHand") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[15]);
+                rot = glm::toMat4(rotations[15]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else if (nodeName == "mixamorig_RightShoulder") {
+                // translate = glm::translate(glm::mat4(1.0f), landmarks[34]);
+                // rot = glm::toMat4(rotations[34]);
+                // bone->UpdateTransform(currentTime, translate, rot, scale);
+                bone->Update(currentTime);
+            } else if (nodeName == "mixamorig_RightArm") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[12]);
+                rot = glm::toMat4(rotations[12]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else if (nodeName == "mixamorig_RightForeArm") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[14]);
+                rot = glm::toMat4(rotations[14]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else if (nodeName == "mixamorig_RightHand") {
+                translate = glm::translate(glm::mat4(1.0f), landmarks[16]);
+                rot = glm::toMat4(rotations[16]);
+                bone->UpdateTransform(currentTime, translate, rot, scale);
+            } else {
+                bone->Update(currentTime);
+            }
+            
+            nodeTransform = bone->GetLocalTransform();
+        }
+
+        glm::mat4 globalTransformation = parentTransform * nodeTransform;
+
+        auto boneInfoMap = animation->GetBoneIDMap();
+        if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
+            int index = boneInfoMap[nodeName].id;
+            glm::mat4 offset = boneInfoMap[nodeName].offset;
+            m_FinalBoneMatrices[index] = globalTransformation * offset;
+            // std::cout << "Update m_FinalBoneMatrices index :" << index << std::endl;
+        }
+
+        for (int i = 0; i < node->childrenCount; i++)
+            CalculateBoneTransformWithBone(&node->children[i], globalTransformation, animation, currentTime, landmarks, rotations);
+    }
+
     void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform, Animation* animation, float currentTime) {
         std::string nodeName = node->name;
         // std::cout << "CalculateBoneTransform nodeName :" << nodeName << std::endl;
@@ -143,6 +230,9 @@ public:
         Bone* bone = animation->FindBone(nodeName);
 
         if (bone) {
+            if (nodeName == "LeftHand") {
+                std::cout << "Get transform of lefthand" << std::endl;
+            }
             bone->Update(currentTime);
             nodeTransform = bone->GetLocalTransform();
         }
