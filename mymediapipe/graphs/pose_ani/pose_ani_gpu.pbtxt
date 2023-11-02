@@ -11,10 +11,12 @@ output_stream: "pose_landmarks"
 # Generates side packet to enable segmentation.
 node {
   calculator: "ConstantSidePacketCalculator"
-  output_side_packet: "PACKET:enable_segmentation"
+  output_side_packet: "PACKET:0:enable_segmentation"
+  output_side_packet: "PACKET:1:model_complexity"
   node_options: {
     [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
       packet { bool_value: false }
+      packet { int_value: 2 }
     }
   }
 }
@@ -63,6 +65,7 @@ node {
 node {
   calculator: "PoseLandmarkGpu"
   input_side_packet: "ENABLE_SEGMENTATION:enable_segmentation"
+  input_side_packet: "MODEL_COMPLEXITY:model_complexity"
   input_stream: "IMAGE:throttled_input_video"
   output_stream: "LANDMARKS:pose_landmarks"
   output_stream: "SEGMENTATION_MASK:segmentation_mask"
@@ -94,7 +97,8 @@ node {
 node: {
     calculator: "Gl18aCameraSkeletalAnimationCalculator"
     input_stream: "IMAGE_GPU:pose_render_video"
-    input_stream: "NORM_LANDMARKS:pose_world_landmarks"
+    input_stream: "LANDMARKS:pose_landmarks"
+    input_stream: "WORLD_LANDMARKS:pose_world_landmarks"
     input_side_packet: "ENVIRONMENT:environment"
     output_stream: "IMAGE_GPU:output_video"
 }

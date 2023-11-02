@@ -12,13 +12,14 @@
 
 // function set_pose_origin()
 void set_pose_origin(std::vector<glm::vec3>& landmarks) {
-    landmarks[34] = (landmarks[11] + landmarks[12]) * 0.5f; // shoulder center location
-    landmarks[33] = (landmarks[23] + landmarks[24]) * 0.5f; // hip center location
+    landmarks[34] = (landmarks[11] + landmarks[12]) / 2.f; // shoulder center location
+    landmarks[33] = (landmarks[23] + landmarks[24]) / 2.f; // hip center location
 
+    // offset
     glm::vec3 offset = landmarks[33];
-    for (int i=0; i<landmarks.size(); i++) {
-        landmarks[i] = landmarks[i] - offset;
-    }
+    // for (int i=0; i<landmarks.size(); i++) {
+    //     landmarks[i] = landmarks[i] - offset;
+    // }
     landmarks[35] = offset;
 }
 
@@ -42,7 +43,7 @@ glm::vec3 plan_from_vec(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2) {
 }
 
 glm::vec3 neg_from_vec(glm::vec3 v0) {
-    return glm::vec3(v0.x * -1.0, v0.y * -1.0, v0.z * -1.0);
+    return glm::vec3(-v0.x, -v0.y, -v0.z);
 }
 
 void torso_rotation(std::vector<glm::vec3>& landmarks, std::vector<glm::quat> &pose_rotations) {
@@ -61,6 +62,8 @@ void limb_rotation(std::vector<glm::vec3>& landmarks, std::vector<glm::quat> &po
 
     pose_rotations[23] = rotate_towards(neg_from_vec(glm::normalize(landmarks[23] - landmarks[25])), VEC3_X, VEC3_Z); // left hip
     pose_rotations[25] = rotate_towards(neg_from_vec(glm::normalize(landmarks[25] - landmarks[27])), VEC3_X, VEC3_Z); // left knee
+    // pose_rotations[23] = rotate_towards(neg_from_vec(glm::normalize(landmarks[25] - landmarks[23])), VEC3_X, VEC3_Z); // left hip
+    // pose_rotations[25] = rotate_towards(neg_from_vec(glm::normalize(landmarks[27] - landmarks[25])), VEC3_X, VEC3_Z); // left knee
 
     pose_rotations[24] = rotate_towards(neg_from_vec(glm::normalize(landmarks[24] - landmarks[26])), VEC3_X, VEC3_Z); // right hip
     pose_rotations[26] = rotate_towards(neg_from_vec(glm::normalize(landmarks[26] - landmarks[28])), VEC3_X, VEC3_Z); // right knee
@@ -69,9 +72,13 @@ void limb_rotation(std::vector<glm::vec3>& landmarks, std::vector<glm::quat> &po
     pose_rotations[13] = rotate_towards(neg_from_vec(glm::normalize(landmarks[13] - landmarks[15])), VEC3_X, VEC3_Z); // left elbow
     pose_rotations[15] = rotate_towards(neg_from_vec(glm::normalize(landmarks[15] - landmarks[19])), VEC3_X, VEC3_Z); // left hand
 
-    pose_rotations[12] = rotate_towards(neg_from_vec(glm::normalize(landmarks[12] - landmarks[14])), VEC3_X, VEC3_Z); // right shoulder
-    pose_rotations[14] = rotate_towards(neg_from_vec(glm::normalize(landmarks[14] - landmarks[16])), VEC3_X, VEC3_Z); // right elbow
-    pose_rotations[16] = rotate_towards(neg_from_vec(glm::normalize(landmarks[16] - landmarks[20])), VEC3_X, VEC3_Z); // right hand
+    pose_rotations[12] = rotate_towards((glm::normalize(landmarks[12] - landmarks[14])), VEC3_X, VEC3_Z); // right shoulder
+    pose_rotations[14] = rotate_towards((glm::normalize(landmarks[14] - landmarks[16])), VEC3_X, VEC3_Z); // right elbow
+    pose_rotations[16] = rotate_towards((glm::normalize(landmarks[16] - landmarks[20])), VEC3_X, VEC3_Z); // right hand
+
+    // pose_rotations[12] = rotate_towards((glm::normalize(landmarks[14] - landmarks[12])), VEC3_Z, VEC3_X); // right shoulder
+    // pose_rotations[14] = rotate_towards((glm::normalize(landmarks[16] - landmarks[14])), VEC3_Z, VEC3_X); // right elbow
+    // pose_rotations[16] = rotate_towards((glm::normalize(landmarks[20] - landmarks[16])), VEC3_Z, VEC3_X); // right hand
 }
 
 /// Calculates foot rotation.
@@ -117,9 +124,8 @@ void calc_rotation_data(std::vector<glm::vec3>& landmarks, std::vector<glm::quat
 //   calculate rotation data (data, rotation_data)
 //   return rotation_data
 std::vector<glm::quat> pose_rotation(std::vector<glm::vec3>& landmarks) {
-    std::vector<glm::quat> pose_rotations;
+    std::vector<glm::quat> pose_rotations(36);
     landmarks.resize(36);
-    pose_rotations.resize(36);
     set_pose_origin(landmarks);
 
     calc_rotation_data(landmarks, pose_rotations);

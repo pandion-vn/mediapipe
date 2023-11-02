@@ -31,7 +31,7 @@ cc_library(
         "//mymediapipe/calculators/debugger:common_debugger_calculator",
         "//mediapipe/modules/face_geometry:env_generator_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_11b_coordinate_system_calculator",
-        "//mymediapipe/graphs/glanimation/calculators:gl_18_camera_skeletal_animation_calculator",
+        # "//mymediapipe/graphs/glanimation/calculators:gl_18_camera_skeletal_animation_calculator",
         "//mymediapipe/graphs/glanimation/calculators:gl_18a_camera_skeletal_animation_calculator",
     ],
 )

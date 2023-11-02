@@ -110,16 +110,12 @@ public:
         ourShader = new Shader(vert_src, frag_src);
 
         // load models
-        ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
-        // ourModel = new Model("mymediapipe/assets/vrm/Ashtra.vrm");
+        // ourModel = new Model("mymediapipe/assets/opengl/aj/aj.dae");
+        ourModel = new Model("mymediapipe/assets/opengl/michelle/michelle.dae");
         
-        animation = new Animation("mymediapipe/assets/opengl/aj/aj.dae", ourModel);
-        // animation = new Animation("mymediapipe/assets/vrm/Ashtra.vrm", ourModel);
+        // animation = new Animation("mymediapipe/assets/opengl/aj/aj.dae", ourModel);
+        animation = new Animation("mymediapipe/assets/opengl/michelle/michelle.dae", ourModel);
         animation->ShowBones();
-        // animation1 = new Animation("mymediapipe/assets/opengl/aj/walking.dae", ourModel);
-        // animation2 = new Animation("mymediapipe/assets/opengl/aj/jump.dae", ourModel);
-        // animation3 = new Animation("mymediapipe/assets/opengl/aj/breathing_idle.dae", ourModel);
-        // animation4 = new Animation("mymediapipe/assets/opengl/aj/left_strafe_walking.dae", ourModel);
         
         animator = new Animator();
         animator->PlayAnimation(animation);
@@ -130,41 +126,23 @@ public:
               double deltaTime,
               std::vector<glm::vec3> &landmarks,
               std::vector<glm::quat> &rotations) {
-        // if (counting > 550) 
-        //     counting = 0;
-        // else if (counting > 300)
-        //     animator->PlayAnimation(animation4);
-        // else if (counting > 250)
-        //     animator->PlayAnimation(animation3);
-        // else if (counting > 200)
-        //     animator->PlayAnimation(animation2);
-        // else
-        //     animator->PlayAnimation(animation1);
-        
         counting++;
-
-        // Bone* leftArm = animation->FindBone("mixamorig_LeftHand");
-        // if (leftArm) {
-        //     // std::cout << "lefthand: " << leftArm->GetBoneName() << "(" << leftArm->GetBoneID() << ")" << std::endl;
-        //     // std::cout << "  position num: " << leftArm->m_NumPositions << std::endl;
-        //     // std::cout << "  rotation num: " << leftArm->m_NumRotations << std::endl;
-        //     // std::cout << "  scale num: " << leftArm->m_NumScalings << std::endl;
-        //     // leftArm->UpdateTransform(translation, rotation, scale);
-        // }
         
-        // animator->UpdateAnimationWithBone(deltaTime, landmarks, rotations);
+        animator->UpdateAnimationWithBone(deltaTime, landmarks, rotations);
 
         ourShader->use();
 
-        Camera camera(glm::vec3(0.0f, 0.0f, 5.0f)); // aj
+        // x, y, z
+        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        glm::vec3 cameraUp = glm::vec3(0.0f, -1.0f, 0.0f);
 
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 
-                                                (float)src_width / (float)src_height, 
-                                                0.1f,
-                                                1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(65.f), (float)src_width / (float)src_height, 0.1f, 100.0f);
 
-        glm::mat4 view = camera.GetViewMatrix();
+        // glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 view = glm::lookAt(camPos, position, cameraUp);
+        // std::cout << "camera view" << glm::to_string(view) << std::endl;
         ourShader->setMat4("projection", projection);
         ourShader->setMat4("view", view);
 
@@ -179,26 +157,28 @@ public:
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         // x, y, z
-        // model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate down michelle
-        // model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// michelle & aj
-        // model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
-        // model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// michelle & aj
-        // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // michelle & aj
-        // model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
+        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f)); // translate down michelle
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f)); // translate far michelle
+        // model = glm::translate(model, glm::vec3(0.0f, 1.1f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.015f, 0.015f, 0.015f));	// michelle & aj
         ourShader->setMat4("model", model);
 
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         framebuffer_target_.Bind();
         glViewport(0, 0, src_width, src_height);
-        // bind diffuse map
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
-        // ourShader->setInt("texture_diffuse1", 0);
+
+        // draw model
         ourShader->use();
         ourModel->Draw(*ourShader);
+
+        // draw landmarks
+        // glBegin( GL_LINES);
+        //     glVertex3f(landmarks[11].x, landmarks[11].y, landmarks[11].z);
+        //     glVertex3f(landmarks[13].x, landmarks[13].y, landmarks[13].z);
+        //     glVertex3f(landmarks[13].x, landmarks[13].y, landmarks[13].z);
+        //     glVertex3f(landmarks[15].x, landmarks[15].y, landmarks[15].z);
+        // glEnd();
 
         framebuffer_target_.Unbind();
         glDisable(GL_DEPTH_TEST);

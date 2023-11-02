@@ -22,10 +22,12 @@
 #include "lib/model.h"
 #include "lib/video_scene.h"
 #include "lib/model_scene_a.h"
+#include "lib/model_line.h"
 #include "lib/animation.h"
 #include "lib/animator.h"
 // #include "lib/util.h"
 #include "lib/my_pose.h"
+// #include "lib/kalidokit.h"
 
 namespace mediapipe {
 
@@ -33,6 +35,7 @@ static constexpr char kImageGpuTag[] = "IMAGE_GPU";
 static constexpr char kEnvironmentTag[] = "ENVIRONMENT";
 static constexpr char kLandmarksTag[] = "LANDMARKS";
 static constexpr char kNormLandmarksTag[] = "NORM_LANDMARKS";
+static constexpr char kWorldLandmarksTag[] = "WORLD_LANDMARKS";
 static constexpr char kMultiFaceGeometryTag[] = "MULTI_FACE_GEOMETRY";
 
 enum { ATTRIB_VERTEX, ATTRIB_NORMAL, ATTRIB_TEXTURE_COORDS, LIGHTING_NUM_ATTRIBUTES };
@@ -103,6 +106,7 @@ private:
     // GLuint VBO[2], VAO;
     VideoScene *videoScene;
     ModelSceneA *modelScene;
+    ModelLine *modelLine;
     int counting;
     face_geometry::Environment environment_;
     LandmarkList prev_landmarks;
@@ -130,8 +134,12 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::GetContract(CalculatorContr
             .Tag(kEnvironmentTag)
             .Set<face_geometry::Environment>();
 
-    if (cc->Inputs().HasTag(kNormLandmarksTag)) {
-        cc->Inputs().Tag(kNormLandmarksTag).Set<LandmarkList>();
+    if (cc->Inputs().HasTag(kWorldLandmarksTag)) {
+        cc->Inputs().Tag(kWorldLandmarksTag).Set<LandmarkList>();
+    }
+
+    if (cc->Inputs().HasTag(kLandmarksTag)) {
+        cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
     }
     
     if (cc->Inputs().HasTag(kMultiFaceGeometryTag)) {
@@ -182,16 +190,9 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::Process(CalculatorContext* 
         }
 
         GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);
-        int dst_width = input_gl_texture.width();
-        int dst_height = input_gl_texture.height();
+        int dst_width = 1440; // input_gl_texture.width();
+        int dst_height = 900; // input_gl_texture.height();
         GlTexture output_gl_texture = gpu_helper_.CreateDestinationTexture(dst_width, dst_height);
-
-        // get face geometry
-        // multi_face_geometry = cc->Inputs().Tag(kMultiFaceGeometryTag).IsEmpty()
-        //                                         ? empty_multi_face_geometry
-        //                                         : cc->Inputs()
-        //                                             .Tag(kMultiFaceGeometryTag)
-        //                                             .Get<std::vector<face_geometry::FaceGeometry>>();
 
         // Set the destination texture as the color buffer. Then, clear both the
         // color and the depth buffers for the render target.
@@ -242,6 +243,9 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::GlSetup() {
     modelScene = new ModelSceneA();
     modelScene->Setup();
 
+    modelLine = new ModelLine();
+    modelLine->Setup();
+
     counting = 0;
 
     LOG(INFO) << "DONE setup";
@@ -265,90 +269,72 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::GlRender(CalculatorContext*
 
     videoScene->Draw(*framebuffer_target_, src.target(), src.name(), src_width, src_height);
 
+    if (cc->Inputs().HasTag(kWorldLandmarksTag) &&
+        cc->Inputs().Tag(kWorldLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+    if (cc->Inputs().HasTag(kLandmarksTag) &&
+        cc->Inputs().Tag(kLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+
     bool visualize_depth = true;// options_.visualize_landmark_depth();
     float z_min = 0.f;
     float z_max = 0.f;
-    if (cc->Inputs().HasTag(kNormLandmarksTag)) {
-        const auto& landmarks = cc->Inputs().Tag(kNormLandmarksTag).Get<LandmarkList>();
-        // if (visualize_depth) {
-        //     GetMinMaxZ<NormalizedLandmarkList, NormalizedLandmark>(landmarks, &z_min, &z_max);
-        // }
+    const auto& landmarks_3d = cc->Inputs().Tag(kWorldLandmarksTag).Get<LandmarkList>();
+    const auto& landmarks_2d = cc->Inputs().Tag(kLandmarksTag).Get<NormalizedLandmarkList>();
+    if (visualize_depth) {
+        GetMinMaxZ<LandmarkList, Landmark>(landmarks_3d, &z_min, &z_max);
+    }
+    std::cout << "z_min: " << z_min << ", z_max: " << z_max << std::endl;
 
-        // for (int i = 0; i < landmarks.landmark_size(); ++i) {
-        //     const Landmark& landmark = landmarks.landmark(i);
-        //     std::cout << "landmark (" << i << ") : " << landmark.x() << " " << landmark.y() << " " << landmark.z() << std::endl;
-        // }
+    // for (int i = 0; i < landmarks.landmark_size(); ++i) {
+    //     const Landmark& landmark = landmarks.landmark(i);
+    //     std::cout << "landmark (" << i << ") : " << landmark.x() << " " << landmark.y() << " " << landmark.z() << std::endl;
+    // }
 
-        // std::cout << std::endl;
-        // return absl::OkStatus();
+    // std::cout << std::endl;
+    // return absl::OkStatus();
 
-        // prepare landmarks
-        std::vector<glm::vec3> pose_landmarks;
-        for (int i = 0; i < landmarks.landmark_size(); ++i) {
-            const Landmark& landmark = landmarks.landmark(i);
-            // pose_landmarks.push_back(glm::vec3(-landmark.x(), landmark.z(), -landmark.y()));
-            pose_landmarks.push_back(glm::vec3(-landmark.x(), landmark.y(), -landmark.z()));
-        }
-
-        auto rotations = pose_rotation(pose_landmarks);
-
-        // std::cout << "set origin point: " << std::endl;
-        // for (int i=0; i<pose_landmarks.size(); i++) {
-        //     std::cout << "landmark point (" << i << "): " << glm::to_string(pose_landmarks[i]) << std::endl;
-        // }
-
-        // std::cout << "rotations: " << std::endl;
-        // for (int i=0; i<rotations.size(); i++) {
-        //     std::cout << "rotation point (" << i << "): " << glm::to_string(rotations[i]) << std::endl;
-        // }
-
-        modelScene->Draw(*framebuffer_target_, src_width, src_height, deltaTime, pose_landmarks, rotations);
-
+    // prepare landmarks
+    std::vector<glm::vec3> lm3d;
+    std::vector<glm::vec3> lm2d;
+    std::vector<float> lm3d_visibility;
+    for (int i = 0; i < landmarks_3d.landmark_size(); ++i) {
+        const Landmark& landmark3d = landmarks_3d.landmark(i);
+        const NormalizedLandmark& landmark2d = landmarks_2d.landmark(i);
+        
+        lm3d.push_back(glm::vec3(landmark3d.x(), landmark3d.y() * -1.0, -landmark3d.z() * -1.0));
+        lm3d_visibility.push_back(landmark3d.visibility());
+        // lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
+        lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
     }
 
-    // ourShader->use();
+    auto rotations3d = pose_rotation(lm3d);
+    auto rotations2d = pose_rotation(lm2d);
+    for (int i = 0; i < lm3d.size(); ++i) {
+        std::cout << "lm3d (" << i << ")" << glm::to_string(lm3d[i]) << std::endl;
+    }
 
-    // view/projection transformations
-    // glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 
-    //                                         (float)src_width / (float)src_height, 
-    //                                         0.1f,
-    //                                         100.0f);
-    // glm::mat4 view = camera.GetViewMatrix();
-    // ourShader->setMat4("projection", projection);
-    // ourShader->setMat4("view", view);
+    for (int i = 0; i < lm2d.size(); ++i) {
+        std::cout << "lm2d (" << i << ")" << glm::to_string(lm2d[i]) << std::endl;
+    }
 
-    // auto transforms = animator->GetFinalBoneMatrices();
-    // // std::cout << "Transform size: " << transforms.size() << std::endl;
-    // for (int i = 0; i < transforms.size(); ++i) {
-    //     ourShader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-    //     // std::cout << "Transform " << i << ": " << glm::to_string(transforms[i]) << std::endl;
-    // }
-    // ourShader->setMat4("finalBonesMatrices", transforms);
+    // std::cout << "rot leftarm 3d" << glm::to_string(rotations3d[12]) << std::endl;
+    // std::cout << "lm3d rightarm[12] " << glm::to_string(lm3d[12]) << std::endl;
+    // std::cout << "lm3d rightforearm[14] " << glm::to_string(lm3d[14]) << std::endl;
+    // std::cout << "lm3d righthand[16] " << glm::to_string(lm3d[15]) << std::endl;
+    // std::cout << "lm2d rightarm[12] " << glm::to_string(lm2d[12]) << std::endl;
+    // std::cout << "lm2d rightarm[14] " << glm::to_string(lm2d[14]) << std::endl;
+    // std::cout << "lm2d rightarm[16] " << glm::to_string(lm2d[16]) << std::endl;
+    // std::cout << "rot rightarm 3d " << glm::to_string(rotations3d[12]) << std::endl;
+    // std::cout << "rot rightarm 2d " << glm::to_string(rotations2d[12]) << std::endl;
 
-    // render the loaded model
-    // glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f)); // translate it down so it's at the center of the scene
-    // model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-    // model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-    // model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));	// it's a bit too big for our scene, so scale it down
-    // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    // model = glm::rotate(model, (float) timestamp * glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 1.0f));  
-    // ourShader->setMat4("model", model);
+    // std::vector<glm::vec3> rots(33);
+    // kalidokitSolve(lm3d, lm3d_visibility, lm2d, rots);
 
-    // glEnable(GL_DEPTH_TEST);
-    // glDepthMask(GL_TRUE);
-    // framebuffer_target_->Bind();
-    // // bind diffuse map
-    // // glActiveTexture(GL_TEXTURE0);
-    // // glBindTexture(GL_TEXTURE_2D, diffuseMapTexture);
-    // // ourShader->setInt("texture_diffuse1", 0);
-    // ourShader->use();
-    // ourModel->Draw(*ourShader);
-
-    // framebuffer_target_->Unbind();
-    // glDisable(GL_DEPTH_TEST);
-    // glDepthMask(GL_FALSE);
+    // modelScene->Draw(*framebuffer_target_, src_width, src_height, deltaTime, lm3d, rotations2d);
+    modelLine->Draw(*framebuffer_target_, src_width, src_height, timestamp, lm3d);
 
     return absl::OkStatus();
 }
@@ -357,7 +343,7 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::GlCleanup() {
     // cleanup
     // glDisable(GL_DEPTH_TEST);
     // glDepthMask(GL_FALSE);
-    glDisable(GL_BLEND);
+    // glDisable(GL_BLEND);
     glFlush();
     return absl::OkStatus();    
 }

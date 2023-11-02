@@ -5,6 +5,23 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+
+cc_library(
+    name = "glm_math_lib",
+    srcs = [
+        "lib/my_math.h",
+        "lib/my_pose.h",
+    ],
+    hdrs = [
+        "lib/my_math.h",
+        "lib/my_pose.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//third_party:opengl_glm",
+    ],
+)
+
 ### General calculator superclasses
 cc_library(
     name = "gl_base_lib",
@@ -17,6 +34,7 @@ cc_library(
         "lib/video_scene.h",
         "lib/model_scene.h",
         "lib/model_scene_a.h",
+        "lib/model_line.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
@@ -24,6 +42,7 @@ cc_library(
         "lib/util.cc",
         "lib/my_pose.h",
         "lib/my_math.h",
+        "lib/kalidokit.h",
         # "lib/tiny_obj_loader.cc",
     ],
     hdrs = [
@@ -35,12 +54,14 @@ cc_library(
         "lib/video_scene.h",
         "lib/model_scene.h",
         "lib/model_scene_a.h",
+        "lib/model_line.h",
         "lib/framebuffer_target.h",
         "lib/bone.h",
         "lib/animation.h",
         "lib/animator.h",
         "lib/my_pose.h",
         "lib/my_math.h",
+        "lib/kalidokit.h",
         # "lib/rapidobj.hpp",
         # "lib/tiny_obj_loader.h",
         "lib/util.h",

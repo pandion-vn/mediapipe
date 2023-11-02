@@ -1,12 +1,16 @@
 #pragma once
+#ifndef ANIMATOR_H
+#define ANIMATOR_H
 
 #include <map>
 #include <vector>
 #include "glm/glm.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "assimp/scene.h"
 #include "assimp/Importer.hpp"
 #include "animation.h"
 #include "bone.h"
+#include "kalidokit.h"
 
 class Animator
 {
@@ -151,6 +155,30 @@ public:
             CalculateBoneTransition(&curNode->children[i], globalTransformation, prevAnimation, nextAnimation, haltTime, currentTime, transitionTime);
     }
 
+    glm::mat4 BonePosition(Bone* bone, glm::vec3 position, float scaleFactor=0.3f) {
+        KeyPosition pos = bone->GetPositions(0.0);
+        // glm::vec3 finalPosition = glm::mix(pos.position, pos.position + position, scaleFactor);
+        glm::mat4 translation = glm::translate(glm::mat4(1.0f), pos.position);
+
+        return translation;
+    }
+
+    glm::mat4 BoneRotation(Bone* bone, glm::quat rotation, float scaleFactor=0.3f) {
+        KeyRotation rot = bone->GetRotations(0.0);
+        // glm::quat finalRotation = glm::slerp(rot.orientation, rotation, scaleFactor);
+        glm::quat finalRotation = glm::normalize(rotation);
+        // glm::quat finalRotation = rotation;
+
+        return glm::toMat4(finalRotation);
+    }
+
+    glm::mat4 BoneScale(Bone* bone, glm::vec3 nextScl, float scaleFactor=0.3f) {
+        KeyScale scl = bone->GetScalings(0.0);
+        // glm::vec3 finalScale = glm::mix(scl.scale, scl.scale + nextScl, scaleFactor);
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), scl.scale);
+        return scale;
+    }
+
     void CalculateBoneTransformWithBone(const AssimpNodeData* node, 
                                         glm::mat4 parentTransform, 
                                         Animation* animation, 
@@ -164,48 +192,233 @@ public:
         Bone* bone = animation->FindBone(nodeName);
 
         if (bone) {
-            glm::mat4 translate = glm::mat4(1.0f);
-            glm::mat4 scale = glm::mat4(1.0f);
-            glm::mat4 rot = glm::mat4(1.0f);
-            if (nodeName == "mixamorig_LeftShoulder") {
-                // translate = glm::translate(glm::mat4(1.0f), landmarks[34]);
-                // rot = glm::toMat4(rotations[34]);
-                // bone->UpdateTransform(currentTime, translate, rot, scale);
-                bone->Update(currentTime);
-            } else if (nodeName == "mixamorig_LeftArm") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[11]);
-                rot = glm::toMat4(rotations[11]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
-            } else if (nodeName == "mixamorig_LeftForeArm") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[13]);
-                rot = glm::toMat4(rotations[13]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
-            } else if (nodeName == "mixamorig_LeftHand") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[15]);
-                rot = glm::toMat4(rotations[15]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
-            } else if (nodeName == "mixamorig_RightShoulder") {
-                // translate = glm::translate(glm::mat4(1.0f), landmarks[34]);
-                // rot = glm::toMat4(rotations[34]);
-                // bone->UpdateTransform(currentTime, translate, rot, scale);
-                bone->Update(currentTime);
+            // glm::mat4 translate = glm::mat4(1.0f);
+            // glm::mat4 scale = glm::mat4(1.0f);
+            // glm::mat4 rot = glm::mat4(1.0f);
+            // std::string order = "XYZ";
+            if (nodeName == "mixamorig_LeftArm") {
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                glm::quat rot = glm::quat(1.0f, -0.8f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, -0.9f, 0.f); // rot up hand from arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.9f); // rot to front arm
+                glm::mat4 rotation = BoneRotation(bone, rot);
+                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                // std::cout << "rot leftarm" << glm::to_string(rotations[11]) << std::endl;
+                nodeTransform = translation * rotation * scale;
             } else if (nodeName == "mixamorig_RightArm") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[12]);
-                rot = glm::toMat4(rotations[12]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
+                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -0.9f); // to front
+                glm::mat4 rotation = BoneRotation(bone, rot);
+                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                nodeTransform = translation * rotation * scale;
             } else if (nodeName == "mixamorig_RightForeArm") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[14]);
-                rot = glm::toMat4(rotations[14]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
+                // glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -0.9f); // to right from shoulder
+                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, 0.f); // T-pose
+                glm::mat4 rotation = BoneRotation(bone, rot);
+                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                nodeTransform = translation * rotation * scale;
             } else if (nodeName == "mixamorig_RightHand") {
-                translate = glm::translate(glm::mat4(1.0f), landmarks[16]);
-                rot = glm::toMat4(rotations[16]);
-                bone->UpdateTransform(currentTime, translate, rot, scale);
-            } else {
-                bone->Update(currentTime);
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
+                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -1.9f); // to left from forearm
+                glm::mat4 rotation = BoneRotation(bone, rot);
+                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                nodeTransform = translation * rotation * scale;
             }
+
+            // if (nodeName == "Head") {
+            // } else if (nodeName == "mixamorig_Neck") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0)/*landmarks[34]*/);
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[34]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (/*nodeName == "Hips" || */nodeName == "mixamorig_Hips") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0)/*landmarks[33]*/);
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[33], 0.3);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "LeftArm" || nodeName == "mixamorig_LeftArm" ) {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[11]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[12], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // // glm::mat4 rotation = BoneRotation(bone, rotations[11]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[11], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rot.orientation + rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     // transform = translation * rotation * scale;
+                
+            // } else if (nodeName == "LeftForeArm" || nodeName == "mixamorig_LeftForeArm") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[13]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[14], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // // glm::mat4 rotation = BoneRotation(bone, rotations[13]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[13], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rot.orientation + rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     // transform = translation * rotation * scale;
+                
+            // } else if (nodeName == "LeftHand" || nodeName == "mixamorig_LeftHand") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[15]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[16], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[15], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rot.orientation + rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     // // glm::mat4 rotation = BoneRotation(bone, rotations[15]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     // transform = translation * rotation * scale;
+            // } else if (nodeName == "RightArm" || nodeName == "mixamorig_RightArm") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // glm::quat rot = glm::quat(1.0f, -0.03f, -0.9f, .0f);
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[12], 1.0);
+
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     // std::cout << "left arm rot: " << glm::to_string(bone->GetRotations(0.0).orientation) << std::endl;
+            //     // std::cout << "left arm rot static: " << glm::to_string(rot) << std::endl;
+            //     // std::cout << "left arm rot calc: " << glm::to_string(rotations[11]) << std::endl;
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[11], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     // transform = translation * rotation * scale;
+
+            // } else if (nodeName == "RightForeArm" || nodeName == "mixamorig_RightForeArm") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[14]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[13], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // glm::mat4 rotation = BoneRotation(bone, rotations[14]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     // transform = translation * rotation * scale;
+            // } else if (nodeName == "RightHand" || nodeName == "mixamorig_RightHand") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[16]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+            //     // float scaleFactor = 0.3f;
+            //     // KeyRotation rot = bone->GetRotations(0.0);
+            //     // glm::quat rota_ = quatFromEuler(rota[15], order);
+            //     // glm::quat finalRotation = glm::slerp(rot.orientation, rota_, scaleFactor);
+            //     // finalRotation = glm::normalize(finalRotation);
+            //     // glm::mat4 rotation = glm::toMat4(finalRotation);
+
+            //     transform = translation * rotation * scale;
+            //     // glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     // glm::mat4 rotation = BoneRotation(bone, rotations[16]);
+            //     // glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     // transform = translation * rotation * scale;
+            // } else if (nodeName == "LeftUpLeg" || nodeName == "mixamorig_LeftUpLeg") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[23]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "LeftLeg" || nodeName == "mixamorig_LeftLeg") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[25]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "LeftFoot" || nodeName == "mixamorig_LeftFoot") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[27]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "RightUpLeg" || nodeName == "mixamorig_RightUpLeg") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[24]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "RightLeg" || nodeName == "mixamorig_RightLeg" ) {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[26]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // } else if (nodeName == "RightFoot" || nodeName == "mixamorig_RightFoot") {
+            //     glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+            //     glm::mat4 rotation = BoneRotation(bone, rotations[28]);
+            //     glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+
+            //     transform = translation * rotation * scale;
+            // }
             
-            nodeTransform = bone->GetLocalTransform();
+            // nodeTransform = bone->GetLocalTransform();
         }
 
         glm::mat4 globalTransformation = parentTransform * nodeTransform;
@@ -299,3 +512,5 @@ private:
     }
 
 };
+
+#endif

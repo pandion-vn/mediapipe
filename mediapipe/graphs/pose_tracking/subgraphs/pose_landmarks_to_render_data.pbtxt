@@ -118,7 +118,8 @@ node {
       landmark_color { r: 255 g: 255 b: 255 }
       connection_color { r: 255 g: 255 b: 255 }
       thickness: 3.0
-      visualize_landmark_depth: false
+      # visualize_landmark_depth: false
+      visualize_landmark_depth: true
       utilize_visibility: true
       visibility_threshold: 0.5
     }
@@ -182,7 +183,8 @@ node {
       landmark_color { r: 255 g: 255 b: 255 }
       connection_color { r: 255 g: 255 b: 255 }
       thickness: 5.0
-      visualize_landmark_depth: false
+      # visualize_landmark_depth: false
+      visualize_landmark_depth: true
       utilize_visibility: true
       visibility_threshold: 0.5
     }
@@ -200,7 +202,8 @@ node {
       landmark_color { r: 255 g: 138 b: 0 }
       connection_color { r: 255 g: 138 b: 0 }
       thickness: 3.0
-      visualize_landmark_depth: false
+      # visualize_landmark_depth: false
+      visualize_landmark_depth: true
       utilize_visibility: true
       visibility_threshold: 0.5
     }
@@ -218,7 +221,8 @@ node {
       landmark_color { r: 0 g: 217 b: 231 }
       connection_color { r: 0 g: 217 b: 231 }
       thickness: 3.0
-      visualize_landmark_depth: false
+      # visualize_landmark_depth: false
+      visualize_landmark_depth: true
       utilize_visibility: true
       visibility_threshold: 0.5
     }

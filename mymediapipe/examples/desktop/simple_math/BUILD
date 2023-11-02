@@ -3,26 +3,14 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "glm_base_lib",
-    srcs = [
-        "my_math.h",
-        "my_pose.h",
-    ],
-    hdrs = [
-        "my_math.h",
-        "my_pose.h",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//third_party:opengl_glm",
-    ],
-)
-
-cc_library(
     name = "glm_deps",
     hdrs = [
+        "my_math.h",
+        "my_pose.h",
     ],
     srcs = [
+        "my_math.h",
+        "my_pose.h",
         "main.cc",
     ],
     deps = [
@@ -46,8 +34,7 @@ cc_library(
         "@eigen_archive//:eigen3",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
-        "@com_google_absl//absl/strings",
-        ":glm_base_lib",
+        "@com_google_absl//absl/strings"
     ],
 )
 

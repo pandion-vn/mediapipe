@@ -69,11 +69,7 @@ absl::StatusOr<mediapipe::GlCalculatorHelper> GetGpuHelper(mediapipe::Calculator
 
 absl::StatusOr<cv::VideoCapture> InitialCamera(bool load_video, bool save_video) {
     cv::VideoCapture capture;
-
-    // capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-    // capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    // capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-    // capture.set(cv::CAP_PROP_FPS, 30);
+    // cv::VideoCapture capture("udpsrc port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink", cv::CAP_GSTREAMER);
 
     if (load_video) {
         LOG(INFO) << "Load the video.";
@@ -108,11 +104,11 @@ absl::StatusOr<cv::Mat> GetFrame(cv::VideoCapture& capture, bool load_video) {
         return absl::UnavailableError("End of video");
     }
 
+    if (!load_video) {
+        cv::flip(camera_frame_raw, camera_frame_raw, /*flipcode=HORIZONTAL*/ 1);
+    }
     cv::Mat camera_frame;
     cv::cvtColor(camera_frame_raw, camera_frame, cv::COLOR_BGR2RGBA);
-    if (!load_video) {
-        cv::flip(camera_frame, camera_frame, /*flipcode=HORIZONTAL*/ 1);
-    }
     return camera_frame;
 }
 
@@ -289,6 +285,9 @@ absl::Status RunMPPGraph() {
             writer.write(output_frame_mat);
 
         } else {
+            // if (!load_video) {
+            //     cv::flip(output_frame_mat, output_frame_mat, /*flipcode=HORIZONTAL*/ 1);
+            // }
             // LOG(INFO) << "Display output";
             cv::imshow(kWindowName, output_frame_mat);
             // Press any key to exit.

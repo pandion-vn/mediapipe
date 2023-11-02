@@ -16,7 +16,7 @@ static const glm::vec3 VEC3_NEG_X = glm::vec3(-1.0f, 0.0f, 0.0f);
 static const glm::vec3 VEC3_NEG_Y = glm::vec3(0.0f, -1.0f, 0.0f);
 static const glm::vec3 VEC3_NEG_Z = glm::vec3(0.0f, 0.0f, -1.0f);
 
-static const glm::quat QUAT_IDENTITY = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
+static const glm::quat QUAT_IDENTITY = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 glm::vec3 perpendicular(glm::vec3 vec) {
     if (vec.x != 0.0f) {
@@ -28,11 +28,11 @@ glm::vec3 perpendicular(glm::vec3 vec) {
     }
 }
 
-glm::quat from_axis_angles(glm::vec3 axis, float angle) {
+glm::quat from_axis_angle(glm::vec3 axis, float angle) {
     float s = sin(angle * 0.5);
     float c = cos(angle * 0.5);
     glm::vec3 v = axis * s;
-    return glm::quat(v.x, v.y, v.z, c);
+    return glm::quat(c, v.x, v.y, v.z);
 }
 
 // based on opengl rotation tutorial
@@ -40,17 +40,17 @@ glm::quat rotation_between(glm::vec3 start, glm::vec3 dest) {
     float cos_theta = glm::dot(start, dest);
     if (cos_theta <= -1.0f+0.0001f) {
         auto perp = glm::normalize(perpendicular(start));
-        return from_axis_angles(perp, PI/2.0f);
+        return from_axis_angle(perp, PI/2.0f);
     }
 
     auto rot_axis = glm::cross(start, dest);
     float s = sqrt((1.0f+cos_theta)*2.0f);
     float invs = 1.0f / s;
     return glm::quat(
+            s*0.5f,
             rot_axis.x*invs,
             rot_axis.y*invs,
-            rot_axis.z*invs,
-            s*0.5f);
+            rot_axis.z*invs);
 }
 
 glm::quat rotate_towards(glm::vec3 dir, glm::vec3 track, glm::vec3 up) {
@@ -58,7 +58,7 @@ glm::quat rotate_towards(glm::vec3 dir, glm::vec3 track, glm::vec3 up) {
         return QUAT_IDENTITY;
     }
 
-    auto right = glm::cross(dir, VEC3_Z);
+    auto right = glm::cross(dir, VEC3_Y);
     auto prev_up = glm::cross(right, dir);
     auto q1 = rotation_between(track, dir);
     auto new_up = up * q1;
@@ -82,20 +82,20 @@ glm::quat from_rotation_axes(glm::vec3 x, glm::vec3 y, glm::vec3 z) {
             float four_xsq = omm22 - dif10;
             float inv4x = 0.5 / sqrt(four_xsq);
             return glm::quat(
+                (m12 - m21) * inv4x, // w
                 four_xsq * inv4x,
                 (m01 + m10) * inv4x,
-                (m02 + m20) * inv4x,
-                (m12 - m21) * inv4x
+                (m02 + m20) * inv4x
             );
         } else {
             // y^2 >= x^2
             float four_ysq = omm22 + dif10;
             float inv4y = 0.5 / sqrt(four_ysq);
             return glm::quat(
+                (m20 - m02) * inv4y, // w
                 (m01 + m10) * inv4y,
                 four_ysq * inv4y,
-                (m12 + m21) * inv4y,
-                (m20 - m02) * inv4y
+                (m12 + m21) * inv4y
             );
         }
     } else {
@@ -107,20 +107,20 @@ glm::quat from_rotation_axes(glm::vec3 x, glm::vec3 y, glm::vec3 z) {
             float four_zsq = opm22 - sum10;
             float inv4z = 0.5 / sqrt(four_zsq);
             return glm::quat(
+                (m01 - m10) * inv4z, // w
                 (m02 + m20) * inv4z,
                 (m12 + m21) * inv4z,
-                four_zsq * inv4z,
-                (m01 - m10) * inv4z
+                four_zsq * inv4z
             );
         } else {
             // w^2 >= z^2
             float four_wsq = opm22 + sum10;
             float inv4w = 0.5 / sqrt(four_wsq);
             return glm::quat(
+                four_wsq * inv4w, // w
                 (m12 - m21) * inv4w,
                 (m20 - m02) * inv4w,
-                (m01 - m10) * inv4w,
-                four_wsq * inv4w
+                (m01 - m10) * inv4w
             );
         }
     }

@@ -10,17 +10,32 @@ public:
     void Setup() {
         static const GLfloat square_vertices[] = {
             // positions      
-            -1.0f, -1.0f, 0.0f,  // bottom left
-            1.0f, -1.0f, 0.0f,  // bottom right
-            -1.0f,  1.0f, 0.0f,  // top left
-            1.0f,  1.0f, 0.0f,  // top right
+            // -1.0f, -1.0f, 0.0f,  // TOP left
+            // 1.0f, -1.0f, 0.0f,  // TOP right
+            // -1.0f,  1.0f, 0.0f,  // BOTTOM left
+            // 1.0f,  1.0f, 0.0f,  // BOTTOM right
+            // bottom right position
+            // 0.5f, -1.0f, 0.0f,  // TOP left
+            // 1.0f, -1.0f, 0.0f,  // TOP right
+            // .5f,  -.5f, 0.0f,  // BOTTOM left
+            // 1.0f, -.5f, 0.0f,  // BOTTOM right
+
+            0.5f, 0.5f, 0.0f,  // half TOP left
+            1.0f, 0.5f, 0.0f,  // half TOP right
+            0.5f, 1.0f, 0.0f,  // half BOTTOM left
+            1.0f, 1.0f, 0.0f,  // half BOTTOM right
+
+            // 0.0f, 0.0f, 0.0f,  // zero TOP left
+            // 1.0f, 0.0f, 0.0f,  // zero TOP right
+            // 0.0f, 1.0f, 0.0f,  // zero BOTTOM left
+            // 1.0f, 1.0f, 0.0f,  // BOTTOM right
         };
         static const float texture_vertices[] = {
             // texture coords square
-            0.0f, 0.0f,     // bottom left
-            1.0f, 0.0f,     // bottom right
-            0.0f, 1.0f,     // top left
-            1.0f, 1.0f,     // top right
+            0.0f, 0.0f,     // top left
+            1.0f, 0.0f,     // top right
+            0.0f, 1.0f,     // BOTTOM left
+            1.0f, 1.0f,     // BOTTOM right
         };
 
         // vertex storage
