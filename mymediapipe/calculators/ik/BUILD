@@ -9,6 +9,18 @@ load("//mediapipe/framework/port:build_config.bzl", "mediapipe_cc_proto_library"
 cc_library(
     name = "ik_calculators",
     visibility = ["//visibility:public"],
+    srcs = [
+        "target.cc",
+        "segment.cc",
+        "chain.cc",
+    ],
+    hdrs = [
+        "camera.h",
+        "shader.h",
+        "target.h",
+        "segment.h",
+        "chain.h",
+    ],
     deps = [
         # "//mediapipe/framework:calculator_framework",
         # "//mediapipe/framework/formats:image_frame",
@@ -25,6 +37,8 @@ cc_library(
         # "//mediapipe/gpu:gl_calculator_helper",
         # "//mediapipe/util:resource_util",
         # "//third_party:opencv",
+        "//mediapipe/gpu:shader_util",
+        "//third_party:opengl_glm",
         "//third_party:opengl",
         "//third_party:opengl_es",
         "@com_google_absl//absl/flags:flag",

@@ -24,6 +24,7 @@ cc_library(
         "//third_party:assimp",
         "@com_google_absl//absl/memory",
         "@eigen_archive//:eigen3",
+        "//mymediapipe/calculators/gpu:framebuffer",
         "//mymediapipe/calculators/ik:ik_calculators",
         # ":gl_base_calculator",
         # ":gl_base_lib",

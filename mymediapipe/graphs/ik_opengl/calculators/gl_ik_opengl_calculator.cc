@@ -3,12 +3,12 @@
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/framework/port/status_macros.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
-// #include "lib/framebuffer_target.h"
 #include "mediapipe/framework/port/ret_check.h"
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/gpu/gl_simple_shaders.h"
 #include "mediapipe/gpu/shader_util.h"
 // #include "gl_base_calculator.h"
+#include "mymediapipe/calculators/gpu/framebuffer_target.h"
 #include "glm/glm.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtc/quaternion.hpp"
@@ -34,6 +34,9 @@
 // #include "lib/util.h"
 // #include "lib/my_pose.h"
 // #include "lib/kalidokit.h"
+#include "mymediapipe/calculators/ik/camera.h"
+#include "mymediapipe/calculators/ik/target.h"
+#include "mymediapipe/calculators/ik/chain.h"
 
 namespace mediapipe {
 
@@ -50,6 +53,12 @@ public:
     absl::Status Open(CalculatorContext* cc) override;
     absl::Status Process(CalculatorContext* cc) override;
     absl::Status Close(CalculatorContext* cc) override;
+
+    absl::Status GlSetup();
+    absl::Status GlBind();
+    absl::Status GlRender(CalculatorContext* cc, const GlTexture& src, const GlTexture& dst, double timestamp);
+    absl::Status GlCleanup();
+    absl::Status GlTeardown();
 protected:
     // Forward invocations of RunInGlContext to the helper.
     // The decltype part just says that this method returns whatever type the
@@ -61,10 +70,15 @@ protected:
         -> decltype(std::declval<GlCalculatorHelper>().RunInGlContext(f)) {
         return gpu_helper_.RunInGlContext(std::forward<F>(f));
     }
+    std::unique_ptr<FrameBufferTarget> framebuffer_target_;
 
 private:
     bool initialized_;
+    Camera* camera;
     GlCalculatorHelper gpu_helper_;
+    std::vector<glm::vec3> joints1;
+    std::vector<glm::vec3> joints2;
+    Chain* chain1;
 };
 
 REGISTER_CALCULATOR(GlIkOpenglCalculator);
@@ -83,25 +97,6 @@ absl::Status GlIkOpenglCalculator::GetContract(CalculatorContract* cc) {
         << "Failed to update contract for the GPU helper!";
 
     cc->Inputs().Tag(kImageGpuTag).Set<GpuBuffer>();
-    
-    // cc->InputSidePackets()
-    //         .Tag(kEnvironmentTag)
-    //         .Set<face_geometry::Environment>();
-
-    // if (cc->Inputs().HasTag(kWorldLandmarksTag)) {
-    //     cc->Inputs().Tag(kWorldLandmarksTag).Set<LandmarkList>();
-    // }
-
-    // if (cc->Inputs().HasTag(kLandmarksTag)) {
-    //     cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
-    // }
-    
-    // if (cc->Inputs().HasTag(kMultiFaceGeometryTag)) {
-    //     cc->Inputs()
-    //             .Tag(kMultiFaceGeometryTag)
-    //             .Set<std::vector<face_geometry::FaceGeometry>>();
-    // }
-
     cc->Outputs().Tag(kImageGpuTag).Set<GpuBuffer>();
     // Currently we pass GL context information and other stuff as external
     // inputs, which are handled by the helper.
@@ -117,12 +112,8 @@ absl::Status GlIkOpenglCalculator::Open(CalculatorContext* cc) {
     MP_RETURN_IF_ERROR(gpu_helper_.Open(cc)) 
         << "Failed to open the GPU helper!";
     return RunInGlContext([this, cc]() -> absl::Status {
-        // environment_ = cc->InputSidePackets()
-        //                     .Tag(kEnvironmentTag)
-        //                     .Get<face_geometry::Environment>();
-
-        // ASSIGN_OR_RETURN(framebuffer_target_, FrameBufferTarget::Create(),
-        //                  _ << "Failed to create a framebuffer target!");
+        ASSIGN_OR_RETURN(framebuffer_target_, FrameBufferTarget::Create(),
+                         _ << "Failed to create a framebuffer target!");
         return absl::OkStatus();
     });
 }
@@ -150,8 +141,8 @@ absl::Status GlIkOpenglCalculator::Process(CalculatorContext* cc) {
 
         // Set the destination texture as the color buffer. Then, clear both the
         // color and the depth buffers for the render target.
-        // framebuffer_target_->SetColorbuffer(dst_width, dst_height, output_gl_texture.target(), output_gl_texture.name());
-        // framebuffer_target_->Clear();
+        framebuffer_target_->SetColorbuffer(dst_width, dst_height, output_gl_texture.target(), output_gl_texture.name());
+        framebuffer_target_->Clear();
 
         // MP_RETURN_IF_ERROR(GlBind());
         // // Run core program.
@@ -185,8 +176,68 @@ absl::Status GlIkOpenglCalculator::Close(CalculatorContext* cc) {
 
 GlIkOpenglCalculator::~GlIkOpenglCalculator() {
   RunInGlContext([this] {
-    // framebuffer_target_.reset();
+    framebuffer_target_.reset();
   });
+}
+
+absl::Status GlIkOpenglCalculator::GlSetup() {
+    return absl::OkStatus();
+}
+
+absl::Status GlIkOpenglCalculator::GlBind() {
+    // Setup some OpenGL options
+    // glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_MULTISAMPLE);
+
+    // Load joints
+    for(int i = 0; i < 10; ++i) {
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        joints1.push_back(glm::vec3(0, r, 0));
+    }
+
+    joints2.push_back(glm::vec3(0, 0.0f, 0));
+    joints2.push_back(glm::vec3(0, 1.0f, 0));
+    joints2.push_back(glm::vec3(1.0f, 2.0f, 0));
+
+    // Load our model object
+    Target target(1.0f, 2.0f, 0);
+    Target target2(2, 0, 0);
+    Target target3(1, 1, 0);
+
+    chain1 = new Chain(joints1, &target);
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+    
+    return absl::OkStatus();
+}
+
+absl::Status GlIkOpenglCalculator::GlRender(CalculatorContext* cc, 
+                                            const GlTexture& src, 
+                                            const GlTexture& dst,
+                                            double timestamp) {
+    // make sure we clear the framebuffer's content
+    int src_width = dst.width();
+    int src_height = dst.height();
+    glm::mat4 projection = glm::perspective(camera->Zoom, (float)src_width/(float)src_height, 0.1f, 100.0f);
+    glm::mat4 view = camera->GetViewMatrix();
+
+    chain1->Solve();
+    chain1->Render(view, projection);
+
+    return absl::OkStatus();
+}
+
+absl::Status GlIkOpenglCalculator::GlCleanup() {
+    // cleanup
+    // glDisable(GL_DEPTH_TEST);
+    // glDepthMask(GL_FALSE);
+    // glDisable(GL_BLEND);
+    glFlush();
+    return absl::OkStatus();    
+}
+
+absl::Status GlIkOpenglCalculator::GlTeardown() {
+    // ourShader->tearDown();
+    return absl::OkStatus();
 }
 
 }
