@@ -4,6 +4,7 @@
 #include <math.h>
 
 #define PI 3.14159265
+#define EPS 1e-4
 
 static const glm::vec3 VEC3_ZERO = glm::vec3(0.0f, 0.0f, 0.0f);
 static const glm::vec3 VEC3_ONE = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -29,16 +30,19 @@ glm::vec3 perpendicular(glm::vec3 vec) {
 }
 
 glm::quat from_axis_angle(glm::vec3 axis, float angle) {
-    float s = sin(angle * 0.5);
-    float c = cos(angle * 0.5);
-    glm::vec3 v = axis * s;
-    return glm::quat(c, v.x, v.y, v.z);
+    float half_sin = sin(angle * 0.5);
+    float half_cos = cos(angle * 0.5);
+    // glm::vec3  = axis * s;
+    return glm::quat(half_cos, 
+                     axis.x * half_sin,
+                     axis.y * half_sin,
+                     axis.z * half_sin);
 }
 
 // based on opengl rotation tutorial
 glm::quat rotation_between(glm::vec3 start, glm::vec3 dest) {
     float cos_theta = glm::dot(start, dest);
-    if (cos_theta <= -1.0f+0.0001f) {
+    if (cos_theta < -1.0001f) {
         auto perp = glm::normalize(perpendicular(start));
         return from_axis_angle(perp, PI/2.0f);
     }
@@ -58,7 +62,7 @@ glm::quat rotate_towards(glm::vec3 dir, glm::vec3 track, glm::vec3 up) {
         return QUAT_IDENTITY;
     }
 
-    auto right = glm::cross(dir, VEC3_Y);
+    auto right = glm::cross(dir, VEC3_Z);
     auto prev_up = glm::cross(right, dir);
     auto q1 = rotation_between(track, dir);
     auto new_up = up * q1;
@@ -125,5 +129,113 @@ glm::quat from_rotation_axes(glm::vec3 x, glm::vec3 y, glm::vec3 z) {
         }
     }
 }
+
+// Based on https://github.com/dfelinto/blender from_track_quat mathutil
+// glm::quat from_vec_to_track_quat(glm::vec3 vec, int axis, int upflag) {
+//     // let mut nor: [f32; 3] = [0.0; 3];
+//     // let mut tvec: [f32; 3] = vec.to_array();
+//     // let mut co: f32;
+//     glm::vec3 tvec = vec;
+//     glm::vec3 nor(0.0, 0.0, 0.0);
+//     float co;
+
+//     // assert!(axis != upflag);
+//     // assert!(axis <= 5);
+//     // assert!(upflag <= 2);
+
+//     float len = glm::lenght(vec);
+//     if (len == 0.0f) {
+//         return QUAT_IDENTITY;
+//     }
+
+//     // rotate to axis
+//     if (axis > 2) {
+//         axis -= 3;
+//     } else {
+//         tvec[0] *= -1.0;
+//         tvec[1] *= -1.0;
+//         tvec[2] *= -1.0;
+//     }
+
+//     // x-axis
+//     if (axis == 0) {
+//         nor[0] = 0.0;
+//         nor[1] = -tvec[2];
+//         nor[2] = tvec[1];
+
+//         if (std::abs(tvec[1]) + std::abs(tvec[2])) < EPS {
+//             nor[1] = 1.0;
+//         }
+//         co = tvec[0];
+//     }
+//     // y-axis
+//     else if (axis == 1) {
+//         nor[0] = tvec[2];
+//         nor[1] = 0.0;
+//         nor[2] = -tvec[0];
+
+//         if (std::abs(tvec[0]) + std::abs(tvec[2])) < EPS {
+//             nor[2] = 1.0;
+//         }
+//         co = tvec[1];
+//     }
+//     // z-axis
+//     else {
+//         nor[0] = -tvec[1];
+//         nor[1] = tvec[0];
+//         nor[2] = 0.0;
+
+//         if (std::abs(tvec[0]) + std::abs(tvec[1]) < EPS {
+//             nor[0] = 1.0;
+//         }
+//         co = tvec[2];
+//     }
+//     co /= len;
+
+//     // saacos
+//     if (co <= -1.0) {
+//         co = PI;
+//     } else if (co >= 1.0) {
+//         co = 0.0;
+//     } else {
+//         co = std::acos(co);
+//     }
+
+//     // q from angle
+//     glm::quat q = from_axis_angle(glm::normalize(nor), co);
+//     if (axis != upflag) {
+//         // let angle: f32;
+//         float angle;
+//         let mat = q.quat_to_rotation_matrix();
+//         let fp = mat.z;
+//         float fp;
+
+//         if (axis == 0) {
+//             if (upflag == 1) {
+//                 angle = 0.5 * fp.z.atan2(fp.y);
+//             } else {
+//                 angle = -0.5 * fp.y.atan2(fp.z);
+//             }
+//         } else if axis == 1 {
+//             if upflag == 0 {
+//                 angle = -0.5 * fp.z.atan2(fp.x);
+//             } else {
+//                 angle = 0.5 * fp.x.atan2(fp.z);
+//             }
+//         } else {
+//             if upflag == 0 {
+//                 angle = 0.5 * -fp.y.atan2(-fp.x);
+//             } else {
+//                 angle = -0.5 * -fp.x.atan2(-fp.y);
+//             }
+//         }
+
+//         let si = angle.sin() / len;
+//         let mut q2 = Quaternion::new(tvec[0] * si, tvec[1] * si, tvec[2] * si, angle.cos());
+//         q2 *= q;
+//         return q2
+//     }
+//     return q;
+// }
 
 #endif

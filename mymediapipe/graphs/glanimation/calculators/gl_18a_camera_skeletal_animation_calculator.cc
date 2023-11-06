@@ -304,36 +304,36 @@ absl::Status Gl18aCameraSkeletalAnimationCalculator::GlRender(CalculatorContext*
         const Landmark& landmark3d = landmarks_3d.landmark(i);
         const NormalizedLandmark& landmark2d = landmarks_2d.landmark(i);
         
-        lm3d.push_back(glm::vec3(landmark3d.x(), landmark3d.y() * -1.0, -landmark3d.z() * -1.0));
+        lm3d.push_back(glm::vec3(landmark3d.x() * -1.0, landmark3d.y() * -1.0, landmark3d.z() * -1.0));
         lm3d_visibility.push_back(landmark3d.visibility());
         // lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
         lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
     }
 
     auto rotations3d = pose_rotation(lm3d);
-    auto rotations2d = pose_rotation(lm2d);
-    for (int i = 0; i < lm3d.size(); ++i) {
-        std::cout << "lm3d (" << i << ")" << glm::to_string(lm3d[i]) << std::endl;
-    }
+    // auto rotations2d = pose_rotation(lm2d);
+    // for (int i = 0; i < lm3d.size(); ++i) {
+    //     std::cout << "lm3d (" << i << ")" << glm::to_string(lm3d[i]) << std::endl;
+    // }
 
-    for (int i = 0; i < lm2d.size(); ++i) {
-        std::cout << "lm2d (" << i << ")" << glm::to_string(lm2d[i]) << std::endl;
-    }
+    // for (int i = 0; i < lm2d.size(); ++i) {
+    //     std::cout << "lm2d (" << i << ")" << glm::to_string(lm2d[i]) << std::endl;
+    // }
 
     // std::cout << "rot leftarm 3d" << glm::to_string(rotations3d[12]) << std::endl;
-    // std::cout << "lm3d rightarm[12] " << glm::to_string(lm3d[12]) << std::endl;
-    // std::cout << "lm3d rightforearm[14] " << glm::to_string(lm3d[14]) << std::endl;
-    // std::cout << "lm3d righthand[16] " << glm::to_string(lm3d[15]) << std::endl;
-    // std::cout << "lm2d rightarm[12] " << glm::to_string(lm2d[12]) << std::endl;
-    // std::cout << "lm2d rightarm[14] " << glm::to_string(lm2d[14]) << std::endl;
-    // std::cout << "lm2d rightarm[16] " << glm::to_string(lm2d[16]) << std::endl;
+    std::cout << "lm3d rightarm[12] " << glm::to_string(rotations3d[12]) << std::endl;
+    std::cout << "lm3d rightforearm[14] " << glm::to_string(rotations3d[14]) << std::endl;
+    std::cout << "lm3d righthand[16] " << glm::to_string(rotations3d[16]) << std::endl;
+    std::cout << "lm3d leftarm[11] " << glm::to_string(rotations3d[11]) << std::endl;
+    std::cout << "lm3d leftarm[13] " << glm::to_string(rotations3d[13]) << std::endl;
+    std::cout << "lm3d lefarm [15] " << glm::to_string(rotations3d[15]) << std::endl;
     // std::cout << "rot rightarm 3d " << glm::to_string(rotations3d[12]) << std::endl;
     // std::cout << "rot rightarm 2d " << glm::to_string(rotations2d[12]) << std::endl;
 
     // std::vector<glm::vec3> rots(33);
     // kalidokitSolve(lm3d, lm3d_visibility, lm2d, rots);
 
-    // modelScene->Draw(*framebuffer_target_, src_width, src_height, deltaTime, lm3d, rotations2d);
+    modelScene->Draw(*framebuffer_target_, src_width, src_height, deltaTime, lm3d, rotations3d);
     modelLine->Draw(*framebuffer_target_, src_width, src_height, timestamp, lm3d);
 
     return absl::OkStatus();

@@ -22,7 +22,7 @@
 #include "mediapipe/framework/port/status.h"
 #include "mediapipe/framework/port/status_macros.h"
 #include "mediapipe/gpu/gl_calculator_helper.h"
-#include "lib/framebuffer_target.h"
+#include "mymediapipe/calculators/gpu/framebuffer_target.h"
 
 namespace mediapipe {
 

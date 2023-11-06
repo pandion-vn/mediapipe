@@ -68,7 +68,9 @@ public:
         glViewport(0, 0, viewport_width_, viewport_height_);
     }
 
-    void Unbind() const { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+    void Unbind() const {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 
     void Clear() const {
         Bind();

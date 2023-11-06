@@ -139,27 +139,20 @@ public:
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(65.f), (float)src_width / (float)src_height, 0.1f, 100.0f);
-
-        // glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 view = glm::lookAt(camPos, position, cameraUp);
-        // std::cout << "camera view" << glm::to_string(view) << std::endl;
         ourShader->setMat4("projection", projection);
         ourShader->setMat4("view", view);
 
         auto transforms = animator->GetFinalBoneMatrices();
-        // // std::cout << "Transform size: " << transforms.size() << std::endl;
         for (int i = 0; i < transforms.size(); ++i) {
             ourShader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-        //     // std::cout << "Transform " << i << ": " << glm::to_string(transforms[i]) << std::endl;
         }
-        // ourShader->setMat4("finalBonesMatrices", transforms);
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         // x, y, z
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f)); // translate down michelle
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f)); // translate far michelle
-        // model = glm::translate(model, glm::vec3(0.0f, 1.1f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(0.015f, 0.015f, 0.015f));	// michelle & aj
         ourShader->setMat4("model", model);
 
@@ -171,14 +164,6 @@ public:
         // draw model
         ourShader->use();
         ourModel->Draw(*ourShader);
-
-        // draw landmarks
-        // glBegin( GL_LINES);
-        //     glVertex3f(landmarks[11].x, landmarks[11].y, landmarks[11].z);
-        //     glVertex3f(landmarks[13].x, landmarks[13].y, landmarks[13].z);
-        //     glVertex3f(landmarks[13].x, landmarks[13].y, landmarks[13].z);
-        //     glVertex3f(landmarks[15].x, landmarks[15].y, landmarks[15].z);
-        // glEnd();
 
         framebuffer_target_.Unbind();
         glDisable(GL_DEPTH_TEST);

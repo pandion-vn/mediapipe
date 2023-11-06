@@ -190,13 +190,17 @@ public:
         ourShader->setMat4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float) deltaTime * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        // model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
+        // model = glm::rotate(model, (float) deltaTime * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader->setMat4("model", model);
 
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         framebuffer_target_.Bind();
         glViewport(0, 0, src_width, src_height);
+        // render in bottom right 
+        // glViewport((int)src_width * 0.75, (int) src_height * 0.5, (int) src_width, (int)src_height * 0.75);
 
         ourShader->use();
         glBindVertexArray(VAO);

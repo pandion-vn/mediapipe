@@ -198,11 +198,34 @@ public:
             // std::string order = "XYZ";
             if (nodeName == "mixamorig_LeftArm") {
                 glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
-                glm::quat rot = glm::quat(1.0f, -0.8f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, -0.8f, 0.f, 0.f); // up arm
                 // glm::quat rot = glm::quat(1.0f, 0.0f, -0.9f, 0.f); // rot up hand from arm
                 // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.9f); // rot to front arm
-                glm::mat4 rotation = BoneRotation(bone, rot);
-                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // t-pose
+                // glm::mat4 rotation = BoneRotation(bone, rot);
+                glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                // std::cout << "rot leftarm" << glm::to_string(rotations[11]) << std::endl;
+                nodeTransform = translation * rotation * scale;
+            } else if (nodeName == "mixamorig_LeftForeArm") {
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                // glm::quat rot = glm::quat(1.0f, -0.8f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, -0.9f, 0.f); // rot up hand from arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.9f); // rot to front arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // t-pose
+                // glm::mat4 rotation = BoneRotation(bone, rot);
+                glm::mat4 rotation = BoneRotation(bone, rotations[14]);
+                glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
+                // std::cout << "rot leftarm" << glm::to_string(rotations[11]) << std::endl;
+                nodeTransform = translation * rotation * scale;
+            } else if (nodeName == "mixamorig_LeftHand") {
+                glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
+                // glm::quat rot = glm::quat(1.0f, -0.8f, 0.f, 0.f); // up arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, -0.9f, 0.f); // rot up hand from arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.9f); // rot to front arm
+                // glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // t-pose
+                // glm::mat4 rotation = BoneRotation(bone, rot);
+                glm::mat4 rotation = BoneRotation(bone, rotations[16]);
                 glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
                 // std::cout << "rot leftarm" << glm::to_string(rotations[11]) << std::endl;
                 nodeTransform = translation * rotation * scale;
@@ -210,9 +233,9 @@ public:
                 glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
                 // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
                 // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
-                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -0.9f); // to front
-                glm::mat4 rotation = BoneRotation(bone, rot);
-                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                // glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -0.9f); // to front
+                // glm::mat4 rotation = BoneRotation(bone, rot);
+                glm::mat4 rotation = BoneRotation(bone, rotations[11]);
                 glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
                 nodeTransform = translation * rotation * scale;
             } else if (nodeName == "mixamorig_RightForeArm") {
@@ -220,18 +243,19 @@ public:
                 // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
                 // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
                 // glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -0.9f); // to right from shoulder
-                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, 0.f); // T-pose
-                glm::mat4 rotation = BoneRotation(bone, rot);
-                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                // glm::quat rot = glm::quat(1.0f, 0.f, 0.f, 0.f); // T-pose
+                // glm::mat4 rotation = BoneRotation(bone, rot);
+                glm::mat4 rotation = BoneRotation(bone, rotations[13]);
                 glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
                 nodeTransform = translation * rotation * scale;
             } else if (nodeName == "mixamorig_RightHand") {
                 glm::mat4 translation = BonePosition(bone, glm::vec3(0.0));
                 // glm::quat rot = glm::quat(1.0f, -0.9f, 0.f, 0.f); // up arm
                 // glm::quat rot = glm::quat(1.0f, 0.f, -0.9f, 0.f); // rot up hand from arm
-                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -1.9f); // to left from forearm
+                // glm::quat rot = glm::quat(1.0f, 0.f, 0.f, -1.9f); // to left from forearm
+                glm::quat rot = glm::quat(1.0f, 0.f, 0.f, 0.f); // to left from forearm
                 glm::mat4 rotation = BoneRotation(bone, rot);
-                // glm::mat4 rotation = BoneRotation(bone, rotations[12]);
+                // glm::mat4 rotation = BoneRotation(bone, rotations[15]);
                 glm::mat4 scale = BoneScale(bone, glm::vec3(0.0));
                 nodeTransform = translation * rotation * scale;
             }

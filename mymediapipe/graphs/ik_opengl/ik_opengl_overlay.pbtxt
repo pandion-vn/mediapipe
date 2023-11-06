@@ -1,0 +1,10 @@
+input_stream: "input_video"
+input_side_packet: "texture_3d"
+input_side_packet: "asset_3d"
+output_stream: "output_video"
+
+node: {
+    calculator: "GlIkOpenglCalculator"
+    input_stream: "IMAGE_GPU:input_video"
+    output_stream: "IMAGE_GPU:output_video"
+}
