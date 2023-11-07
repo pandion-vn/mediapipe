@@ -21,27 +21,25 @@ void Chain::Solve() {
     // Target is out of reach; fully extend the arm
     if (current_distance > total_length) {
         for(int i = 0; i < joints.size() - 1; ++i) {
-        float r = glm::length(target->position - joints[i]);
-        float l = segments[i].magnitude / r;
-        joints[i + 1] = (1 - l) * joints[i] + l * target->position;
+            float r = glm::length(target->position - joints[i]);
+            float l = segments[i].magnitude / r;
+            joints[i + 1] = (1 - l) * joints[i] + l * target->position;
         }
         
         std::vector<float> lengths;
         std::vector<glm::quat> directions;
         CalculateLinks(joints, &lengths, &directions);
-    
     } else { // Target is in reach, use FABRIK to solve both back and forwards
         int count = 0;
         float difference = glm::length(joints[joints.size() - 1] - target->position);
-        while(difference > tolerance || count < 1) {
-        Backward();
-        Forward();
-        difference = glm::length(joints[joints.size() - 1] - target->position);
-        count++;
-        
-        if(count > 10) break;
+        while (difference > tolerance || count < 1) {
+            Backward();
+            Forward();
+            difference = glm::length(joints[joints.size() - 1] - target->position);
+            count++;
+            
+            if (count > 20) break;
         }
-
     }
     
     SetSegments();
@@ -52,7 +50,7 @@ void Chain::SetSegments() {
     std::vector<glm::quat> directions;
     CalculateLinks(joints, &lengths, &directions);
     
-    for(int i = 0; i < lengths.size(); ++i) {
+    for (int i = 0; i < lengths.size(); ++i) {
         segments[i].Set(joints[i], joints[i+1], lengths[i], directions[i]);
     }
 }
@@ -60,7 +58,7 @@ void Chain::SetSegments() {
 void Chain::Backward() {
     auto end = joints.end() - 1;
     *end = target->position;
-    for(int i = int(joints.size() - 2); i >= 0; --i) {
+    for (int i = int(joints.size() - 2); i >= 0; --i) {
         float r = glm::length(joints[i+1] - joints[i]);
         float l = segments[i].magnitude / r;
         joints[i] = (1 - l) * joints[i+1] + l * joints[i];
@@ -70,12 +68,13 @@ void Chain::Backward() {
 void Chain::Forward() {
     auto beg = joints.begin();
     *beg = origin;
-    for(int i = 0; i < joints.size() - 1; ++i) {
+    for (int i = 0; i < joints.size() - 1; ++i) {
         float r = glm::length(joints[i+1] - joints[i]);
         float l = segments[i].magnitude / r;
         
         glm::vec3 new_point = (1 - l) * joints[i] + l * joints[i+1];
-        if(i > 0 && this->please_constrain) new_point = Constrain(new_point, segments[i].magnitude, &(segments[i - 1]));
+        if (i > 0 && this->please_constrain) 
+            new_point = Constrain(new_point, segments[i].magnitude, &(segments[i - 1]));
         joints[i + 1] = new_point;
     }
 }
@@ -92,7 +91,7 @@ glm::vec3 Chain::Constrain(glm::vec3 point, float true_length, Segment *seg) {
     glm::vec3 projected_point = scalar * line_dir + seg->end_position;
     
     
-    if(debug) {
+    if (debug) {
         float angle = glm::acos(scalar/ (glm::length(point - seg->end_position) * glm::length(line_dir)));
         std::cout << "angle: " << glm::degrees(angle) << std::endl;
         std::cout << "scalar: " << scalar << std::endl;
@@ -119,7 +118,7 @@ glm::vec3 Chain::Constrain(glm::vec3 point, float true_length, Segment *seg) {
     float x_aspect = glm::dot(adjusted_distance, x_axis);
     float y_aspect = glm::dot(adjusted_distance, y_axis);
     
-    if(debug) {
+    if (debug) {
         std::cout << glm::radians(seg->constraint_cone[0]) << std::endl;
         std::cout << glm::radians(seg->constraint_cone[0]) << std::endl;
         std::cout << glm::tan(glm::radians(seg->constraint_cone[0])) << std::endl;
@@ -144,7 +143,7 @@ glm::vec3 Chain::Constrain(glm::vec3 point, float true_length, Segment *seg) {
     std::cout << "y_aspect " << y_aspect << "  x_aspect " << x_bound << std::endl;
     
     // If the point we calculated is outside of this ellipse, then we must constrain the joint
-    if(ellipse_point > 1 || scalar < 0) {
+    if (ellipse_point > 1 || scalar < 0) {
         std::cout << "Not in bounds!" << std::endl;
         float a = glm::atan(y_aspect, x_aspect);
         float x = x_bound * glm::cos(a);
@@ -163,10 +162,9 @@ void Chain::CalculateLinks(std::vector<glm::vec3> joints, std::vector<float> *le
     origin = *joints.begin();
     end = *(joints.end() - 1);
     
-    for(auto it = joints.begin(); it != joints.end() - 1; ++it) {
+    for (auto it = joints.begin(); it != joints.end() - 1; ++it) {
         glm::vec3 current = *it;
         glm::vec3 next = *(it + 1);
-        
         glm::vec3 link_vector = next - current;
         
         // Get magnitude of link
@@ -184,7 +182,7 @@ void Chain::CalculateLinks(std::vector<glm::vec3> joints, std::vector<float> *le
 }
 
 void Chain::Render(glm::mat4 view, glm::mat4 proj) {
-    for(auto it = segments.begin(); it != segments.end(); ++it) {
+    for (auto it = segments.begin(); it != segments.end(); ++it) {
         it->Render(view, proj);
     }
 }

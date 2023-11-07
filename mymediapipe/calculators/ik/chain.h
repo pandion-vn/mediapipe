@@ -37,7 +37,7 @@ public:
 private:
     std::vector<glm::vec3> joints; // Joints themselves
     std::vector<Segment> segments; // The pieces that actually get rendered
-    float tolerance = 0.01f;
+    float tolerance = 0.001f;
 };
 
 #endif

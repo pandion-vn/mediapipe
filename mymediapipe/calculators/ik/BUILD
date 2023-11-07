@@ -15,6 +15,7 @@ cc_library(
         "segment.cc",
         "chain.cc",
         "model.cc",
+        "multi_chain.cc",
     ],
     hdrs = [
         "camera.h",
@@ -24,6 +25,7 @@ cc_library(
         "segment.h",
         "chain.h",
         "model.h",
+        "multi_chain.h",
     ],
     deps = [
         # "//mediapipe/framework:calculator_framework",
