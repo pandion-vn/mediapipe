@@ -18,11 +18,11 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const GLfloat YAW        =  -90.0f;
-const GLfloat PITCH      =  0.0f;
-const GLfloat SPEED      =  3.0f;
-const GLfloat SENSITIVTY =  0.25f;
-const GLfloat ZOOM       =  45.0f;
+const float YAW        =  -90.0f;
+const float PITCH      =  0.0f;
+const float SPEED      =  3.0f;
+const float SENSITIVTY =  0.25f;
+const float ZOOM       =  45.0f;
 
 // An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
 class Camera {
@@ -35,18 +35,18 @@ public:
     glm::vec3 WorldUp;
     
     // Eular Angles
-    GLfloat Yaw;
-    GLfloat Pitch;
+    float Yaw;
+    float Pitch;
     
     // Camera options
-    GLfloat MovementSpeed;
-    GLfloat MouseSensitivity;
-    GLfloat Zoom;
+    float MovementSpeed;
+    float MouseSensitivity;
+    float Zoom;
     
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
-           GLfloat yaw = YAW, GLfloat pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+           float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         this->Position = position;
         this->WorldUp = up;
@@ -55,7 +55,7 @@ public:
         this->updateCameraVectors();
     }
     // Constructor with scalar values
-    Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         this->Position = glm::vec3(posX, posY, posZ);
         this->WorldUp = glm::vec3(upX, upY, upZ);
@@ -71,9 +71,9 @@ public:
     }
     
     // Processes input received from the keyboard
-    void ProcessTranslation(Camera_Movement direction, GLfloat deltaTime)
+    void ProcessTranslation(Camera_Movement direction, float deltaTime)
     {
-        GLfloat velocity = this->MovementSpeed * deltaTime;
+        float velocity = this->MovementSpeed * deltaTime;
         if (direction == FORWARD)
             this->Position -= glm::vec3(0, 1.0f, 0) * velocity;
         if (direction == BACKWARD)
@@ -85,7 +85,7 @@ public:
     }
     
     // Processes input received from a mouse scroll-wheel event
-    void ProcessMouseScroll(GLfloat yoffset)
+    void ProcessMouseScroll(float yoffset)
     {
         float zoomSmallLimit = 47.0f;
         float zoomLargeLimit = 44.5f;

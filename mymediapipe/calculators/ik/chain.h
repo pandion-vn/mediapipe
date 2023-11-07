@@ -12,6 +12,8 @@
 #include "target.h"
 #include "segment.h"
 
+const glm::vec3 ref_rot_vector(0.0f, 0.0f, -1.0f);
+
 class Chain {
 public:
     Chain(std::vector<glm::vec3> joints, Target* target);
@@ -26,6 +28,12 @@ public:
     void SetFirstJoint(glm::vec3 joint);
     void SetSegments();
 
+    unsigned long size;
+    float total_length;
+    glm::vec3 origin;
+    glm::vec3 end;
+    Target *target;
+    bool please_constrain = false;
 private:
     std::vector<glm::vec3> joints; // Joints themselves
     std::vector<Segment> segments; // The pieces that actually get rendered

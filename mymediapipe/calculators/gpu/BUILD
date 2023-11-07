@@ -35,3 +35,23 @@ cc_library(
         "//mediapipe/gpu:shader_util",
     ],
 )
+
+cc_library(
+    name = "video_scene",
+    visibility = ["//visibility:public"],
+    srcs = ["video_scene.h"],
+    hdrs = ["video_scene.h"],
+    deps = [
+        "//mediapipe/gpu:shader_util",
+    ],
+)
+
+cc_library(
+    name = "shader",
+    visibility = ["//visibility:public"],
+    srcs = ["shader.h"],
+    hdrs = ["shader.h"],
+    deps = [
+        "//mediapipe/gpu:shader_util",
+    ],
+)

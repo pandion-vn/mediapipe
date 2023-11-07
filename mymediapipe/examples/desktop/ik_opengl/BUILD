@@ -40,3 +40,11 @@ cc_binary(
         "//mymediapipe/graphs/ik_opengl:ik_opengl_deps",
     ],
 )
+
+cc_binary(
+    name = "ik_opengl_pose_demo",
+    deps = [
+        "//mymediapipe/examples/desktop/ik_opengl:ik_opengl",
+        "//mymediapipe/graphs/ik_opengl:ik_opengl_pose_deps",
+    ],
+)

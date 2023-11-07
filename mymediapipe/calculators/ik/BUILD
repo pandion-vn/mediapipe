@@ -11,15 +11,19 @@ cc_library(
     visibility = ["//visibility:public"],
     srcs = [
         "target.cc",
+        "mesh.cc",
         "segment.cc",
         "chain.cc",
+        "model.cc",
     ],
     hdrs = [
         "camera.h",
-        "shader.h",
+        "mesh.h",
+        # "shader.h",
         "target.h",
         "segment.h",
         "chain.h",
+        "model.h",
     ],
     deps = [
         # "//mediapipe/framework:calculator_framework",
@@ -41,8 +45,10 @@ cc_library(
         "//third_party:opengl_glm",
         "//third_party:opengl",
         "//third_party:opengl_es",
+        "//third_party:assimp",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/strings",
+        "//mymediapipe/calculators/gpu:shader",
     ],
 )

@@ -42,13 +42,16 @@
 namespace mediapipe {
 
 static constexpr char kImageGpuTag[] = "IMAGE_GPU";
+static constexpr char kLandmarksTag[] = "LANDMARKS";
+static constexpr char kNormLandmarksTag[] = "NORM_LANDMARKS";
+static constexpr char kWorldLandmarksTag[] = "WORLD_LANDMARKS";
 
-class GlIkOpenglCalculator : public CalculatorBase {
+class GlIkOpenglPoseCalculator : public CalculatorBase {
 public:
-    GlIkOpenglCalculator() : initialized_(false), count_(0) {}
-    GlIkOpenglCalculator(const GlIkOpenglCalculator&) = delete;
-    GlIkOpenglCalculator& operator=(const GlIkOpenglCalculator&) = delete;
-    ~GlIkOpenglCalculator();
+    GlIkOpenglPoseCalculator() : initialized_(false), count_(0) {}
+    GlIkOpenglPoseCalculator(const GlIkOpenglPoseCalculator&) = delete;
+    GlIkOpenglPoseCalculator& operator=(const GlIkOpenglPoseCalculator&) = delete;
+    ~GlIkOpenglPoseCalculator();
 
     static absl::Status GetContract(CalculatorContract* cc);
     absl::Status Open(CalculatorContext* cc) override;
@@ -86,7 +89,7 @@ private:
     VideoScene* videoScene;
 };
 
-REGISTER_CALCULATOR(GlIkOpenglCalculator);
+REGISTER_CALCULATOR(GlIkOpenglPoseCalculator);
 
 // A calculator that renders a visual effect for multiple faces.
 //
@@ -97,18 +100,26 @@ REGISTER_CALCULATOR(GlIkOpenglCalculator);
 //   IMAGE_GPU (`GpuBuffer`, required):
 //     A buffer with a visual effect being rendered for multiple faces.
 // static
-absl::Status GlIkOpenglCalculator::GetContract(CalculatorContract* cc) {
+absl::Status GlIkOpenglPoseCalculator::GetContract(CalculatorContract* cc) {
     MP_RETURN_IF_ERROR(GlCalculatorHelper::UpdateContract(cc))
         << "Failed to update contract for the GPU helper!";
 
     cc->Inputs().Tag(kImageGpuTag).Set<GpuBuffer>();
     cc->Outputs().Tag(kImageGpuTag).Set<GpuBuffer>();
+
+    if (cc->Inputs().HasTag(kWorldLandmarksTag)) {
+        cc->Inputs().Tag(kWorldLandmarksTag).Set<LandmarkList>();
+    }
+
+    if (cc->Inputs().HasTag(kLandmarksTag)) {
+        cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
+    }
     // Currently we pass GL context information and other stuff as external
     // inputs, which are handled by the helper.
     return GlCalculatorHelper::UpdateContract(cc);
 }
 
-absl::Status GlIkOpenglCalculator::Open(CalculatorContext* cc) {
+absl::Status GlIkOpenglPoseCalculator::Open(CalculatorContext* cc) {
     // Inform the framework that we always output at the same timestamp
     // as we receive a packet at.
     cc->SetOffset(mediapipe::TimestampDiff(0));
@@ -123,7 +134,7 @@ absl::Status GlIkOpenglCalculator::Open(CalculatorContext* cc) {
     });
 }
 
-absl::Status GlIkOpenglCalculator::Process(CalculatorContext* cc) {
+absl::Status GlIkOpenglPoseCalculator::Process(CalculatorContext* cc) {
     // The `IMAGE_GPU` stream is required to have a non-empty packet. In case
     // this requirement is not met, there's nothing to be processed at the
     // current timestamp.
@@ -172,20 +183,20 @@ absl::Status GlIkOpenglCalculator::Process(CalculatorContext* cc) {
     });
 }
 
-absl::Status GlIkOpenglCalculator::Close(CalculatorContext* cc) {
+absl::Status GlIkOpenglPoseCalculator::Close(CalculatorContext* cc) {
     return RunInGlContext([this]() -> absl::Status { 
         // return GlTeardown(); 
         return absl::OkStatus();
     });
 }
 
-GlIkOpenglCalculator::~GlIkOpenglCalculator() {
+GlIkOpenglPoseCalculator::~GlIkOpenglPoseCalculator() {
   RunInGlContext([this] {
     framebuffer_target_.reset();
   });
 }
 
-absl::Status GlIkOpenglCalculator::GlSetup() {
+absl::Status GlIkOpenglPoseCalculator::GlSetup() {
     // Load joints
     for(int i = 0; i < 10; ++i) {
         float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -193,15 +204,17 @@ absl::Status GlIkOpenglCalculator::GlSetup() {
     }
     std::cout << "joint1 size: " << joints1.size() << std::endl;
 
-    joints2.push_back(glm::vec3(0, 0.0f, 0));
-    joints2.push_back(glm::vec3(0, 1.0f, 0));
-    joints2.push_back(glm::vec3(2.0f, 2.0f, 0));
+    joints2.push_back(glm::vec3(1.0f, 2.0f, 0));
+    joints2.push_back(glm::vec3(0.5f, 1.5f, 0));
+    joints2.push_back(glm::vec3(1.0f, 1.0f, 0));
+    joints2.push_back(glm::vec3(0.5f, 0.5f, 0));
+    joints2.push_back(glm::vec3(0.25f, 0.24f, 0.3));
 
     // Load our model object
     // Target target(5.0f, 3.0f, 0);
     // Target target2(2, 0, 0);
     // Target target3(1, 1, 0);
-    target = new Target(5.0f, 3.0f, 0);
+    target = new Target(1.0f, 1.0f, 0);
 
     chain1 = new Chain(joints1, target);
     chain2 = new Chain(joints2, target);
@@ -215,7 +228,7 @@ absl::Status GlIkOpenglCalculator::GlSetup() {
     return absl::OkStatus();
 }
 
-absl::Status GlIkOpenglCalculator::GlBind() {
+absl::Status GlIkOpenglPoseCalculator::GlBind() {
     // Setup some OpenGL options
     // glEnable(GL_DEPTH_TEST);
     // glEnable(GL_MULTISAMPLE);
@@ -223,31 +236,46 @@ absl::Status GlIkOpenglCalculator::GlBind() {
     return absl::OkStatus();
 }
 
-absl::Status GlIkOpenglCalculator::GlRender(CalculatorContext* cc, 
+absl::Status GlIkOpenglPoseCalculator::GlRender(CalculatorContext* cc, 
                                             const GlTexture& src, 
                                             const GlTexture& dst,
                                             double timestamp) {
+
+    if (cc->Inputs().HasTag(kWorldLandmarksTag) &&
+        cc->Inputs().Tag(kWorldLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+    if (cc->Inputs().HasTag(kLandmarksTag) &&
+        cc->Inputs().Tag(kLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+
     // make sure we clear the framebuffer's content
     int src_width = dst.width();
     int src_height = dst.height();
     glm::mat4 projection = glm::perspective(camera->Zoom, (float)src_width/(float)src_height, 0.1f, 100.0f);
     glm::mat4 view = camera->GetViewMatrix();
-    if (count_ > 500) {
-        count_ = 0;
-        glm::vec3 pos = target->position;
-        pos.x = rand() % 3 + 1;
-        target->position = pos;
-    } 
-    count_++;
 
-    chain1->Solve();
+    const auto& landmarks_3d = cc->Inputs().Tag(kWorldLandmarksTag).Get<LandmarkList>();
+    const auto& landmarks_2d = cc->Inputs().Tag(kLandmarksTag).Get<NormalizedLandmarkList>();
+    // if (count_ > 500) {
+    //     count_ = 0;
+    //     glm::vec3 pos = target->position;
+    //     pos.x = rand() % 3 + 1;
+    //     target->position = pos;
+    // } 
+    // count_++;
+    glm::vec3 pos = glm::vec3(landmarks_2d.landmark(15).x(), landmarks_2d.landmark(15).y() * -1.0, landmarks_2d.landmark(15).z() * -1.0);
+    target->position = pos;
+
+    // chain1->Solve();
     chain2->Solve();
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     framebuffer_target_->Bind();
     glViewport(0, 0, src_width, src_height);
     target->Render(view, projection);
-    chain1->Render(view, projection);
+    // chain1->Render(view, projection);
     chain2->Render(view, projection);
 
     framebuffer_target_->Unbind();
@@ -268,7 +296,7 @@ absl::Status GlIkOpenglCalculator::GlRender(CalculatorContext* cc,
     return absl::OkStatus();
 }
 
-absl::Status GlIkOpenglCalculator::GlCleanup() {
+absl::Status GlIkOpenglPoseCalculator::GlCleanup() {
     // cleanup
     // glDisable(GL_DEPTH_TEST);
     // glDepthMask(GL_FALSE);
@@ -277,7 +305,7 @@ absl::Status GlIkOpenglCalculator::GlCleanup() {
     return absl::OkStatus();    
 }
 
-absl::Status GlIkOpenglCalculator::GlTeardown() {
+absl::Status GlIkOpenglPoseCalculator::GlTeardown() {
     // ourShader->tearDown();
     return absl::OkStatus();
 }
