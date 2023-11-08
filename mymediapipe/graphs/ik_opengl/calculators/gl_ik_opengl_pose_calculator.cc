@@ -85,8 +85,20 @@ private:
     std::vector<glm::vec3> joints2;
     Chain* chain1;
     Chain* chain2;
-    Target* target;
+    Target* targetLeftArm;
+    Target* targetRightArm;
+    Target* targetLeftForeArm;
+    Target* targetRightForeArm;
+    Target* targetLeftShoulder;
+    Target* targetRighShoulder;
+    Target* targetLeftHip;
+    Target* targetRighHip;
+    Target* targetLeftKnee;
+    Target* targetRighKnee;
+    Target* targetLeftAnkle;
+    Target* targetRighAnkle;
     VideoScene* videoScene;
+    // std::vector<Target*> targets;
 };
 
 REGISTER_CALCULATOR(GlIkOpenglPoseCalculator);
@@ -198,26 +210,42 @@ GlIkOpenglPoseCalculator::~GlIkOpenglPoseCalculator() {
 
 absl::Status GlIkOpenglPoseCalculator::GlSetup() {
     // Load joints
-    for(int i = 0; i < 10; ++i) {
-        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        joints1.push_back(glm::vec3(0, r, 0));
-    }
-    std::cout << "joint1 size: " << joints1.size() << std::endl;
+    // for(int i = 0; i < 10; ++i) {
+    //     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    //     joints1.push_back(glm::vec3(0, r, 0));
+    // }
+    // std::cout << "joint1 size: " << joints1.size() << std::endl;
+    joints1.push_back(glm::normalize(glm::vec3(-3.414665, 7.343246, 0.004669)));
+    joints1.push_back(glm::normalize(glm::vec3(0.000000, 7.189681, 0.000000)));
+    joints1.push_back(glm::normalize(glm::vec3(0.000000, 24.202721, 0.000000)));
+    joints1.push_back(glm::normalize(glm::vec3(0.000000, 21.595646, 0.000000)));
 
-    joints2.push_back(glm::vec3(1.0f, 2.0f, 0));
-    joints2.push_back(glm::vec3(0.5f, 1.5f, 0));
-    joints2.push_back(glm::vec3(1.0f, 1.0f, 0));
-    joints2.push_back(glm::vec3(0.5f, 0.5f, 0));
-    joints2.push_back(glm::vec3(0.25f, 0.24f, 0.3));
+    joints2.push_back(glm::normalize(glm::vec3(3.414665, 7.343371, -0.017399)));
+    joints2.push_back(glm::normalize(glm::vec3(0.000000, 7.189681, 0.000000)));
+    joints2.push_back(glm::normalize(glm::vec3(0.000000, 24.203573, 0.000000)));
+    joints2.push_back(glm::normalize(glm::vec3(0.000000, 21.595100, 0.000000)));
+    // joints2.push_back(glm::vec3(0.25f, 0.24f, 0.3));
 
     // Load our model object
     // Target target(5.0f, 3.0f, 0);
     // Target target2(2, 0, 0);
     // Target target3(1, 1, 0);
-    target = new Target(1.0f, 1.0f, 0);
+    // target = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftArm = new Target(0.0f, 0.0f, 0.0f);
+    targetRightArm = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftForeArm = new Target(0.0f, 0.0f, 0.0f);
+    targetRightForeArm = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftShoulder = new Target(0.0f, 0.0f, 0.0f);
+    targetRighShoulder = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftHip = new Target(0.0f, 0.0f, 0.0f);
+    targetRighHip = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftKnee = new Target(0.0f, 0.0f, 0.0f);
+    targetRighKnee = new Target(0.0f, 0.0f, 0.0f);
+    targetLeftAnkle = new Target(0.0f, 0.0f, 0.0f);
+    targetRighAnkle = new Target(0.0f, 0.0f, 0.0f);
 
-    chain1 = new Chain(joints1, target);
-    chain2 = new Chain(joints2, target);
+    chain1 = new Chain(joints1, targetLeftArm);
+    chain2 = new Chain(joints2, targetLeftArm);
     chain2->please_constrain = true;
 
     camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
@@ -265,17 +293,38 @@ absl::Status GlIkOpenglPoseCalculator::GlRender(CalculatorContext* cc,
     //     target->position = pos;
     // } 
     // count_++;
-    glm::vec3 pos = glm::vec3(landmarks_2d.landmark(15).x(), landmarks_2d.landmark(15).y() * -1.0, landmarks_2d.landmark(15).z() * -1.0);
-    target->position = pos;
+    targetLeftArm->position  = glm::vec3(landmarks_3d.landmark(16).x(), landmarks_3d.landmark(16).y(), landmarks_3d.landmark(16).z() * -1.0);
+    targetRightArm->position = glm::vec3(landmarks_3d.landmark(15).x(), landmarks_3d.landmark(15).y(), landmarks_3d.landmark(15).z() * -1.0);
+    targetLeftForeArm->position  = glm::vec3(landmarks_3d.landmark(14).x(), landmarks_3d.landmark(14).y(), landmarks_3d.landmark(14).z() * -1.0);
+    targetRightForeArm->position = glm::vec3(landmarks_3d.landmark(13).x(), landmarks_3d.landmark(13).y(), landmarks_3d.landmark(13).z() * -1.0);
+    targetLeftShoulder->position  = glm::vec3(landmarks_3d.landmark(12).x(), landmarks_3d.landmark(12).y(), landmarks_3d.landmark(12).z() * -1.0);
+    targetRighShoulder->position = glm::vec3(landmarks_3d.landmark(11).x(), landmarks_3d.landmark(11).y(), landmarks_3d.landmark(11).z() * -1.0);
+    targetLeftHip->position = glm::vec3(landmarks_3d.landmark(24).x(), landmarks_3d.landmark(24).y(), landmarks_3d.landmark(24).z() * -1.0);
+    targetRighHip->position = glm::vec3(landmarks_3d.landmark(23).x(), landmarks_3d.landmark(23).y(), landmarks_3d.landmark(23).z() * -1.0);
+    targetLeftKnee->position = glm::vec3(landmarks_3d.landmark(26).x(), landmarks_3d.landmark(26).y(), landmarks_3d.landmark(26).z() * -1.0);
+    targetRighKnee->position = glm::vec3(landmarks_3d.landmark(25).x(), landmarks_3d.landmark(25).y(), landmarks_3d.landmark(25).z() * -1.0);
+    targetLeftAnkle->position = glm::vec3(landmarks_3d.landmark(28).x(), landmarks_3d.landmark(28).y(), landmarks_3d.landmark(28).z() * -1.0);
+    targetRighAnkle->position = glm::vec3(landmarks_3d.landmark(27).x(), landmarks_3d.landmark(27).y(), landmarks_3d.landmark(27).z() * -1.0);
 
-    // chain1->Solve();
+    chain1->Solve();
     chain2->Solve();
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     framebuffer_target_->Bind();
     glViewport(0, 0, src_width, src_height);
-    target->Render(view, projection);
-    // chain1->Render(view, projection);
+    targetLeftArm->Render(view, projection);
+    targetRightArm->Render(view, projection);
+    targetLeftForeArm->Render(view, projection);
+    targetRightForeArm->Render(view, projection);
+    targetLeftShoulder->Render(view, projection);
+    targetRighShoulder->Render(view, projection);
+    targetLeftHip->Render(view, projection);
+    targetRighHip->Render(view, projection);
+    targetLeftKnee->Render(view, projection);
+    targetRighKnee->Render(view, projection);
+    targetLeftAnkle->Render(view, projection);
+    targetRighAnkle->Render(view, projection);
+    chain1->Render(view, projection);
     chain2->Render(view, projection);
 
     framebuffer_target_->Unbind();

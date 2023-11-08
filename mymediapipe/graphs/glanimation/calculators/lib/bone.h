@@ -62,6 +62,14 @@ public:
             data.timeStamp = timeStamp;
             m_Scales.push_back(data);
         }
+
+        bool debug = true;
+        if (debug) {
+            std::cout << "Bone : " << name << std::endl;
+            std::cout << "Position : " << glm::to_string(m_Positions[0].position) << std::endl;
+            std::cout << "Quat : " << glm::to_string(m_Rotations[0].orientation) << std::endl;
+            std::cout << "Scale : " << glm::to_string(m_Scales[0].scale) << std::endl;
+        }
     }
     
     void Update(float animationTime) {
