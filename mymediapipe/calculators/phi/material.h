@@ -2,13 +2,13 @@
 #define MATERIAL_H__
 
 #include "common.h"
-#include "shader.h"
+#include "phi_shader.h"
 
 class Material {
 public:
     Material() {}
     Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess); 
-    void SetShader(Shader& shader); 
+    void SetShader(PhiShader& shader); 
 private:
     glm::vec3	d_ambient;
     glm::vec3	d_diffuse;
@@ -23,7 +23,7 @@ inline Material::Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specul
     d_shininess(shininess) {
 }
 
-void Material::SetShader(Shader& shader) {
+inline void Material::SetShader(PhiShader& shader) {
     shader.SetUniform("material.ambient", d_ambient);
     shader.SetUniform("material.diffuse", d_diffuse);
     shader.SetUniform("material.specular", d_specular);

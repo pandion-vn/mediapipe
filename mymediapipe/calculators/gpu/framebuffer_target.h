@@ -63,13 +63,25 @@ public:
         return absl::OkStatus();
     }
 
-    void Bind() const {
+    void Bind(bool is_depth = true) const {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_handle_);
         glViewport(0, 0, viewport_width_, viewport_height_);
+        if (is_depth) {
+            glEnable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+        } else {
+            glDisable(GL_BLEND);
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+        }
     }
 
     void Unbind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDepthMask(GL_FALSE);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
     }
 
     void Clear() const {

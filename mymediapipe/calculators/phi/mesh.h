@@ -5,6 +5,7 @@
 #include "bone.h"
 #include "vertex.h"
 #include "texture.h"
+// #include "phi_shader.h"
 #include "material.h"
 
 class Mesh {
@@ -44,7 +45,7 @@ public:
          Material material, 
          std::vector<glm::vec2> textCoords, 
          TVecCoord normals);
-    void Draw(Shader& shader, bool withAdjecencies = false);
+    void Draw(PhiShader& shader, bool withAdjecencies = false);
     float Area() const { return d_area; } 
 
 private:
@@ -149,7 +150,7 @@ inline void Mesh::setupMesh() {
     glBindVertexArray(0);
 }
 
-inline void Mesh::Draw(Shader& shader, bool withAdjecencies) {
+inline void Mesh::Draw(PhiShader& shader, bool withAdjecencies) {
     shader.Use();
     if ( this->m_textures.size()>0) {
         for(GLuint i = 0; i < this->m_textures.size(); i++) {

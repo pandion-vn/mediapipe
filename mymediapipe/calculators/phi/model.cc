@@ -1,7 +1,7 @@
 #include "model.h"
 
 /*  Functions   */
-Model::Model(const char* path): d_numberOfBone(0) {
+Model::Model(std::string path): d_numberOfBone(0) {
     assert(path);
     m_skeleton = new Skeleton();
     this->loadModel(path); 
@@ -21,7 +21,7 @@ Model::~Model() {
     delete m_skeleton;
 }
 
-void Model::Draw(Shader& shader, bool withAdjacencies) {
+void Model::Draw(PhiShader& shader, bool withAdjacencies) {
     shader.Use();
 
     this->d_model_matrix = GetModelMatrix();

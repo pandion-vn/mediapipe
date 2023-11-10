@@ -25,10 +25,10 @@ private:
 public:
     /*  Functions   */
     // Constructor, expects a filepath to a 3D model.
-    explicit Model(const char* path);
+    explicit Model(std::string path);
     ~Model();
     // Draws the model, and thus all its meshes
-    void Draw(Shader& shader, bool withAdjacencies = false);
+    void Draw(PhiShader& shader, bool withAdjacencies = false);
     void loadModel(std::string path);
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene);

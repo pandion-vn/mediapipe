@@ -10,7 +10,9 @@ cc_library(
     name = "phi_calculators",
     visibility = ["//visibility:public"],
     srcs = [
+        "helper.cc",
         "model.cc",
+        "texture.cc",
     ],
     hdrs = [
         "common.h",
@@ -22,7 +24,7 @@ cc_library(
         "texture.h",
         "material.h",
         "simulation.h",
-        "shader.h",
+        "phi_shader.h",
         "vertex.h",
     ],
     deps = [

@@ -38,6 +38,7 @@
 // #include "mymediapipe/calculators/ik/target.h"
 // #include "mymediapipe/calculators/ik/chain.h"
 #include "mymediapipe/calculators/gpu/video_scene.h"
+#include "mymediapipe/calculators/phi/model.h"
 
 namespace mediapipe {
 
@@ -83,6 +84,7 @@ private:
     // Chain* chain1;
     // Chain* chain2;
     // Target* target;
+    Model* model;
     VideoScene* videoScene;
 };
 
@@ -212,6 +214,9 @@ absl::Status PhiEglCalculator::GlSetup() {
     videoScene = new VideoScene();
     videoScene->Setup();
 
+    const std::string RAPTOR_MODEL = "mymediapipe/assets/phi/raptor.dae";
+    model = new Model(RAPTOR_MODEL);
+
     return absl::OkStatus();
 }
 
@@ -242,28 +247,18 @@ absl::Status PhiEglCalculator::GlRender(CalculatorContext* cc,
 
     // chain1->Solve();
     // chain2->Solve();
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
     framebuffer_target_->Bind();
-    glViewport(0, 0, src_width, src_height);
     // target->Render(view, projection);
     // chain1->Render(view, projection);
     // chain2->Render(view, projection);
 
     framebuffer_target_->Unbind();
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-    framebuffer_target_->Bind();
-    glViewport(0, 0, src_width, src_height);
+    
+    // draw input camera in bottom right coner
+    framebuffer_target_->Bind(false);
     videoScene->Draw(src.target(), src.name());
 
     framebuffer_target_->Unbind();    
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
 
     return absl::OkStatus();
 }
