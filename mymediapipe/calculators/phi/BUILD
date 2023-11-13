@@ -13,9 +13,11 @@ cc_library(
         "helper.cc",
         "model.cc",
         "texture.cc",
+        "stb_image.cc",
     ],
     hdrs = [
         "common.h",
+        "camera.h",
         "helper.h",
         "bone.h",
         "mesh.h",
@@ -25,7 +27,10 @@ cc_library(
         "material.h",
         "simulation.h",
         "phi_shader.h",
+        "stb_image.h",
         "vertex.h",
+        "controller/abstract_controller.h",
+        "controller/fem_controller.h",
     ],
     deps = [
         # "//mediapipe/framework:calculator_framework",

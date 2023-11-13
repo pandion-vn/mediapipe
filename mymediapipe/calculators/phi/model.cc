@@ -25,12 +25,11 @@ void Model::Draw(PhiShader& shader, bool withAdjacencies) {
     shader.Use();
 
     this->d_model_matrix = GetModelMatrix();
-
-
     if (m_skeleton->getNumberOfBones() > 0)
         glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
-    shader.SetUniform("hasTexture",Has_Texture());
+    shader.SetUniform("hasTexture", Has_Texture());
+    // std::cout << "Shader set hasTexture" << std::endl;
 
     for (GLuint i = 0; i < this->d_meshes.size(); i++)
         this->d_meshes[i].Draw(shader, withAdjacencies);
@@ -52,13 +51,13 @@ void Model::loadModel(std::string path) {
     }
 
     // Retrieve the directory path of the filepath
-    this->d_directory = path.substr(0, path.find_last_of('\\'));
+    this->d_directory = path.substr(0, path.find_last_of('/'));
 
     // Process ASSIMP's root node recursively
     this->processNode(scene->mRootNode, scene);
 
     // there should always be a 'root node', even if no skeleton exists
-    if (!m_skeleton->importSkeletonBone ( scene->mRootNode)) {
+    if (!m_skeleton->importSkeletonBone(scene->mRootNode)) {
         // fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n", path.c_str());
         std::cout << "ERROR: Model could not import node tree from mesh" << std::endl;
     } // endif 
@@ -117,7 +116,7 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
     // Walk through each of the mesh's vertices
     for(GLuint i = 0; i < ai_mesh->mNumVertices; i++)
     {
-        Vertex vertex;
+        // Vertex vertex;
         glm::vec3 vector;
         TCoord vectorVert; // We declare a placeholder vector since Assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
         TCoord vectorNorm;
@@ -133,7 +132,7 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
             vectorNorm[0] = ai_mesh->mNormals[i].x;
             vectorNorm[1] = ai_mesh->mNormals[i].y;
             vectorNorm[2] = ai_mesh->mNormals[i].z;
-            vertex.Normal = vector;
+            // vertex.Normal = vector;
             normals.push_back(vectorNorm);
         }
         // Texture Coordinates
@@ -145,12 +144,12 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
             // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
             vec.x = ai_mesh->mTextureCoords[0][i].x; 
             vec.y = ai_mesh->mTextureCoords[0][i].y;
-            vertex.TexCoords = vec;
+            // vertex.TexCoords = vec;
             textCoordVert.push_back(vec);
         }
         else
         {
-            vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+            // vertex.TexCoords = glm::vec2(0.0f, 0.0f);
             textCoordVert.push_back(glm::vec2(0.0f));
         }
 
@@ -161,15 +160,15 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
             tangent.y = ai_mesh->mTangents[i].y;
             tangent.z = ai_mesh->mTangents[i].z;
 
-            vertex.Tangent = tangent;
+            // vertex.Tangent = tangent;
         }
         //vertices.push_back(vertex);
     }
 
     // #pragma region [ Process Faces ]
-    //if (d_withAdjacencies)
-    //FindAdjacencies(ai_mesh, adjacent_indices);
-    //	else
+    // if (d_withAdjacencies)
+    //      FindAdjacencies(ai_mesh, adjacent_indices);
+    // else
     //Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
     for(GLuint i = 0; i < ai_mesh->mNumFaces; i++)
     {
@@ -269,7 +268,14 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
     }
 
     // Return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, textures, boneWeights, adjacent_indices ,material, textCoordVert, normals);
+    return Mesh(vertices,
+                indices,
+                textures,
+                boneWeights,
+                adjacent_indices, 
+                material,
+                textCoordVert,
+                normals);
 }
 
 // Checks all material textures of a given type and loads the textures if they're not loaded yet.

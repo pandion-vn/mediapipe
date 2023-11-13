@@ -38,7 +38,9 @@
 // #include "mymediapipe/calculators/ik/target.h"
 // #include "mymediapipe/calculators/ik/chain.h"
 #include "mymediapipe/calculators/gpu/video_scene.h"
-#include "mymediapipe/calculators/phi/model.h"
+// #include "mymediapipe/calculators/phi/model.h"
+#include "mymediapipe/calculators/phi/common.h"
+#include "mymediapipe/calculators/phi/controller/fem_controller.h"
 
 namespace mediapipe {
 
@@ -84,8 +86,9 @@ private:
     // Chain* chain1;
     // Chain* chain2;
     // Target* target;
-    Model* model;
+    // Model* model;
     VideoScene* videoScene;
+    FemController* controller;
 };
 
 REGISTER_CALCULATOR(PhiEglCalculator);
@@ -142,8 +145,8 @@ absl::Status PhiEglCalculator::Process(CalculatorContext* cc) {
         }
 
         GlTexture input_gl_texture = gpu_helper_.CreateSourceTexture(input_gpu_buffer);
-        int dst_width = 1440; // input_gl_texture.width();
-        int dst_height = 900; // input_gl_texture.height();
+        int dst_width = VIEWPORT_WIDTH; // input_gl_texture.width();
+        int dst_height = VIEWPORT_HEIGHT; // input_gl_texture.height();
         GlTexture output_gl_texture = gpu_helper_.CreateDestinationTexture(dst_width, dst_height);
 
         // Set the destination texture as the color buffer. Then, clear both the
@@ -188,34 +191,14 @@ PhiEglCalculator::~PhiEglCalculator() {
 }
 
 absl::Status PhiEglCalculator::GlSetup() {
-    // Load joints
-    // for(int i = 0; i < 10; ++i) {
-    //     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //     joints1.push_back(glm::vec3(0, r, 0));
-    // }
-    // std::cout << "joint1 size: " << joints1.size() << std::endl;
-
-    // joints2.push_back(glm::vec3(0, 0.0f, 0));
-    // joints2.push_back(glm::vec3(0, 1.0f, 0));
-    // joints2.push_back(glm::vec3(2.0f, 2.0f, 0));
-
-    // Load our model object
-    // Target target(5.0f, 3.0f, 0);
-    // Target target2(2, 0, 0);
-    // Target target3(1, 1, 0);
-    // target = new Target(5.0f, 3.0f, 0);
-
-    // chain1 = new Chain(joints1, target);
-    // chain2 = new Chain(joints2, target);
-    // chain2->please_constrain = true;
-
-    // camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-
     videoScene = new VideoScene();
     videoScene->Setup();
 
-    const std::string RAPTOR_MODEL = "mymediapipe/assets/phi/raptor.dae";
-    model = new Model(RAPTOR_MODEL);
+    // const std::string RAPTOR_MODEL = "mymediapipe/assets/phi/raptor.dae";
+    // model = new Model(RAPTOR_MODEL);
+
+    controller = new FemController();
+    controller->Init();
 
     return absl::OkStatus();
 }
@@ -235,23 +218,8 @@ absl::Status PhiEglCalculator::GlRender(CalculatorContext* cc,
     // make sure we clear the framebuffer's content
     int src_width = dst.width();
     int src_height = dst.height();
-    // glm::mat4 projection = glm::perspective(camera->Zoom, (float)src_width/(float)src_height, 0.1f, 100.0f);
-    // glm::mat4 view = camera->GetViewMatrix();
-    // if (count_ > 500) {
-    //     count_ = 0;
-    //     glm::vec3 pos = target->position;
-    //     pos.x = rand() % 3 + 1;
-    //     target->position = pos;
-    // } 
-    // count_++;
-
-    // chain1->Solve();
-    // chain2->Solve();
     framebuffer_target_->Bind();
-    // target->Render(view, projection);
-    // chain1->Render(view, projection);
-    // chain2->Render(view, projection);
-
+    controller->Draw();
     framebuffer_target_->Unbind();
     
     // draw input camera in bottom right coner

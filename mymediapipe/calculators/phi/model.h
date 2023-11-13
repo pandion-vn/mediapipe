@@ -67,7 +67,7 @@ public:
     } 
 
     void Rotate(glm::quat rotation) {
-        this->d_rotation =  rotation;
+        this->d_rotation = rotation;
     }
 
     glm::vec3 GetPositionVec() {
@@ -79,7 +79,8 @@ public:
     }
 
     glm::mat4 GetModelMatrix() const {
-        return d_position * glm::toMat4(d_rotation) * d_scale;
+        // return d_position * glm::toMat4(d_rotation) * d_scale;
+        return glm::mat4(1.0f);
     }
 
     void CleanAnimationMatrix() {
