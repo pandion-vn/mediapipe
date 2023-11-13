@@ -54,8 +54,8 @@ void FemController::Draw() {
     // std::cout << "d_view_matrix: " << glm::to_string(d_view_matrix) << std::endl;
     d_shader->Use();
     glm::vec3 position = glm::vec3(0, 0, 0) + 0.0001f;
-    glm::vec3 scale = glm::vec3(.5f, .5f, .5f);
-    float pitch = 0.0f;
+    glm::vec3 scale = glm::vec3(.15f, .15f, .15f);
+    float pitch = 10.0f;
     float yaw = 0.0f;
     glm::mat4 model;
     glm::mat4 T = glm::translate(glm::mat4(1.0f), position);
@@ -63,7 +63,9 @@ void FemController::Draw() {
     glm::mat4 R = glm::rotate(glm::mat4(1.0f), pitch, glm::vec3(1, 0, 0));
     R = glm::rotate(R, yaw, glm::vec3(0, 0, 1));
     model = T * R * S;
-    d_shader->SetUniform("mvp", d_projection_matrix * d_view_matrix * model);
+    d_shader->SetUniform("view", d_view_matrix);
+    d_shader->SetUniform("projection", d_projection_matrix);
+    d_shader->SetUniform("model", model);
     // d_shader->SetUniform("mv", d_view_matrix * d_floor->GetModelMatrix());
     // d_shader->SetUniform("model_matrix", d_floor->GetModelMatrix());
     // d_shader->SetUniform("model_transpose_inverse",  glm::transpose(glm::inverse(d_floor->GetModelMatrix())));

@@ -23,6 +23,9 @@ precision highp float;
 // uniform bool    use_bump_mapping;
 out vec4 color;
 
+in vec3 FragPos;
+in vec3 Normal;
+
 // struct Material {
 //     vec3 ambient;
 //     vec3 diffuse;

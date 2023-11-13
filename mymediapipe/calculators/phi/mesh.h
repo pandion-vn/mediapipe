@@ -115,10 +115,10 @@ inline void Mesh::setupMesh() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TCoord), (GLvoid*)0);
     // Vertex Normals
-    // glEnableVertexAttribArray(1);
-    // glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_normals);
-    // glBufferData(GL_ARRAY_BUFFER, this->m_normals.size() * sizeof(TCoord), &this->m_normals[0], GL_STATIC_DRAW); 
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,(GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_normals);
+    glBufferData(GL_ARRAY_BUFFER, this->m_normals.size() * sizeof(TCoord), &this->m_normals[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TCoord), (GLvoid*)0);
     // Vertex Texture Coordinates
     // glEnableVertexAttribArray(2);
     // glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_textures);

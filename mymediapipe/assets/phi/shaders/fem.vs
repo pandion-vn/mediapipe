@@ -1,7 +1,7 @@
 #version 310 es
 precision highp float;
 layout (location = 0) in vec3 position;
-// layout (location = 1) in vec3 normals;
+layout (location = 1) in vec3 normals;
 // layout (location = 2) in vec2 texCoord;
 // layout (location = 3) in vec4 color;
 // layout (location = 4) in vec3 tangent;
@@ -17,9 +17,12 @@ layout (location = 0) in vec3 position;
 // uniform bool draw_sky_box;
 // uniform bool use_refraction;
 // uniform float refractive_index;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-// out vec3 normalized_normal;  
-// out vec2 tex_coord; 
+// out vec3 normalized_normal;
+// out vec2 tex_coord;
 // out vec3 light_direction;
 // out vec3 eye_direction;
 // out vec3 normal_world_space;
@@ -29,6 +32,8 @@ layout (location = 0) in vec3 position;
 // out vec3 vertex_view_space;
 // out vec3 not_normalized_normal;
 // out vec4 out_color;
+out vec3 Normal;
+out vec3 FragPos;
 
 // struct Light {
 //     vec3 position;
@@ -38,12 +43,12 @@ layout (location = 0) in vec3 position;
 // };
 
 // uniform Light light;
-uniform mat4 mvp;
+// uniform mat4 mvp;
 // uniform mat4 mv;
 
-vec4 mvpTransform(vec4 position) {
-    return mvp * position;
-}
+// vec4 mvpTransform(vec4 position) {
+//     return mvp * position;
+// }
 
 // vec3 normal_transform(mat4 model_transpose_inverse, vec3 normal) {
 //     return mat3(model_transpose_inverse) * normal;
@@ -77,7 +82,9 @@ void main() {
     // vec3 cube_map_reflection =  reflect(-eye_direction, normalized_normal);
     // vec3 cube_map_refraction =  refract(-eye_direction, normalized_normal, 1.00/refractive_index);
 
-    gl_Position         =  mvpTransform(position_vec4);
+    gl_Position         =  projection * view *  model * position_vec4;
+    FragPos = vec3(model * vec4(position, 1.0f));
+    Normal = mat3(transpose(inverse(model))) * normals;
 
     // tex_coord           =  texCoord;
     // out_color           =  color;
