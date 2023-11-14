@@ -28,8 +28,7 @@ inline AbstractController::AbstractController() :
     d_camera(nullptr),
     d_light_ambient(glm::vec3(0.2f, 0.2f, 0.2f)),
     d_light_diffuse(glm::vec3(0.5f, 0.5f, 0.5f)),
-    d_light_specular(glm::vec3(0.5f, 0.5f, 0.5f))
-    {
+    d_light_specular(glm::vec3(0.5f, 0.5f, 0.5f)) {
     // Empty
 }
 
