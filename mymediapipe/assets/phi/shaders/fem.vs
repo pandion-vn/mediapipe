@@ -2,7 +2,7 @@
 precision highp float;
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normals;
-// layout (location = 2) in vec2 texCoord;
+layout (location = 2) in vec2 texCoord;
 // layout (location = 3) in vec4 color;
 // layout (location = 4) in vec3 tangent;
 
@@ -22,7 +22,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 // out vec3 normalized_normal;
-// out vec2 tex_coord;
+out vec2 tex_coord;
 // out vec3 light_direction;
 // out vec3 eye_direction;
 // out vec3 normal_world_space;
@@ -86,7 +86,7 @@ void main() {
     FragPos = vec3(model * vec4(position, 1.0f));
     Normal = mat3(transpose(inverse(model))) * normals;
 
-    // tex_coord           =  texCoord;
+    tex_coord           =  texCoord;
     // out_color           =  color;
 
     // if (draw_sky_box)

@@ -37,7 +37,7 @@ void FemController::Init(/*int argc, char* argv[]*/) {
     d_camera->SetPosition(glm::vec3(0.0f, 0.0f, 5.0f));
     // d_camera->CameraType = FREE_FLY;
     // d_camera->MovementSpeed = 0.5f;
-	// d_camera->SetTarget(glm::vec3(0.0, 0.0, 0.0));
+	// d_camera->SetTarget(glm::vec3(0.0f, 0.0f, 0.0f));
 
     std::string v_shader = "mymediapipe/assets/phi/shaders/fem.vs";
     std::string f_shader = "mymediapipe/assets/phi/shaders/fem.fs";
@@ -55,7 +55,7 @@ void FemController::Draw() {
     d_shader->Use();
     glm::vec3 position = glm::vec3(0, 0, 0) + 0.0001f;
     glm::vec3 scale = glm::vec3(.15f, .15f, .15f);
-    float pitch = 10.0f;
+    float pitch = 5.0f;
     float yaw = 0.0f;
     glm::mat4 model;
     glm::mat4 T = glm::translate(glm::mat4(1.0f), position);

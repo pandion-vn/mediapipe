@@ -108,7 +108,7 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
     std::vector<GLuint> adjacent_indices;
     std::vector<Texture> textures;
     std::vector<VertexWeight> boneWeights;
-    std::vector<glm::vec2> textCoordVert;
+    std::vector<glm::vec2> textCoordsVert;
     Material material;
     glm::uint numBones = 0; 
 
@@ -145,12 +145,12 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
             vec.x = ai_mesh->mTextureCoords[0][i].x; 
             vec.y = ai_mesh->mTextureCoords[0][i].y;
             // vertex.TexCoords = vec;
-            textCoordVert.push_back(vec);
+            textCoordsVert.push_back(vec);
         }
         else
         {
             // vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-            textCoordVert.push_back(glm::vec2(0.0f));
+            textCoordsVert.push_back(glm::vec2(0.0f));
         }
 
         if (ai_mesh->HasTangentsAndBitangents())
@@ -274,7 +274,7 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
                 boneWeights,
                 adjacent_indices, 
                 material,
-                textCoordVert,
+                textCoordsVert,
                 normals);
 }
 

@@ -96,8 +96,8 @@ inline void Mesh::setupMesh() {
 
     glGenBuffers(1, &this->d_VBO);
     glGenBuffers(1, &this->d_EBO);
-    // glGenBuffers(1, &this->d_VBO_textures);
-    // glGenBuffers(1, &this->d_VBO_normals);
+    glGenBuffers(1, &this->d_VBO_normals);
+    glGenBuffers(1, &this->d_VBO_textures);
 
     glBindVertexArray(this->d_VAO);
     // Load data into vertex buffers
@@ -120,10 +120,10 @@ inline void Mesh::setupMesh() {
     glBufferData(GL_ARRAY_BUFFER, this->m_normals.size() * sizeof(TCoord), &this->m_normals[0], GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TCoord), (GLvoid*)0);
     // Vertex Texture Coordinates
-    // glEnableVertexAttribArray(2);
-    // glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_textures);
-    // glBufferData(GL_ARRAY_BUFFER, this->m_texCoords.size() * sizeof(glm::vec2), &this->m_texCoords[0], GL_STATIC_DRAW); 
-    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, this->d_VBO_textures);
+    glBufferData(GL_ARRAY_BUFFER, this->m_texCoords.size() * sizeof(glm::vec2), &this->m_texCoords[0], GL_STATIC_DRAW); 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
     /*
     glEnableVertexAttribArray(3);	

@@ -13,7 +13,7 @@ precision highp float;
 
 // in vec3 normalized_normal;
 // in vec3 tangent_dir;
-// in vec2 tex_coord;
+in vec2 tex_coord;
 // in vec3 light_direction;
 // in vec3 eye_direction;
 
