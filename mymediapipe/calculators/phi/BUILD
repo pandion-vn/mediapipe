@@ -32,6 +32,7 @@ cc_library(
         "vertex.h",
         "controller/abstract_controller.h",
         "controller/fem_controller.h",
+        "controller/ani_controller.h",
     ],
     deps = [
         # "//mediapipe/framework:calculator_framework",
