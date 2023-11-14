@@ -6,7 +6,7 @@
 #include "vertex.h"
 #include "texture.h"
 // #include "phi_shader.h"
-#include "material.h"
+#include "rendering/material.h"
 
 class Mesh {
 public:
@@ -153,32 +153,21 @@ inline void Mesh::setupMesh() {
 
 inline void Mesh::Draw(PhiShader& shader, bool withAdjecencies) {
     shader.Use();
-    // if (this->m_textures.size()>0) {
-    //     for(GLuint i = 0; i < this->m_textures.size(); i++) {
-    //         GLuint textureType = GL_TEXTURE_2D;
-    //         glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
-    //         // Retrieve texture number (the N in diffuse_textureN)
-    //         std::stringstream ss;
-    //         std::string number;
-    //         auto uniform_name = m_textures[i].Get_Uniform_Name("1");
-    //         //if(name == "material.texture_diffuse")
-    //         //	ss << diffuseNr++; // Transfer GLuint to stream
-    //         //else if(name == "material.texture_specular")
-    //         //	ss << specularNr++; // Transfer GLuint to stream
-    //         //number = ss.str(); 
-    //         // Now set the sampler to the correct texture unit
-    //         GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
-    //         glUniform1i(shader_location, i);
-    //         // And finally bind the texture
-    //         glBindTexture(textureType, this->m_textures[i].id);
-    //     }
-    //     glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
-    // }
-    // std::cout << "Set texture" << std::endl;
-
-    // d_material.SetShader(shader);
-    // std::cout << "Set material" << std::endl;
-
+    if (this->m_textures.size()>0) {
+        for(GLuint i = 0; i < this->m_textures.size(); i++) {
+            GLuint textureType = GL_TEXTURE_2D;
+            glActiveTexture(GL_TEXTURE0 + i); // Active proper texture unit before binding
+            // Retrieve texture number (the N in diffuse_textureN)
+            auto uniform_name = m_textures[i].Get_Uniform_Name("1");
+            // Now set the sampler to the correct texture unit
+            GLuint shader_location = glGetUniformLocation(shader.m_program,  uniform_name.c_str());
+            glUniform1i(shader_location, i);
+            // And finally bind the texture
+            glBindTexture(textureType, this->m_textures[i].id);
+        }
+        // glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
+    }
+    d_material.SetShader(&shader);
     // Draw mesh
     glBindVertexArray(this->d_VAO);
 
@@ -191,6 +180,7 @@ inline void Mesh::Draw(PhiShader& shader, bool withAdjecencies) {
     glDrawElements(drawMode, indices_size, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0); // Always good practice to set everything back to defaults once configured.
 }
 
 #endif

@@ -87,7 +87,6 @@ public:
             has_bone = true;
         }
 
-
         for (int i = 0; i < (int)assimp_node->mNumChildren; i++)  { 
             //Bone* recursiveBone = bone;
             ////I'm setting the parent here

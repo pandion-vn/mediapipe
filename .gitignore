@@ -6,6 +6,7 @@ third_party/assimp/lib/linux_x86_64/libassimp.a
 third_party/assimp/lib/linux_aarch64/libassimp.a
 mymediapipe/assets/opengl/
 mymediapipe/assets/vrm/
+mymediapipe/assets/phi/
 mymediapipe/assets/video/boy.mp4
 mymediapipe/assets/video/woman.mp4
 node_modules/

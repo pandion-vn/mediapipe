@@ -50,7 +50,7 @@ public:
 
 public:
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-           glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+           glm::vec3 up = glm::vec3(0.0f, -1.0f, 0.0f),
            GLfloat yaw = YAW, 
            GLfloat pitch = PITCH) :
             Front(glm::vec3(0.0f, 0.0f, -1.0f)),
@@ -67,7 +67,7 @@ public:
 
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix() {
-      return glm::lookAt(this->Position , this->Position + this->Front, this->Up);
+      return glm::lookAt(this->Position , this->Position + this->Front, this->WorldUp);
     }
 
     void SetTarget(glm::vec3 target) {

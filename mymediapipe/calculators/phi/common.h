@@ -31,5 +31,7 @@
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
 
 #define FLOOR_MODEL "mymediapipe/assets/phi/floor/floor.obj"
+#define RAPTOR_MODEL "mymediapipe/assets/phi/raptor/raptor.dae"
+#define DART_MAUL_MODEL "mymediapipe/assets/phi/dartmaul/dartmaul.dae"
 
 #endif

@@ -1,7 +1,12 @@
 #include "model.h"
 
 /*  Functions   */
-Model::Model(std::string path): d_numberOfBone(0) {
+Model::Model(std::string path): 
+    d_numberOfBone(0),
+    d_model_matrix(1.0f),
+    d_scale(1.0f),
+    d_position(1.0f),
+    d_rotation(1.0f, 0.0f, 0.0f, 0.0f) {
     assert(path);
     m_skeleton = new Skeleton();
     this->loadModel(path); 
@@ -25,10 +30,10 @@ void Model::Draw(PhiShader& shader, bool withAdjacencies) {
     shader.Use();
 
     this->d_model_matrix = GetModelMatrix();
-    if (m_skeleton->getNumberOfBones() > 0)
-        glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
+    // if (m_skeleton->getNumberOfBones() > 0)
+    //     glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
-    shader.SetUniform("hasTexture", Has_Texture());
+    // shader.SetUniform("hasTexture", Has_Texture());
     // std::cout << "Shader set hasTexture" << std::endl;
 
     for (GLuint i = 0; i < this->d_meshes.size(); i++)
@@ -65,6 +70,7 @@ void Model::loadModel(std::string path) {
     m_skeleton->m_inverse_global = aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
     int numOfBones = m_skeleton->getNumberOfBones();
     if (numOfBones > 0) { 
+        std::cout << "m_skeleton bones: " << numOfBones << std::endl;
         // d_bone_location = (GLuint*) malloc( m_skeleton->getNumberOfBones()* sizeof(GLuint));
 
         for (unsigned int i = 0 ; i < numOfBones; i++) {
