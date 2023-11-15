@@ -5,12 +5,13 @@
 #include "helper.h"
 #include "mesh.h"
 #include "skeleton.h"
+#include "animation/i_animation.h"
 
 class Model 
 {
 public:
-    glm::mat4*      m_animation_matrix;
-    Skeleton*       m_skeleton;
+    std::vector<glm::mat4>  m_animation_matrix;
+    Skeleton*               m_skeleton;
 private: 
     std::vector<Mesh>       d_meshes;
     std::vector<Texture>    d_textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
@@ -29,10 +30,10 @@ public:
     ~Model();
     // Draws the model, and thus all its meshes
     void Draw(PhiShader& shader, bool withAdjacencies = false);
-    void loadModel(std::string path);
-    void processNode(aiNode* node, const aiScene* scene);
-    Mesh processMesh(aiMesh* ai_mesh, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName);
+    void LoadModel(std::string path);
+    void ProcessNode(aiNode* node, const aiScene* scene);
+    Mesh ProcessMesh(aiMesh* ai_mesh, const aiScene* scene);
+    std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName);
 
     glm::vec3 Position() const { 
         return decomposeT(d_position); 
@@ -85,8 +86,24 @@ public:
 
     void CleanAnimationMatrix() {
         //Initialize bones in the shader for the uniform 
-        for (unsigned int i = 0 ; i < m_skeleton->getNumberOfBones(); i++) 
-            m_animation_matrix[i] = glm::mat4(1); 
+        // for (unsigned int i = 0 ; i < m_skeleton->GetNumberOfBones(); i++) 
+        //     m_animation_matrix[i] = glm::mat4(1.0f); 
+        for (int i = 0; i < 100; i++)
+            m_animation_matrix[i] = glm::mat4(1.0f);
+    }
+
+    void Animate(IAnimation* animationInvoker, 
+                 glm::vec3 const& target, 
+                 std::string const& boneEffector,
+                 int numParent = 4) {
+        assert(animationInvoker);
+
+        Bone *effector = m_skeleton->GetBone(boneEffector);
+        assert(effector);
+
+        animationInvoker->Animate(this->d_model_matrix, effector, target, numParent);
+
+        m_skeleton->UpdateAnimationMatrix(m_animation_matrix);
     }
 
 };

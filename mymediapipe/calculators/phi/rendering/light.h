@@ -16,13 +16,13 @@ private:
     glm::vec3 d_specular;
 };
 
-Light::Light(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
+inline Light::Light(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
     :	d_position(position),
         d_ambient(ambient),
         d_diffuse(diffuse),
         d_specular(specular) { }
 
-void Light::SetShader(PhiShader *shader) {
+inline void Light::SetShader(PhiShader *shader) {
     shader->SetUniform("light.position", d_position);
     shader->SetUniform("light.ambient", d_ambient);
     shader->SetUniform("light.diffuse", d_diffuse);

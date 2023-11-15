@@ -134,19 +134,16 @@ inline void Mesh::setupMesh() {
     // glEnableVertexAttribArray(4);	
     // glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
 
-    // if (hasBones())
-    // {
-    //     glGenBuffers(1, &this->d_bone_VBO);
-
-    //     glBindBuffer(GL_ARRAY_BUFFER, d_bone_VBO);
-    //     glBufferData(GL_ARRAY_BUFFER, sizeof(m_boneWeights[0]) * m_boneWeights.size(), &m_boneWeights[0], GL_STATIC_DRAW);
-
-    //     glEnableVertexAttribArray(5);
-    //     glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
-
-    //     glEnableVertexAttribArray(6);    
-    //     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
-    // }
+    if (hasBones())
+    {
+        glGenBuffers(1, &this->d_bone_VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, this->d_bone_VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_boneWeights[0]) * m_boneWeights.size(), &m_boneWeights[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(3);
+        glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexWeight), (const GLvoid*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexWeight), (const GLvoid*)offsetof(VertexWeight, Weights)); 
+    }
 
     glBindVertexArray(0);
 }

@@ -9,14 +9,16 @@ Model::Model(std::string path):
     d_rotation(1.0f, 0.0f, 0.0f, 0.0f) {
     assert(path);
     m_skeleton = new Skeleton();
-    this->loadModel(path); 
-    if (m_skeleton->getNumberOfBones() > 0){
-        m_animation_matrix = (glm::mat4*) malloc(m_skeleton->getNumberOfBones() * sizeof(glm::mat4));
+    this->LoadModel(path); 
+    if (m_skeleton->GetNumberOfBones() > 0) {
+        m_animation_matrix.reserve(100);
+        for (int i = 0; i < 100; i++)
+            m_animation_matrix.push_back(glm::mat4(1.0f));
+        // m_animation_matrix = (glm::mat4*) malloc(m_skeleton->GetNumberOfBones() * sizeof(glm::mat4));
 
-        CleanAnimationMatrix();
-
-        m_skeleton->updateSkeleton();
-        m_skeleton->updateAnimationMatrix(m_animation_matrix); 
+        this->CleanAnimationMatrix();
+        m_skeleton->UpdateSkeleton();
+        m_skeleton->UpdateAnimationMatrix(m_animation_matrix); 
     }
 }
 
@@ -30,8 +32,13 @@ void Model::Draw(PhiShader& shader, bool withAdjacencies) {
     shader.Use();
 
     this->d_model_matrix = GetModelMatrix();
-    // if (m_skeleton->getNumberOfBones() > 0)
-    //     glUniformMatrix4fv (d_bone_location[0], m_skeleton->getNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
+    if (m_skeleton->GetNumberOfBones() > 0) {
+        for (int i = 0; i < m_animation_matrix.size(); ++i) {
+            shader.SetUniform("bones[" + std::to_string(i) + "]", m_animation_matrix[i]);
+            // std::cout << "m_animation_matrix[" << i << "]" << glm::to_string(m_animation_matrix[i]) << std::endl;
+        }
+    }
+    //     glUniformMatrix4fv(d_bone_location[0], m_skeleton->GetNumberOfBones(), GL_FALSE, glm::value_ptr(m_animation_matrix[0]));
 
     // shader.SetUniform("hasTexture", Has_Texture());
     // std::cout << "Shader set hasTexture" << std::endl;
@@ -41,7 +48,7 @@ void Model::Draw(PhiShader& shader, bool withAdjacencies) {
 }
 
 // Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-void Model::loadModel(std::string path) {
+void Model::LoadModel(std::string path) {
     // Read file via ASSIMP
     Assimp::Importer importer; 
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | 
@@ -59,54 +66,54 @@ void Model::loadModel(std::string path) {
     this->d_directory = path.substr(0, path.find_last_of('/'));
 
     // Process ASSIMP's root node recursively
-    this->processNode(scene->mRootNode, scene);
+    this->ProcessNode(scene->mRootNode, scene);
 
     // there should always be a 'root node', even if no skeleton exists
-    if (!m_skeleton->importSkeletonBone(scene->mRootNode)) {
+    if (!m_skeleton->ImportSkeletonBone(scene->mRootNode)) {
         // fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n", path.c_str());
         std::cout << "ERROR: Model could not import node tree from mesh" << std::endl;
     } // endif 
 
     m_skeleton->m_inverse_global = aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
-    int numOfBones = m_skeleton->getNumberOfBones();
-    if (numOfBones > 0) { 
-        std::cout << "m_skeleton bones: " << numOfBones << std::endl;
-        // d_bone_location = (GLuint*) malloc( m_skeleton->getNumberOfBones()* sizeof(GLuint));
-
-        for (unsigned int i = 0 ; i < numOfBones; i++) {
-            char Name[128];
-            //IKMatrices[i] = glm::mat4(1); 
-
-            // memset(Name, 0, sizeof(Name));
-            // sprintf_s(Name, sizeof(Name), "bones[%d]", i);
-            //	GLint location = glGetUniformLocation(d_shader->Program, Name);
-            //					if (location == INVALID_UNIFORM_LOCATION) {
-            //fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
-            //}
-
-            //d_bone_location[i] = location;
-        }
+    if (true) { // debug
+        std::cout << "m_inverse_global" << glm::to_string(m_skeleton->m_inverse_global) << std::endl;
     }
+    // int numOfBones = m_skeleton->GetNumberOfBones();
+    // if (numOfBones > 0) { 
+    //     std::cout << "m_skeleton bones: " << numOfBones << std::endl;
+    //     // d_bone_location = (GLuint*) malloc( m_skeleton->GetNumberOfBones()* sizeof(GLuint));
+    //     for (unsigned int i = 0 ; i < numOfBones; i++) {
+    //         char Name[128];
+    //         //IKMatrices[i] = glm::mat4(1); 
+    //         // memset(Name, 0, sizeof(Name));
+    //         // sprintf_s(Name, sizeof(Name), "bones[%d]", i);
+    //         //	GLint location = glGetUniformLocation(d_shader->Program, Name);
+    //         //					if (location == INVALID_UNIFORM_LOCATION) {
+    //         //fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", Name);
+    //         //}
+    //         //d_bone_location[i] = location;
+    //     }
+    // }
 }
 
 // Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-void Model::processNode(aiNode* node, const aiScene* scene) { 
+void Model::ProcessNode(aiNode* node, const aiScene* scene) { 
     // Process each mesh located at the current node
     for (GLuint i = 0; i < node->mNumMeshes; i++) {
         // The node object only contains indices to index the actual objects in the scene. 
         // The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh* ai_mesh = scene->mMeshes[node->mMeshes[i]]; 
-        Mesh mesh = this->processMesh(ai_mesh, scene );
+        Mesh mesh = this->ProcessMesh(ai_mesh, scene );
 
         this->d_meshes.push_back(mesh);			
     }
     // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for (GLuint i = 0; i < node->mNumChildren; i++) {
-        this->processNode(node->mChildren[i], scene);
+        this->ProcessNode(node->mChildren[i], scene);
     }
 }
 
-Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
+Mesh Model::ProcessMesh(aiMesh* ai_mesh, const aiScene* scene) {
     // Data to fill
     TVecCoord vertices;
     TVecCoord normals;
@@ -220,18 +227,18 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
         // Normal: texture_normalN
 
         // 1. Diffuse maps
-        std::vector<Texture> diffuseMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, TextureType_DIFFUSE);
+        std::vector<Texture> diffuseMaps = this->LoadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, TextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         // 2. Specular maps
-        std::vector<Texture> specularMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, TextureType_SPECULAR);
+        std::vector<Texture> specularMaps = this->LoadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, TextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
         // 3. Normal maps
-        std::vector<Texture> normalMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_NORMALS, TextureType_NORMAL);
+        std::vector<Texture> normalMaps = this->LoadMaterialTextures(aiMaterial, aiTextureType_NORMALS, TextureType_NORMAL);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
         // 4. Ref maps
-        std::vector<Texture> reflMaps = this->loadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);
+        std::vector<Texture> reflMaps = this->LoadMaterialTextures(aiMaterial, aiTextureType_AMBIENT, TextureType_REFLECTION);
         textures.insert(textures.end(), reflMaps.begin(), reflMaps.end());
     }
     // #pragma endregion  
@@ -286,7 +293,7 @@ Mesh Model::processMesh(aiMesh* ai_mesh, const aiScene* scene) {
 
 // Checks all material textures of a given type and loads the textures if they're not loaded yet.
 // The required info is returned as a Texture struct.
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName) {
+std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType typeName) {
     std::vector<Texture> textures; 
     for(GLuint i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;

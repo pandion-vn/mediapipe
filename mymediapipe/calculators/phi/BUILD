@@ -33,6 +33,8 @@ cc_library(
         "controller/abstract_controller.h",
         "controller/fem_controller.h",
         "controller/ani_controller.h",
+        "animation/i_animation.h",
+        "animation/ik_animator.h",
     ],
     deps = [
         # "//mediapipe/framework:calculator_framework",

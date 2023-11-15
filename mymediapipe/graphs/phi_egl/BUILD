@@ -10,6 +10,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "phi_egl_deps",
     deps = [
+        "//mymediapipe/graphs/phi_egl/calculators:phi_ani_egl_calculator",
         "//mymediapipe/graphs/phi_egl/calculators:phi_egl_calculator",
     ],
 )

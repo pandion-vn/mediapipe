@@ -75,6 +75,7 @@ public:
             this->Target = target;
             this->Front = glm::normalize(Target - Position);
         }
+        this->updateCameraVectors();
     }
 
     void SetPosition(glm::vec3 position) {

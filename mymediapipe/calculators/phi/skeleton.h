@@ -27,61 +27,69 @@ public:
         //Consider a recursive method to free all the space
     }
 
-    void updateSkeleton(Bone* bone = nullptr) {
+    void UpdateSkeleton(Bone* bone = nullptr) {
         if (d_num_of_bones == 0) return;
 
-        root_bone_check(&bone);
+        RootBoneCheck(&bone);
 
-        bone->globalTransform =  bone->getParentTransform() * bone->transform * bone->localTransform;
-
+        bone->globalTransform =  bone->GetParentTransform() * bone->transform * bone->localTransform;
         bone->finalTransform = m_inverse_global * bone->globalTransform  * bone->boneOffset;  
+        // if (true) { // debug
+        //     std::cout << "bone: " << bone->name << std::endl
+        //               << "  parent transform: " << glm::to_string(bone->GetParentTransform()) << std::endl
+        //               << "  transform: " << glm::to_string(bone->transform) << std::endl
+        //               << "  boneOffset: " << glm::to_string(bone->boneOffset) << std::endl
+        //               << "  globalTransform: " << glm::to_string(bone->globalTransform) << std::endl
+        //               << "  localTransform: " << glm::to_string(bone->localTransform) << std::endl
+        //               << "  finalTransform: " << glm::to_string(bone->finalTransform) 
+        //               << std::endl;
+        // }
 
         for (int i = 0; i < bone->children.size(); i++) {
-            updateSkeleton (&bone->children[i]);
+            UpdateSkeleton(&bone->children[i]);
         }
     }
 
-    void traversePositions(Bone* bone, glm::mat4 const& modelMatrix, std::vector<glm::vec3> &positions) {
-        if (!bone) {
-            bone = m_root_bone;
-        }
+    void TraversePositions(Bone* bone, glm::mat4 const& modelMatrix, std::vector<glm::vec3> &positions) {
+        RootBoneCheck(&bone);
 
-        positions.push_back( bone->getWorldSpacePosition(modelMatrix));
+        positions.push_back(bone->GetWorldSpacePosition(modelMatrix));
 
         for (int i = 0; i < bone->children.size(); i++) {
-            traversePositions (&bone->children[i],modelMatrix,positions);
+            TraversePositions(&bone->children[i],modelMatrix,positions);
         }
     }
 
-    std::vector<glm::vec3> getBonePositions(glm::mat4 const& modelMatrix) {
+    std::vector<glm::vec3> GetBonePositions(glm::mat4 const& modelMatrix) {
         std::vector<glm::vec3> positions;
 
-        traversePositions(m_root_bone, modelMatrix,positions);
+        TraversePositions(m_root_bone, modelMatrix, positions);
 
         return positions;
     } 
 
-    glm::vec3 getBonePosition(std::string boneName, glm::mat4 const& modelMatrix) { 
+    glm::vec3 GetBonePosition(std::string boneName, glm::mat4 const& modelMatrix) { 
         Bone* bone = GetBone(boneName);
 
         if (bone)
-            return bone->getWorldSpacePosition(modelMatrix); 
+            return bone->GetWorldSpacePosition(modelMatrix); 
 
+        std::cout << "Not found bone!" << std::endl;
         return glm::vec3();
     } 
 
     // Import the hierarchical data structure from Assimp
-    bool importSkeletonBone(aiNode* assimp_node , Bone* bone = nullptr) {  
+    bool ImportSkeletonBone(aiNode* assimp_node, Bone* bone = nullptr) {  
         bool has_bone = false;
         bool has_useful_child = false;
         std::string boneName = assimp_node->mName.C_Str();
+        std::cout << "Bone: " << boneName << std::endl;
 
-        root_bone_check(&bone);
+        RootBoneCheck(&bone);
 
         bone->children.resize((int)assimp_node->mNumChildren);
 
-        if (this->boneMapping.find(boneName) != this->boneMapping.end()) 
-        {
+        if (this->boneMapping.find(boneName) != this->boneMapping.end())  {
             // strcpy_s (bone->name, boneName);
             bone->name = boneName;
             has_bone = true;
@@ -90,12 +98,11 @@ public:
         for (int i = 0; i < (int)assimp_node->mNumChildren; i++)  { 
             //Bone* recursiveBone = bone;
             ////I'm setting the parent here
-            /*if (has_bone)
-            {*/
+            //if (has_bone) {
             bone->children[i].parent = bone; 
             //}
 
-            bool importRes = importSkeletonBone(assimp_node->mChildren[i], &bone->children[i]);
+            bool importRes = ImportSkeletonBone(assimp_node->mChildren[i], &bone->children[i]);
             if (importRes) 
                 has_useful_child = true; 
         }
@@ -119,7 +126,7 @@ public:
     }
 
     Bone* GetBone(int boneIndex, Bone* boneToFind = nullptr) {
-        root_bone_check(&boneToFind);
+        RootBoneCheck(&boneToFind);
 
         // look for match
         if ( boneToFind->boneIndex == boneIndex) {
@@ -128,7 +135,7 @@ public:
 
         // recurse to children
         for (int i = 0; i < boneToFind->children.size(); i++) {
-            auto child = GetBone (boneIndex,	&boneToFind->children[i]);
+            auto child = GetBone(boneIndex, &boneToFind->children[i]);
             if (child != nullptr) {
                 return child;
             }
@@ -139,8 +146,8 @@ public:
     }
 
     // Retrieve a bone given the name
-    Bone* GetBone (const std::string node_name, Bone* boneToFind = nullptr) {
-        root_bone_check(&boneToFind); 
+    Bone* GetBone(const std::string node_name, Bone* boneToFind = nullptr) {
+        RootBoneCheck(&boneToFind); 
 
         // look for match
         if (node_name == boneToFind->name) {
@@ -149,7 +156,7 @@ public:
 
         // recurse to children
         for (unsigned int i = 0; i < boneToFind->children.size(); i++) {
-            auto child = GetBone (node_name, &boneToFind->children[i]);
+            auto child = GetBone(node_name, &boneToFind->children[i]);
             if (child != nullptr) {
                 return child;
             }
@@ -161,29 +168,29 @@ public:
 
 
     // get the total number of bones. traverses the tree to count them
-    int getNumberOfBones() { 
+    int GetNumberOfBones() { 
         if (d_num_of_bones != -1) return d_num_of_bones;
 
-        d_num_of_bones = traverseGetNumberOfBones(m_root_bone);
+        d_num_of_bones = TraverseGetNumberOfBones(m_root_bone);
 
         return d_num_of_bones;
     }
 
-    void updateAnimationMatrix(glm::mat4* animationMatrix, Bone* bone = nullptr) {
+    void UpdateAnimationMatrix(std::vector<glm::mat4> &animationMatrix, Bone* bone = nullptr) {
         assert(animationMatrix);
 
-        root_bone_check (&bone); 
+        RootBoneCheck(&bone); 
 
         if (bone->boneIndex >= 0)
             animationMatrix[bone->boneIndex] = bone->finalTransform;
 
         for (unsigned int i = 0; i < bone->children.size(); i++) {
-            updateAnimationMatrix(animationMatrix, &bone->children[i]);
+            UpdateAnimationMatrix(animationMatrix, &bone->children[i]);
         }
     } 
 
     void ResetAllJointLimits(Bone* bone = nullptr) {
-        root_bone_check(&bone);
+        RootBoneCheck(&bone);
         AngleRestriction newRestr;
         bone->angleRestriction = newRestr;	
 
@@ -192,20 +199,20 @@ public:
     }
 
 private:
-    void root_bone_check(Bone** bone) {
+    void RootBoneCheck(Bone** bone) {
         if(!*bone)
             *bone = m_root_bone;
 
         assert(*bone);
     }
 
-    int traverseGetNumberOfBones(Bone* bone) {
-        root_bone_check(&bone);
+    int TraverseGetNumberOfBones(Bone* bone) {
+        RootBoneCheck(&bone);
 
         int counter = bone->boneIndex > -1 ? 1 : 0;
 
         for (unsigned int i = 0; i < bone->children.size(); i++)
-            counter += traverseGetNumberOfBones(&bone->children[i]);
+            counter += TraverseGetNumberOfBones(&bone->children[i]);
 
         return counter;
     }

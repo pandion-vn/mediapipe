@@ -3,8 +3,14 @@ input_side_packet: "texture_3d"
 input_side_packet: "asset_3d"
 output_stream: "output_video"
 
+# node: {
+#     calculator: "PhiEglCalculator"
+#     input_stream: "IMAGE_GPU:input_video"
+#     output_stream: "IMAGE_GPU:output_video"
+# }
+
 node: {
-    calculator: "PhiEglCalculator"
+    calculator: "PhiAniEglCalculator"
     input_stream: "IMAGE_GPU:input_video"
     output_stream: "IMAGE_GPU:output_video"
 }
