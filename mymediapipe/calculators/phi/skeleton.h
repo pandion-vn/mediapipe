@@ -83,7 +83,7 @@ public:
         bool has_bone = false;
         bool has_useful_child = false;
         std::string boneName = assimp_node->mName.C_Str();
-        std::cout << "Bone: " << boneName << std::endl;
+        // std::cout << "Bone: " << boneName << std::endl;
 
         RootBoneCheck(&bone);
 
@@ -108,8 +108,8 @@ public:
         }
 
         if (has_useful_child || has_bone) {
-            std::string nodeName(boneName);
-            std::string globalTransf("Node Name " + nodeName + "\n Global Transform");
+            // std::string nodeName(boneName);
+            // std::string globalTransf("Node Name " + nodeName + "\n Global Transform");
 
             bone->boneOffset = this->boneMapping[bone->name].offset;
             bone->boneIndex = this->boneMapping[bone->name].index;

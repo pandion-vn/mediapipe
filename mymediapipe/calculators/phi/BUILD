@@ -32,6 +32,7 @@ cc_library(
         "vertex.h",
         "target.h",
         "pose.h",
+        "floor.h",
         "controller/abstract_controller.h",
         "controller/fem_controller.h",
         "controller/ani_controller.h",

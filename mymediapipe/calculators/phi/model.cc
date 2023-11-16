@@ -71,7 +71,7 @@ void Model::LoadModel(std::string path) {
     // there should always be a 'root node', even if no skeleton exists
     if (!m_skeleton->ImportSkeletonBone(scene->mRootNode)) {
         // fprintf (stderr, "ERROR: Model %s - could not import node tree from mesh\n", path.c_str());
-        std::cout << "ERROR: Model could not import node tree from mesh" << std::endl;
+        std::cout << "WARNING: Model could not import node tree from mesh" << std::endl;
     } // endif 
 
     aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
@@ -80,6 +80,7 @@ void Model::LoadModel(std::string path) {
     // if (true) { // debug
     //     std::cout << "m_inverse_global" << glm::to_string(m_skeleton->m_inverse_global) << std::endl;
     // }
+
     // int numOfBones = m_skeleton->GetNumberOfBones();
     // if (numOfBones > 0) { 
     //     std::cout << "m_skeleton bones: " << numOfBones << std::endl;

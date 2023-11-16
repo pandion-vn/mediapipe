@@ -9,6 +9,7 @@
 #include "../animation/ik_animator.h"
 #include "../target.h"
 #include "../pose.h"
+#include "../floor.h"
 
 class AnimationController : public AbstractController {
 private:
@@ -23,6 +24,7 @@ private:
     Target*         target;
     std::vector<glm::vec3> lm3d;
     Pose*           pose;
+    Floor*          floor;
 
 public:
     AnimationController();
@@ -100,10 +102,12 @@ inline void AnimationController::Init(/*int argc, char* argv[]*/) {
     // d_model_dartmaul->SetJointLimit("fingers.L",fingers);
     // d_model_dartmaul->SetJointLimit("fingerstip.L",fingers);
     pose = new Pose();
+    floor = new Floor();
 }
 
 inline void AnimationController::Draw(double timestamp) {
     Light light(d_light_position, d_light_ambient, d_light_diffuse, d_light_specular);
+    
     d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 100.0f);
     d_view_matrix = d_camera->GetViewMatrix();
     auto vpMatrix = d_projection_matrix * d_view_matrix;
@@ -124,7 +128,7 @@ inline void AnimationController::Draw(double timestamp) {
     //     std::cout << "position[" << i << "] " << glm::to_string(positions[i]) << std::endl;
     // }
 
-    // d_model_dartmaul->Animate(dartMaulAnimator, lm3d[0], "head", 2);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[0], "head", 1);
     d_model_dartmaul->Animate(dartMaulAnimator, lm3d[15], "hand_R", 3);
     d_model_dartmaul->Animate(dartMaulAnimator, lm3d[16], "hand_L", 3);
     d_model_dartmaul->Animate(dartMaulAnimator, lm3d[27], "foot_R", 2);
@@ -141,11 +145,13 @@ inline void AnimationController::Draw(double timestamp) {
 
     d_model_dartmaul->Draw(*d_shader_bones);
 
-    target->SetPosition(new_pos);
-    target->Render(d_view_matrix, d_projection_matrix);
+    // target->SetPosition(new_pos);
+    // target->Render(d_view_matrix, d_projection_matrix);
 
-    pose->SetLandmarks(lm3d);
-    pose->Render(d_view_matrix, d_projection_matrix);
+    // pose->SetLandmarks(lm3d);
+    // pose->Render(d_view_matrix, d_projection_matrix);
+
+    floor->Render(&light, d_view_matrix, d_projection_matrix);
 }
 
 #endif
