@@ -9,7 +9,7 @@ class AbstractController
 public:
     explicit AbstractController();
     virtual ~AbstractController();
-    virtual void Draw() = 0;
+    virtual void Draw(double timestamp) = 0;
     virtual void Init(/*int argc, char* argv[]*/);
     // virtual void Run() = 0;
 

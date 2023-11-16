@@ -29,6 +29,10 @@
 namespace mediapipe {
 
 static constexpr char kImageGpuTag[] = "IMAGE_GPU";
+static constexpr char kLandmarksTag[] = "LANDMARKS";
+static constexpr char kNormLandmarksTag[] = "NORM_LANDMARKS";
+static constexpr char kWorldLandmarksTag[] = "WORLD_LANDMARKS";
+static constexpr char kMultiFaceGeometryTag[] = "MULTI_FACE_GEOMETRY";
 
 class PhiAniEglCalculator : public CalculatorBase {
 public:
@@ -92,6 +96,14 @@ absl::Status PhiAniEglCalculator::GetContract(CalculatorContract* cc) {
 
     cc->Inputs().Tag(kImageGpuTag).Set<GpuBuffer>();
     cc->Outputs().Tag(kImageGpuTag).Set<GpuBuffer>();
+
+    if (cc->Inputs().HasTag(kWorldLandmarksTag)) {
+        cc->Inputs().Tag(kWorldLandmarksTag).Set<LandmarkList>();
+    }
+
+    if (cc->Inputs().HasTag(kLandmarksTag)) {
+        cc->Inputs().Tag(kLandmarksTag).Set<NormalizedLandmarkList>();
+    }
     // Currently we pass GL context information and other stuff as external
     // inputs, which are handled by the helper.
     return GlCalculatorHelper::UpdateContract(cc);
@@ -193,11 +205,40 @@ absl::Status PhiAniEglCalculator::GlRender(CalculatorContext* cc,
                                             const GlTexture& src, 
                                             const GlTexture& dst,
                                             double timestamp) {
+
+    if (cc->Inputs().HasTag(kWorldLandmarksTag) &&
+        cc->Inputs().Tag(kWorldLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+    if (cc->Inputs().HasTag(kLandmarksTag) &&
+        cc->Inputs().Tag(kLandmarksTag).IsEmpty()) {
+        return absl::OkStatus();
+    }
+
+    const auto& landmarks_3d = cc->Inputs().Tag(kWorldLandmarksTag).Get<LandmarkList>();
+    const auto& landmarks_2d = cc->Inputs().Tag(kLandmarksTag).Get<NormalizedLandmarkList>();
+
+    // prepare landmarks
+    std::vector<glm::vec3> lm3d;
+    std::vector<glm::vec3> lm2d;
+    // std::vector<float> lm3d_visibility;
+    for (int i = 0; i < landmarks_3d.landmark_size(); ++i) {
+        const Landmark& landmark3d = landmarks_3d.landmark(i);
+        const NormalizedLandmark& landmark2d = landmarks_2d.landmark(i);
+        
+        lm3d.push_back(glm::vec3(landmark3d.x() * -1.0 * 1.4, landmark3d.y() * -1.0 * 1.4, landmark3d.z() * -1.0 * 1.4));
+        // lm3d_visibility.push_back(landmark3d.visibility());
+        // lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
+        lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
+    }
+
+    controller->SetLandmarks(lm3d);
+
     // make sure we clear the framebuffer's content
     int src_width = dst.width();
     int src_height = dst.height();
     framebuffer_target_->Bind();
-    controller->Draw();
+    controller->Draw(timestamp);
     framebuffer_target_->Unbind();
     
     // draw input camera in bottom right coner

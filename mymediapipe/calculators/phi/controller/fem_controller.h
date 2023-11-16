@@ -12,7 +12,7 @@ public:
     FemController();
     ~FemController();
     void Init(/*int argc, char* argv[]*/);
-    void Draw();
+    void Draw(double timestamp);
 
 private:
     PhiShader*          d_shader;
@@ -54,7 +54,7 @@ void FemController::Init(/*int argc, char* argv[]*/) {
     // d_shader->SetUniform("use_bump_mapping", false);
 }
 
-void FemController::Draw() {
+void FemController::Draw(double timestamp) {
     d_projection_matrix = glm::perspective(d_camera->Zoom, VIEWPORT_RATIO, 0.1f, 100.0f);
     d_view_matrix = d_camera->GetViewMatrix();
     // std::cout << "d_view_matrix: " << glm::to_string(d_view_matrix) << std::endl;

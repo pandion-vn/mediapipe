@@ -31,6 +31,7 @@ private:
 
 public:
     // Constructor reads and builds our shader
+    // PhiShader();
     PhiShader(std::string vertexSourcePath, std::string fragmentSourcePath, std::string geometrySourcePath = "");
     // PhiShader(std::vector<std::string> vertex_source_paths, std::string fragmentSourcePath, std::string geometrySourcePath = "");
     // PhiShader(std::vector<std::string> vertex_source_paths, std::vector<std::string> fragment_source_paths, std::string geometrySourcePath = "");

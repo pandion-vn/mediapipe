@@ -219,7 +219,7 @@ absl::Status PhiEglCalculator::GlRender(CalculatorContext* cc,
     int src_width = dst.width();
     int src_height = dst.height();
     framebuffer_target_->Bind();
-    controller->Draw();
+    controller->Draw(timestamp);
     framebuffer_target_->Unbind();
     
     // draw input camera in bottom right coner

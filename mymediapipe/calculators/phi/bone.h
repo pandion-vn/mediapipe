@@ -28,7 +28,7 @@ public:
         zMax(glm::radians(zMax)) {
         xAxis = true;
         yAxis = true;
-        zAxis = true;	
+        zAxis = true;
     }
 };
 
@@ -88,6 +88,10 @@ struct Bone {
     glm::vec3 GetWorldSpacePosition(glm::mat4 const& model) {
         auto position = model * this->finalTransform * glm::inverse(this->boneOffset);  //all this is how i do it
         return decomposeT(position);
+    }
+
+    void SetAngleRestriction(AngleRestriction angleRestriction) {
+        this->angleRestriction = angleRestriction;
     }
 };
 

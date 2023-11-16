@@ -106,5 +106,15 @@ public:
         m_skeleton->UpdateAnimationMatrix(m_animation_matrix);
     }
 
+    void SetJointLimit(const std::string &boneName, AngleRestriction angleRestriction) {
+        Bone *effector = m_skeleton->GetBone(boneName);
+        assert(effector);
+        effector->SetAngleRestriction(angleRestriction);
+    }
+
+    void ClearJointsLimit() {
+        m_skeleton->ResetAllJointLimits();
+    }
+
 };
 #endif

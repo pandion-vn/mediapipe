@@ -24,7 +24,7 @@
 #include "mediapipe/gpu/gpu_shared_data_internal.h"
 
 
-constexpr char kWindowName[] = "Simple Shader GPU Demo";
+constexpr char kWindowName[] = "Phi IK GPU App";
 constexpr char kInputStream[] = "input_video";
 constexpr char kInputWidthStream[] = "input_width";
 constexpr char kInputHeightStream[] = "input_height";

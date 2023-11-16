@@ -10,6 +10,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "phi_egl_deps",
     deps = [
+        "//mediapipe/calculators/core:constant_side_packet_calculator",
+        "//mediapipe/calculators/core:flow_limiter_calculator",
+        "//mediapipe/graphs/pose_tracking/subgraphs:pose_renderer_gpu",
+        "//mediapipe/modules/pose_landmark:pose_landmark_gpu",
         "//mymediapipe/graphs/phi_egl/calculators:phi_ani_egl_calculator",
         "//mymediapipe/graphs/phi_egl/calculators:phi_egl_calculator",
     ],

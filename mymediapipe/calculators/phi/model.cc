@@ -74,10 +74,12 @@ void Model::LoadModel(std::string path) {
         std::cout << "ERROR: Model could not import node tree from mesh" << std::endl;
     } // endif 
 
-    m_skeleton->m_inverse_global = aiMatrix4x4ToGlm(&scene->mRootNode->mTransformation);
-    if (true) { // debug
-        std::cout << "m_inverse_global" << glm::to_string(m_skeleton->m_inverse_global) << std::endl;
-    }
+    aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
+    // globalTransformation = globalTransformation.Inverse();
+    m_skeleton->m_inverse_global = aiMatrix4x4ToGlm(&globalTransformation);
+    // if (true) { // debug
+    //     std::cout << "m_inverse_global" << glm::to_string(m_skeleton->m_inverse_global) << std::endl;
+    // }
     // int numOfBones = m_skeleton->GetNumberOfBones();
     // if (numOfBones > 0) { 
     //     std::cout << "m_skeleton bones: " << numOfBones << std::endl;

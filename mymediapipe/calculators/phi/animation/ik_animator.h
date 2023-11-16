@@ -143,13 +143,13 @@ EXIT:
         this->distanceThreshold = distanceThreshold;
     }
 
-    virtual void Animate(glm::mat4 model, Bone* bone, glm::vec3 targetPosition, int numParents = 6) {
+    virtual void Animate(glm::mat4 model, Bone* bone, glm::vec3 targetPosition, int numParents) {
         glm::vec3		currBoneWorldPosition, effectorPosition, targetWorldPositionNormVector, effectorCurrBoneNormVector;
         glm::vec3		crossProduct;
         float			cosAngle,turnAngle;
         float			turnDeg, distance; 
         int				currentIteration = 0;
-        int				numOfBones = skeleton->GetNumberOfBones();
+        // int				numOfBones = skeleton->GetNumberOfBones();
 
         Bone* effectorBone = bone;
         Bone* currBone = effectorBone->parent;
@@ -157,12 +157,12 @@ EXIT:
         effectorPosition  =  effectorBone->GetWorldSpacePosition(model);
 
         distance = glm::distance(effectorPosition, targetPosition);
-        std::cout << "Animate distance : " << distance << std::endl;
+        // std::cout << "Animate distance : " << distance << std::endl;
 
         while (currentIteration++ < maxNumIterations &&  distance > distanceThreshold) {
-            currBoneWorldPosition = currBone->GetWorldSpacePosition(model);
-            effectorCurrBoneNormVector    = glm::normalize(effectorPosition - currBoneWorldPosition);
-            targetWorldPositionNormVector = glm::normalize(targetPosition - currBoneWorldPosition); 
+            currBoneWorldPosition           = currBone->GetWorldSpacePosition(model);
+            effectorCurrBoneNormVector      = glm::normalize(effectorPosition - currBoneWorldPosition);
+            targetWorldPositionNormVector   = glm::normalize(targetPosition - currBoneWorldPosition); 
 
             if ((effectorCurrBoneNormVector != effectorCurrBoneNormVector) || 
                 (targetWorldPositionNormVector != targetWorldPositionNormVector))
@@ -177,7 +177,6 @@ EXIT:
 
             if (distance < distanceThreshold)
                 break;
-
 
             crossProduct = glm::normalize(glm::cross(effectorCurrBoneNormVector, targetWorldPositionNormVector));
             crossProduct = glm::mat3(glm::inverse(currBone->GetWorldSpace(model))) * crossProduct;

@@ -30,6 +30,8 @@ cc_library(
         "phi_shader.h",
         "stb_image.h",
         "vertex.h",
+        "target.h",
+        "pose.h",
         "controller/abstract_controller.h",
         "controller/fem_controller.h",
         "controller/ani_controller.h",
