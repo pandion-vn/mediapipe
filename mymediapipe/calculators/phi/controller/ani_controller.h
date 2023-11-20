@@ -82,6 +82,7 @@ inline void AnimationController::Init(/*int argc, char* argv[]*/) {
 
     d_model_dartmaul->SetJointLimit("neck", head_restrict);
     d_model_dartmaul->SetJointLimit("head", head_restrict);
+    d_model_dartmaul->SetJointLimit("hips", head_restrict);
     d_model_dartmaul->SetJointLimit("shoulder_L", arms_restrict);
     d_model_dartmaul->SetJointLimit("upper_arm_L", arms_restrict);
     d_model_dartmaul->SetJointLimit("forearm_L", arms_restrict);
@@ -128,11 +129,19 @@ inline void AnimationController::Draw(double timestamp) {
     //     std::cout << "position[" << i << "] " << glm::to_string(positions[i]) << std::endl;
     // }
 
-    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[0], "head", 1);
     d_model_dartmaul->Animate(dartMaulAnimator, lm3d[15], "hand_R", 3);
     d_model_dartmaul->Animate(dartMaulAnimator, lm3d[16], "hand_L", 3);
-    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[27], "foot_R", 2);
-    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[28], "foot_L", 2);
+    // d_model_dartmaul->Animate(dartMaulAnimator, lm3d[13], "forearm_R", 2);
+    // d_model_dartmaul->Animate(dartMaulAnimator, lm3d[14], "forearm_L", 2);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[27], "foot_R", 3);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[28], "foot_L", 3);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[25], "shin_R", 2);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[26], "shin_L", 2);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[23], "thigh_R", 0);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[24], "thigh_L", 0);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[33], "hips", 1);    
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[0], "head", 1);
+    d_model_dartmaul->Animate(dartMaulAnimator, lm3d[34], "neck", 1);
 
     // d_shader_bones->SetUniform("model", vpMatrix * d_model_dartmaul->GetModelMatrix()); 
     // d_shader_bones->SetUniform("eye_position", d_camera->Position);  

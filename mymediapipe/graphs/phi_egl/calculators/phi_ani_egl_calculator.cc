@@ -231,6 +231,8 @@ absl::Status PhiAniEglCalculator::GlRender(CalculatorContext* cc,
         // lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
         lm2d.push_back(glm::vec3(landmark2d.x(), landmark2d.y(), landmark2d.z()));
     }
+    lm3d.push_back((lm3d[23] + lm3d[24]) / 2.0f); // hip center location // index = 33
+    lm3d.push_back((lm3d[11] + lm3d[12]) / 2.0f); // shoulder center location // index = 34
 
     controller->SetLandmarks(lm3d);
 

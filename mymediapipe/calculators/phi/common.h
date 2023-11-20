@@ -26,8 +26,8 @@
 #define TVecCoord std::vector<glm::vec3>
 #define TCoord glm::vec3
 
-#define VIEWPORT_WIDTH  1440
-#define VIEWPORT_HEIGHT 900
+#define VIEWPORT_WIDTH  1080
+#define VIEWPORT_HEIGHT 1600
 #define VIEWPORT_RATIO (float)VIEWPORT_WIDTH/(float)VIEWPORT_HEIGHT
 
 #define FLOOR_MODEL "mymediapipe/assets/phi/floor/floor.obj"
