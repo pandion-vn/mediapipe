@@ -106,6 +106,8 @@ absl::StatusOr<cv::Mat> GetFrame(cv::VideoCapture& capture, bool load_video) {
 
     if (!load_video) {
         cv::flip(camera_frame_raw, camera_frame_raw, /*flipcode=HORIZONTAL*/ 1);
+        // rotate camera
+        cv::rotate(camera_frame_raw, camera_frame_raw, cv::ROTATE_90_CLOCKWISE);
     }
     cv::Mat camera_frame;
     cv::cvtColor(camera_frame_raw, camera_frame, cv::COLOR_BGR2RGBA);
